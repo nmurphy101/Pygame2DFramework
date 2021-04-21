@@ -50,7 +50,7 @@ class SnakeAI():
         # How big snake parts are
         self.size = 16
         # How fast the snake can move per loop-tick
-        self.speed = 3
+        self.speed = 1.5
         self.moved_last_cnt = 0
         # Where snake was looking = (North = 0, East = 1, South = 2, West = 3)
         self.prev_direction = 1
@@ -311,6 +311,10 @@ class SnakeGame():
                 # Clear previous frame render
                 self.screen.fill((0, 0, 0, 0))
 
+                # Spawn a new food after it's eaten
+                if not food.alive:
+                    food.spawn()
+
                 ## Draw game Objects
                 food.draw()
                 snake.draw()
@@ -324,9 +328,6 @@ class SnakeGame():
                 if snake.rect.colliderect(food):
                     food.alive = False
                     snake.grow()
-                # Spawn a new food after it's eaten
-                if not food.alive:
-                    food.spawn()
 
             # The game loop FPS
             clock.tick(60)
