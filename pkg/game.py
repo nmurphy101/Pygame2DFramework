@@ -45,12 +45,14 @@ class BaseGame():
         screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption('SnakeAI')
         screen.fill(background_colour)
+        pygame.font.init()
+        game_font = pygame.font.SysFont('Comic Sans MS', 30)
 
         # Show game window
         pygame.display.flip()
 
         # Instantiate the Game Obj
-        game = self.game_obj(screen)
+        game = self.game_obj(screen, game_font)
 
         # Start the game loop
         game.play()

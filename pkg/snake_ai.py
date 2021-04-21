@@ -74,9 +74,6 @@ class SnakeAI():
             else:
                 self.tail_segments.append(TailSegment(self.screen, self.tail_segments[pos-1], pos))
 
-        print("Head is at:", self.head)
-
-
     def draw(self):
         '''
         draw
@@ -95,8 +92,7 @@ class SnakeAI():
             # Render the snake's head based on it's parameters
             self.rect = pygame.draw.rect(self.screen, self.head_color, self.head)
 
-
-    def grow(self):
+    def grow(self, food):
         '''
         grow
         ~~~~~~~~~~
@@ -104,13 +100,13 @@ class SnakeAI():
         grow does stuff
         '''
         # Add a new tail segment
-        self.tail_segments.append(TailSegment(
-            self.screen,
-            self.tail_segments[self.num_tails - 1],
-            self.num_tails + 1
-        ))
-        self.num_tails += 1
-
+        for i in range(food.growth):
+            self.tail_segments.append(TailSegment(
+                self.screen,
+                self.tail_segments[self.num_tails - 1],
+                self.num_tails + 1
+            ))
+            self.num_tails += 1
 
     def choose_direction(self):
         '''
@@ -129,7 +125,6 @@ class SnakeAI():
             self.direction = 3
         elif key[K_RIGHT]:
             self.direction = 1
-
 
     def move(self):
         '''
@@ -189,10 +184,6 @@ class TailSegment():
         # tail color = white
         self.tail_color = (255, 255, 255)
 
-        print("Tail:",)
-        print("Tail:", position, self.tail)
-
-
     def draw(self):
         '''
         draw
@@ -220,15 +211,20 @@ class Food():
 
     Food for the snake
     '''
-    def __init__(self, screen):
+    def __init__(self, screen, screen_size):
         # Window to draw to
         self.screen = screen
         # Food is dead or alive
         self.alive = False
+        # Size of the game screen
+        self.screen_size = screen_size
         # Where the food is located
-        width, height = screen.get_size()
-        self.pos_x = width - random.randint(16, width)
-        self.pos_y = height - random.randint(16, height)
+        self.pos_x = self.screen_size[0] - random.randrange(
+            16, self.screen_size[0], 16
+        )
+        self.pos_y = self.screen_size[1] - random.randrange(
+            16, self.screen_size[1], 16
+        )
         # How big food parts are
         self.size = 16
         # food pos/size = (left, top, width, height)
@@ -236,7 +232,8 @@ class Food():
         self.rect = None
         # food color = green
         self.food_color = (0, 255, 0)
-
+        # How much a snake grows from eating food
+        self.growth = 5
 
     def draw(self):
         '''
@@ -251,7 +248,6 @@ class Food():
             # Render the food segment based on it's parameters
             self.rect = pygame.draw.rect(self.screen, self.food_color, self.food)
 
-
     def spawn(self):
         '''
         spawn
@@ -260,13 +256,14 @@ class Food():
         spawn does stuff
         '''
         # Where the food is located
-        width, height = self.screen.get_size()
-        self.pos_x = width - random.randint(16, width)
-        self.pos_y = height - random.randint(16, height)
+        self.pos_x = self.screen_size[0] - random.randrange(
+            16, self.screen_size[0], 16
+        )
+        self.pos_y = self.screen_size[1] - random.randrange(
+            16, self.screen_size[1], 16
+        )
 
-        self.alive = True
-
-        print("Food is at:", self.pos_x, self.pos_y)
+        self.alive = True=
 
 
 class SnakeGame():
@@ -276,9 +273,12 @@ class SnakeGame():
 
     SnakeGame for the snake
     '''
-    def __init__(self, screen):
+    def __init__(self, screen, game_font):
         self.screen = screen
-
+        self.game_font = game_font
+        screen_w, screen_h = screen.get_size()
+        self.size = (screen_w, screen_h)
+        self.score = 0
 
     def play(self):
         '''
@@ -291,7 +291,7 @@ class SnakeGame():
         clock = pygame.time.Clock()
 
         # Initilize game objects
-        food = Food(self.screen)
+        food = Food(self.screen, self.size)
         snake = SnakeAI(self.screen)
 
         # Game loop
@@ -327,7 +327,15 @@ class SnakeGame():
                 # Collision check between snake and food
                 if snake.rect.colliderect(food):
                     food.alive = False
-                    snake.grow()
+                    snake.grow(food)
+                    self.up_score()
+            else:
+                textsurface = self.game_font.render(
+                    'Score: ' + str(self.score),
+                    True,
+                    (255, 255, 255)
+                )
+                self.screen.blit(textsurface, (0, 0))
 
             # The game loop FPS
             clock.tick(60)
@@ -335,3 +343,6 @@ class SnakeGame():
         # pylint: disable=no-member
         pygame.quit()
         # pylint: enable=no-member
+
+    def up_score(self):
+        self.score += 10
