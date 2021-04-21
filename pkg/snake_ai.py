@@ -234,6 +234,8 @@ class Food():
         self.food_color = (0, 255, 0)
         # How much a snake grows from eating food
         self.growth = 5
+        # Point value of the food
+        self.point_value = 10
 
     def draw(self):
         '''
@@ -263,7 +265,7 @@ class Food():
             16, self.screen_size[1], 16
         )
 
-        self.alive = True=
+        self.alive = True
 
 
 class SnakeGame():
@@ -277,8 +279,9 @@ class SnakeGame():
         self.screen = screen
         self.game_font = game_font
         screen_w, screen_h = screen.get_size()
-        self.size = (screen_w, screen_h)
+        self.screen_size = (screen_w, screen_h)
         self.score = 0
+        self.game_over = False
 
     def play(self):
         '''
@@ -291,8 +294,7 @@ class SnakeGame():
         clock = pygame.time.Clock()
 
         # Initilize game objects
-        food = Food(self.screen, self.size)
-        snake = SnakeAI(self.screen)
+        obj_dict = self.start()
 
         # Game loop
         running = True
@@ -305,37 +307,39 @@ class SnakeGame():
                 # Press escape to pause the game
                 elif event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        pause = not pause
-            # Game is paused
-            if not pause:
-                # Clear previous frame render
-                self.screen.fill((0, 0, 0, 0))
+                        if not self.game_over:
+                            pause = not pause
+                        else:
+                            self.game_over = False
+                            obj_dict = self.start()
+            # Check if the game is over
+            if not self.game_over:
+                # Check if the game is paused
+                if not pause:
+                    # Clear previous frame render
+                    self.screen.fill((0, 0, 0, 0))
 
-                # Spawn a new food after it's eaten
-                if not food.alive:
-                    food.spawn()
+                    # Spawn a new food after it's eaten
+                    if not obj_dict["food"].alive:
+                        obj_dict["food"].spawn()
 
-                ## Draw game Objects
-                food.draw()
-                snake.draw()
-                pygame.display.update()
+                    ## Draw game Objects
+                    obj_dict["food"].draw()
+                    obj_dict["snake"].draw()
+                    pygame.display.update()
 
-                ## Game logic
-                # Snake control and movement
-                snake.choose_direction()
-                snake.move()
-                # Collision check between snake and food
-                if snake.rect.colliderect(food):
-                    food.alive = False
-                    snake.grow(food)
-                    self.up_score()
+                    ## Game logic
+                    # Snake control and movement
+                    obj_dict["snake"].choose_direction()
+                    obj_dict["snake"].move()
+                    self.collision_checks(obj_dict)
+
+                else:
+                    # show the pause menu
+                    self.pause_menu()
             else:
-                textsurface = self.game_font.render(
-                    'Score: ' + str(self.score),
-                    True,
-                    (255, 255, 255)
-                )
-                self.screen.blit(textsurface, (0, 0))
+                # show the game over menu
+                self.game_over_menu()
 
             # The game loop FPS
             clock.tick(60)
@@ -344,5 +348,65 @@ class SnakeGame():
         pygame.quit()
         # pylint: enable=no-member
 
-    def up_score(self):
-        self.score += 10
+    def start(self):
+        # Set the score to 0
+        self.score = 0
+        # Initilize game objects
+        food = Food(self.screen, self.screen_size)
+        snake = SnakeAI(self.screen)
+        obj_dict = {
+            "snake": snake,
+            "food": food,
+        }
+        return obj_dict
+
+    def up_score(self, point_value):
+        # Increase the score
+        self.score += point_value
+
+    def collision_checks(self, obj_dict):
+        # Collision check between snake and food
+        if obj_dict["snake"].rect.colliderect(obj_dict["food"]):
+            obj_dict["food"].alive = False
+            obj_dict["snake"].grow(obj_dict["food"])
+            self.up_score(obj_dict["food"].point_value)
+        # Collision check between snake and tails
+        for tail in obj_dict["snake"].tail_segments:
+            print("Checking collision:", tail.position, tail)
+            if obj_dict["snake"].rect.colliderect(tail):
+                self.game_over = True
+
+    def pause_menu(self):
+        # Render the score
+        text_str = 'Score: ' + str(self.score)
+        text = self.game_font.render_to(
+                self.screen,
+                (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/8),
+                text_str,
+                (255, 255, 255)
+        )
+        # Update the screen display
+        pygame.display.update()
+
+    def game_over_menu(self):
+        # Render the Game Over text
+        text_str = 'Game Over'
+        text = self.game_font.render_to(
+                self.screen,
+                (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/8),
+                text_str,
+                (255, 255, 255)
+        )
+        # Render the score
+        text_str = 'Score: ' + str(self.score)
+        text = self.game_font.render_to(
+                self.screen,
+                (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/6),
+                text_str,
+                (255, 255, 255)
+        )
+        # Update the screen display
+        pygame.display.update()

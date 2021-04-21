@@ -11,7 +11,7 @@
 '''
 
 
-# import os
+import os
 # import threading
 # import logging
 # import sys
@@ -20,6 +20,7 @@
 # import queue as q
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
 import pygame
+import pygame.freetype
 
 
 class BaseGame():
@@ -31,6 +32,7 @@ class BaseGame():
     '''
     def __init__(self, game_obj):
         self.game_obj = game_obj
+        pygame.init()
 
     def run(self):
         '''
@@ -45,8 +47,10 @@ class BaseGame():
         screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption('SnakeAI')
         screen.fill(background_colour)
-        pygame.font.init()
-        game_font = pygame.font.SysFont('Comic Sans MS', 30)
+        game_font = pygame.freetype.Font(
+             file = 'assets/fonts/PressStart2P-Regular.ttf',
+             size = 32,
+        )
 
         # Show game window
         pygame.display.flip()
