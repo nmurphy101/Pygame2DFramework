@@ -336,7 +336,7 @@ class SnakeGame():
                     self.obj_dict["snake"].choose_direction()
                     self.obj_dict["snake"].move()
                     # collision of objects
-                    self.collision_checks(self.screen_size)
+                    self.collision_checks()
 
                 else:
                     # show the pause menu
@@ -400,7 +400,7 @@ class SnakeGame():
             elif event.type == WINDOWFOCUSLOST:
                 self.focus_pause = True
 
-    def collision_checks(self, screen_size):
+    def collision_checks(self):
         '''
         collision_checks
         ~~~~~~~~~~
@@ -414,7 +414,7 @@ class SnakeGame():
             self.up_score(self.obj_dict["food"].point_value)
         # Collision check for edge of screen
         if (self.obj_dict["snake"].pos_x > self.screen_size[0]-self.obj_dict["snake"].size) or (
-             self.obj_dict["snake"].pos_y > self.screen_size[1]-self.obj_dict["snake"].size):
+                self.obj_dict["snake"].pos_y > self.screen_size[1]-self.obj_dict["snake"].size):
             self.game_over = True
         if self.obj_dict["snake"].pos_x < 0 or self.obj_dict["snake"].pos_y < 0:
             self.game_over = True
