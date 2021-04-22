@@ -17,7 +17,7 @@ __version__ = '1.0.0-alpha'
 # from tkinter import Tk
 # from multiprocessing import Manager
 # from multiprocessing import freeze_support
-from pkg.snake_ai import SnakeGame
+from pkg.snake_game import SnakeGame
 from pkg.game import BaseGame
 
 # freeze_support()
