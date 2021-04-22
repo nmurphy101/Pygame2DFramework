@@ -24,6 +24,10 @@ import pygame
 from pygame import (
     freetype, init
 )
+from pygame.constants import (
+    QUIT, KEYDOWN, K_ESCAPE,
+    WINDOWFOCUSGAINED, WINDOWFOCUSLOST,
+)
 # pylint: enable=no-name-in-module
 
 class BaseGame():
@@ -33,8 +37,14 @@ class BaseGame():
 
     Base game structure.
     '''
-    def __init__(self, game_obj):
-        self.game_obj = game_obj
+    def __init__(self, game_pkg):
+        self.game_pkg = game_pkg
+        self.game = None
+        self.running = True
+        self.fps = 60
+        self.screen_width = 1280
+        self.screen_height = 720
+        self.title = "SnakeAI"
         init()
 
     def run(self):
@@ -45,23 +55,39 @@ class BaseGame():
         run does stuff
         '''
         # Game window settings
-        game = self.set_window_settings()
+        self.set_window_settings()
 
-        # Start the game loop
-        game.play()
+        clock = pygame.time.Clock()
+
+        # Initilize game objects
+        self.game.start()
+
+         # Game loop
+        while self.running:
+            # System/window events to be checked
+            self.event_checks()
+
+            # Gameplay logic
+            self.game.play()
+
+            # The game loop FPS
+            clock.tick(self.fps)
+
+        # pylint: disable=no-member
+        pygame.quit()
+        # pylint: enable=no-member
 
     def set_window_settings(self):
-        '''
+        ''' 
         set_window_settings
         ~~~~~~~~~~
 
         set_window_settings does stuff
         '''
         # Game window settings
-        (width, height) = (1280, 720)
         background_colour = (0, 0, 0)
-        screen = pygame.display.set_mode((width, height))
-        pygame.display.set_caption('SnakeAI')
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        pygame.display.set_caption(self.title)
         screen.fill(background_colour)
         game_font = freetype.Font(
             file='assets/fonts/PressStart2P-Regular.ttf',
@@ -72,7 +98,23 @@ class BaseGame():
         pygame.display.flip()
 
         # Instantiate the Game Obj
-        game = self.game_obj(screen, game_font)
+        self.game = self.game_pkg(screen, game_font)
 
-        # Return window objects
-        return game
+    def event_checks(self):
+        for event in pygame.event.get():
+            # print(event)
+            # Game window closes
+            if event.type == QUIT:
+                self.running = False
+            # Press escape to pause the game
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    if not self.game.game_over:
+                        self.pause = not self.pause
+                    else:
+                        self.game.game_over = False
+                        self.start()
+            elif event.type == WINDOWFOCUSGAINED:
+                self.focus_pause = False
+            elif event.type == WINDOWFOCUSLOST:
+                self.focus_pause = True

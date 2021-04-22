@@ -24,8 +24,7 @@ import random
 import pygame
 # pylint: disable=no-name-in-module
 from pygame.constants import (
-    QUIT, K_UP, K_DOWN, K_LEFT, K_RIGHT, KEYDOWN, K_ESCAPE,
-    ACTIVEEVENT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT,
 )
 # pylint: enable=no-name-in-module
 
@@ -292,7 +291,6 @@ class SnakeGame():
         self.screen_size = (screen_w, screen_h)
         self.score = 0
         self.game_over = False
-        self.running = True
         self.pause = False
         self.focus_pause = False
         self.obj_dict = {}
@@ -305,52 +303,35 @@ class SnakeGame():
         play does stuff
         '''
 
-        clock = pygame.time.Clock()
+        # Check if the game is over
+        if not self.game_over:
+            # Check if the game is paused
+            if not self.pause and not self.focus_pause:
+                # Clear previous frame render
+                self.screen.fill((0, 0, 0, 0))
 
-        # Initilize game objects
-        self.start()
+                # Spawn a new food after it's eaten
+                if not self.obj_dict["food"].alive:
+                    self.obj_dict["food"].spawn()
 
-        # Game loop
-        while self.running:
-            # System/window events to be checked
-            self.event_checks()
+                ## Draw game Objects
+                self.obj_dict["food"].draw()
+                self.obj_dict["snake"].draw()
+                pygame.display.update()
 
-            # Check if the game is over
-            if not self.game_over:
-                # Check if the game is paused
-                if not self.pause and not self.focus_pause:
-                    # Clear previous frame render
-                    self.screen.fill((0, 0, 0, 0))
+                ## Game logic
+                # Snake control and movement
+                self.obj_dict["snake"].choose_direction()
+                self.obj_dict["snake"].move()
+                # collision of objects
+                self.collision_checks()
 
-                    # Spawn a new food after it's eaten
-                    if not self.obj_dict["food"].alive:
-                        self.obj_dict["food"].spawn()
-
-                    ## Draw game Objects
-                    self.obj_dict["food"].draw()
-                    self.obj_dict["snake"].draw()
-                    pygame.display.update()
-
-                    ## Game logic
-                    # Snake control and movement
-                    self.obj_dict["snake"].choose_direction()
-                    self.obj_dict["snake"].move()
-                    # collision of objects
-                    self.collision_checks()
-
-                else:
-                    # show the pause menu
-                    self.pause_menu()
             else:
-                # show the game over menu
-                self.game_over_menu()
-
-            # The game loop FPS
-            clock.tick(60)
-
-        # pylint: disable=no-member
-        pygame.quit()
-        # pylint: enable=no-member
+                # show the pause menu
+                self.pause_menu()
+        else:
+            # show the game over menu
+            self.game_over_menu()
 
     def start(self):
         '''
@@ -380,25 +361,6 @@ class SnakeGame():
         '''
         # Increase the score
         self.score += point_value
-    
-    def event_checks(self):
-        for event in pygame.event.get():
-            # print(event)
-            # Game window closes
-            if event.type == QUIT:
-                self.running = False
-            # Press escape to pause the game
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    if not self.game_over:
-                        self.pause = not self.pause
-                    else:
-                        self.game_over = False
-                        self.start()
-            elif event.type == WINDOWFOCUSGAINED:
-                self.focus_pause = False
-            elif event.type == WINDOWFOCUSLOST:
-                self.focus_pause = True
 
     def collision_checks(self):
         '''
