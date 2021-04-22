@@ -25,10 +25,11 @@ from pygame import (
     freetype, init
 )
 from pygame.constants import (
-    QUIT, KEYDOWN, K_ESCAPE,
+    QUIT, KEYDOWN, K_ESCAPE, RESIZABLE,
     WINDOWFOCUSGAINED, WINDOWFOCUSLOST,
 )
 # pylint: enable=no-name-in-module
+
 
 class BaseGame():
     '''
@@ -44,7 +45,7 @@ class BaseGame():
         self.fps = 60
         self.screen_width = 1280
         self.screen_height = 720
-        self.title = "SnakeAI"
+        self.title = "Game Platform"
         init()
 
     def run(self):
@@ -78,7 +79,7 @@ class BaseGame():
         # pylint: enable=no-member
 
     def set_window_settings(self):
-        ''' 
+        '''
         set_window_settings
         ~~~~~~~~~~
 
@@ -86,7 +87,7 @@ class BaseGame():
         '''
         # Game window settings
         background_colour = (0, 0, 0)
-        screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height), RESIZABLE)
         pygame.display.set_caption(self.title)
         screen.fill(background_colour)
         game_font = freetype.Font(
@@ -101,6 +102,12 @@ class BaseGame():
         self.game = self.game_pkg(screen, game_font)
 
     def event_checks(self):
+        '''
+        event_checks
+        ~~~~~~~~~~
+
+        event_checks for the snake
+        '''
         for event in pygame.event.get():
             # print(event)
             # Game window closes
