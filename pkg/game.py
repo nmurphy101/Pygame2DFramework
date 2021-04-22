@@ -110,11 +110,11 @@ class BaseGame():
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     if not self.game.game_over:
-                        self.pause = not self.pause
+                        self.game.pause = not self.game.pause
                     else:
                         self.game.game_over = False
-                        self.start()
+                        self.game.start()
             elif event.type == WINDOWFOCUSGAINED:
-                self.focus_pause = False
+                self.game.focus_pause = False
             elif event.type == WINDOWFOCUSLOST:
-                self.focus_pause = True
+                self.game.focus_pause = True
