@@ -1,0 +1,31 @@
+
+Critical:
+1. ?
+
+Major:
+1. Working Main menu
+2. Working pause menu
+3. Working settings menu
+    a. connected to a config file
+3. Player AI
+
+Minor:
+1. immobile enemies
+    a. "walls" for future level design
+    b. explosive mine
+2. moving enemies
+3. shooting enemies
+    a. Only does damage to hit section (tail segment or head)
+4. consumable-items/pick-ups in level
+5. Level design
+    a. Win condition to get to next level (probably reach a certain score)
+    b. window shifts towards the direction of the edge of the window the player
+       goes.
+    c. level generated with different "scenes"/"windows" as tiles connected.
+        i. Procedual generation of levels
+6. Environmental effects
+    a. wormhole/teleportation to different areas/challenges
+
+
+Bugs:
+1. ?
