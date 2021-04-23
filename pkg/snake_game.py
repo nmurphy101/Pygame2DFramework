@@ -36,7 +36,7 @@ class Snake():
 
     AI for the snake
     '''
-    def __init__(self, screen):
+    def __init__(self, screen, base_game):
         # Window to draw to
         self.screen = screen
         # Snake is dead or alive
@@ -53,9 +53,9 @@ class Snake():
         self.speed = 1.5
         self.moved_last_cnt = 0
         # Where snake was looking = (North = 0, East = 1, South = 2, West = 3)
-        self.prev_direction = -1
+        self.prev_direction = 2
         # Where snake is looking = (North = 0, East = 1, South = 2, West = 3)
-        self.direction = 1
+        self.direction = 2
         # Determines how far the snake can see ahead of itself in the direction it's looking
         self.sight = 5
         # head pos/size  = (left, top, width, height)
@@ -64,6 +64,9 @@ class Snake():
         self.head_color = (255, 0, 0)
         # Snake is a rectangle object
         self.rect = pygame.draw.rect(self.screen, self.head_color, self.head)
+        # Snake death sound
+        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+        self.sound_death.set_volume(base_game.effect_volume/3.5)
         # Number of tail segments
         self.num_tails = 5
         # tail segment list
@@ -220,7 +223,7 @@ class Food():
 
     Food for the snake
     '''
-    def __init__(self, screen, screen_size):
+    def __init__(self, screen, screen_size, base_game):
         # Window to draw to
         self.screen = screen
         # Food is dead or alive
@@ -245,6 +248,9 @@ class Food():
         self.growth = 5
         # Point value of the food
         self.point_value = 10
+        # Interact sound
+        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
+        self.sound_interact.set_volume(base_game.effect_volume)
 
     def draw(self):
         '''
@@ -284,15 +290,29 @@ class SnakeGame():
 
     SnakeGame for the snake
     '''
-    def __init__(self, screen, game_font):
+    def __init__(self, screen, game_font, base_game):
+        # Calling game platform
+        self.base_game = base_game
+        # Window settings
+        self.title = base_game.title + "Snake"
+        pygame.display.set_caption(self.title)
         self.screen = screen
         self.game_font = game_font
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
+        # Game settings
         self.score = 0
         self.game_over = False
+        self.game_music = True
         self.pause = False
         self.focus_pause = False
+        # Game music
+        self.game_music = "assets/music/Cheerful_Piano_NES.wav"
+        pygame.mixer.music.load(self.game_music)
+        pygame.mixer.music.set_volume(base_game.music_volume)
+        pygame.mixer.music.play(-1)
+        
+        # Game object list
         self.obj_dict = {}
 
     def play(self):
@@ -302,6 +322,12 @@ class SnakeGame():
 
         play does stuff
         '''
+
+        # Check game music status
+        if not self.game_music:
+            pygame.mixer.music.pause()
+        else:
+            pygame.mixer.music.unpause()
 
         # Check if the game is over
         if not self.game_over:
@@ -340,13 +366,15 @@ class SnakeGame():
 
         start does stuff
         '''
+        # Start the game music
+        pygame.mixer.music.play(-1)
         # Set the score to 0
         self.score = 0
         self.pause = False
         self.focus_pause = False
         # Initilize game objects
-        food = Food(self.screen, self.screen_size)
-        snake = Snake(self.screen)
+        food = Food(self.screen, self.screen_size, self.base_game)
+        snake = Snake(self.screen, self.base_game)
         self.obj_dict = {
             "snake": snake,
             "food": food,
@@ -371,14 +399,17 @@ class SnakeGame():
         '''
         # Collision check between snake and food
         if self.obj_dict["snake"].rect.colliderect(self.obj_dict["food"]):
+            pygame.mixer.Sound.play(self.obj_dict["food"].sound_interact)
             self.obj_dict["food"].alive = False
             self.obj_dict["snake"].grow(self.obj_dict["food"])
             self.up_score(self.obj_dict["food"].point_value)
         # Collision check for edge of screen
         if (self.obj_dict["snake"].pos_x > self.screen_size[0]-self.obj_dict["snake"].size) or (
                 self.obj_dict["snake"].pos_y > self.screen_size[1]-self.obj_dict["snake"].size):
+            pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
             self.game_over = True
-        if self.obj_dict["snake"].pos_x < 0 or self.obj_dict["snake"].pos_y < 0:
+        elif self.obj_dict["snake"].pos_x < 0 or self.obj_dict["snake"].pos_y < 0:
+            pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
             self.game_over = True
         # Collision check between snake and tails
         i = 0
@@ -386,6 +417,7 @@ class SnakeGame():
             # Skip the first tail segment
             if i > 0:
                 if self.obj_dict["snake"].rect.colliderect(tail):
+                    pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
                     self.game_over = True
             i += 1
 
@@ -396,6 +428,8 @@ class SnakeGame():
 
         pause_menu does stuff
         '''
+        # Pause game music
+        self.game_music = False
         # Render the score
         text_str = 'Score: ' + str(self.score)
         _ = self.game_font.render_to(
@@ -415,6 +449,8 @@ class SnakeGame():
 
         game_over_menu does stuff
         '''
+        # Stop the music
+        pygame.mixer.music.stop()
         # Render the Game Over text
         text_str = 'Game Over'
         _ = self.game_font.render_to(

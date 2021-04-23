@@ -45,7 +45,9 @@ class BaseGame():
         self.fps = 60
         self.screen_width = 1280
         self.screen_height = 720
-        self.title = "Game Platform"
+        self.title = "Game Platform - "
+        self.music_volume = .7
+        self.effect_volume = .7
         init()
 
     def run(self):
@@ -67,10 +69,8 @@ class BaseGame():
         while self.running:
             # System/window events to be checked
             self.event_checks()
-
             # Gameplay logic
             self.game.play()
-
             # The game loop FPS
             clock.tick(self.fps)
 
@@ -99,14 +99,14 @@ class BaseGame():
         pygame.display.flip()
 
         # Instantiate the Game Obj
-        self.game = self.game_pkg(screen, game_font)
+        self.game = self.game_pkg(screen, game_font, self)
 
     def event_checks(self):
         '''
         event_checks
         ~~~~~~~~~~
 
-        event_checks for the snake
+        event_checks for the game
         '''
         for event in pygame.event.get():
             # print(event)
@@ -118,6 +118,7 @@ class BaseGame():
                 if event.key == K_ESCAPE:
                     if not self.game.game_over:
                         self.game.pause = not self.game.pause
+                        self.game.game_music = not self.game.game_music
                     else:
                         self.game.game_over = False
                         self.game.start()
