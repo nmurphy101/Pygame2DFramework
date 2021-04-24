@@ -25,7 +25,7 @@ from pygame import (
     freetype, init
 )
 from pygame.constants import (
-    QUIT, KEYDOWN, K_ESCAPE, RESIZABLE,
+    QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
     WINDOWFOCUSGAINED, WINDOWFOCUSLOST,
 )
 # pylint: enable=no-name-in-module
@@ -63,20 +63,21 @@ class BaseGame():
         clock = pygame.time.Clock()
 
         # Initilize game objects
-        self.game.start()
+        # self.game.start()
 
          # Game loop
         while self.running:
-            # System/window events to be checked
-            self.event_checks()
             # Gameplay logic
-            self.game.play()
+            menu = self.game.play()
+            # System/window events to be checked
+            self.event_checks(menu)
             # The game loop FPS
             clock.tick(self.fps)
 
-        # pylint: disable=no-member
+        # Quit the game
+        #pylint: disable=no-member
         pygame.quit()
-        # pylint: enable=no-member
+        #pylint: enable=no-member
 
     def set_window_settings(self):
         '''
@@ -101,7 +102,7 @@ class BaseGame():
         # Instantiate the Game Obj
         self.game = self.game_pkg(screen, game_font, self)
 
-    def event_checks(self):
+    def event_checks(self, menu):
         '''
         event_checks
         ~~~~~~~~~~
@@ -126,3 +127,8 @@ class BaseGame():
                 self.game.focus_pause = False
             elif event.type == WINDOWFOCUSLOST:
                 self.game.focus_pause = True
+            elif event.type == MOUSEBUTTONDOWN:
+                if menu:
+                    for button in menu:
+                        if button[0].collidepoint(event.pos):
+                            button[1]()
