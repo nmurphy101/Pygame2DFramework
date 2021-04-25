@@ -88,7 +88,7 @@ class BaseGame():
         '''
         # Game window settings
         background_colour = (0, 0, 0)
-        screen = pygame.display.set_mode((self.screen_width, self.screen_height), RESIZABLE)
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height))#, RESIZABLE)
         pygame.display.set_caption(self.title)
         screen.fill(background_colour)
         game_font = freetype.Font(
@@ -117,12 +117,18 @@ class BaseGame():
             # Press escape to pause the game
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    if not self.game.game_over:
-                        self.game.pause = not self.game.pause
-                        self.game.game_music = not self.game.game_music
+                    # If not game over
+                    if self.game.menu_option != 3:
+                        # If already paused
+                        if self.game.menu_option == 1:
+                            self.game.menu_option = None
+                        else:
+                            self.game.menu_option = 1
+                        self.game.pause_game_music = not self.game.pause_game_music
+                    # Is game over
                     else:
-                        self.game.game_over = False
-                        self.game.start()
+                        self.game.menu_option = None
+                        self.game.start(None)
             elif event.type == WINDOWFOCUSGAINED:
                 self.game.focus_pause = False
             elif event.type == WINDOWFOCUSLOST:
@@ -131,4 +137,5 @@ class BaseGame():
                 if menu:
                     for button in menu:
                         if button[0].collidepoint(event.pos):
-                            button[1]()
+                            self.game.prev_menu = button[2]
+                            button[1](button[2])

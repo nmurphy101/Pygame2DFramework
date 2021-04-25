@@ -3,11 +3,13 @@ Critical:
 1. ?
 
 Major:
-1. Working Main menu
-2. Working pause menu
-3. Working settings menu
-    a. connected to a config file
-3. Player AI
+1. Working Main menu - DONE
+2. Working pause menu - DONE
+3. Working settings menu - DONE
+    a. connected to a config file - DONE
+4. Data structure for objects to optimize collision checking and spawning
+    a. "Windows" -> "Chunks" -> "tiles" 
+5. Player AI
 
 Minor:
 1. immobile enemies
@@ -28,4 +30,5 @@ Minor:
 
 
 Bugs:
-1. ?
+1. pressing escape when in a menu pauses instead of returns back a menu/unpauses
+2. unknown random crash while playing.
