@@ -293,12 +293,10 @@ class Food():
             collision_objs = obj_dict["food"].rect.collidedictall(obj_dict, 1)
             if len(collision_objs) < 1:
                 continue
-            print("COLLISION 1: ", len(collision_objs))
             for _, obj in obj_dict.items():
                 try:
                     if obj.children:
                         collision_obj = obj_dict["food"].rect.collidelist(obj.children)
-                        print("COLLISION 2: ", collision_obj)
                 except AttributeError:
                     pass
             found_spawn = True
