@@ -8,8 +8,16 @@ Major:
 3. Working settings menu - DONE
     a. connected to a config file - DONE
 4. Data structure for objects to optimize collision checking and spawning
-    a. "Windows" -> "Chunks" -> "tiles" 
-5. Player AI
+    a. "Windows" -> "Chunks" -> "tiles"
+5. Optimize collision checks to be more generic instead of specific so
+   other objects can get their collisions checked.
+6. Player AI
+7. additional settings
+    - Volume control
+    - Window size control
+8. More advanced collision logic for entity interactions
+  - like not just killing the other obj when colliding
+
 
 Minor:
 1. immobile enemies

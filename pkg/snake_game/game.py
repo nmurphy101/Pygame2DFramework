@@ -43,6 +43,10 @@ class Snake():
         self.screen = screen
         # Snake is dead or alive
         self.alive = True
+        # Snake is player
+        self.player = True
+        # Score this entity has accumulated
+        self.score = 0
         # Where the snake was located
         self.prev_pos_x = 96
         self.prev_pos_y = 96
@@ -69,6 +73,8 @@ class Snake():
         # Snake death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_death.set_volume(base_game.effect_volume/3.5)
+        # Interact sound
+        # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
         self.num_tails = 5
         # tail segment list
@@ -114,6 +120,16 @@ class Snake():
             ))
             self.num_tails += 1
 
+    def up_score(self, point_value):
+        '''
+        up_score
+        ~~~~~~~~~~
+
+        up_score does stuff
+        '''
+        # Increase the score
+        self.score += point_value
+
     def choose_direction(self):
         '''
         choose_direction
@@ -139,7 +155,7 @@ class Snake():
 
         move does stuff
         '''
-        if self.moved_last_cnt > self.speed:
+        if self.moved_last_cnt > self.speed and self.alive:
             # Save current position as last position
             self.prev_pos_x = self.pos_x
             self.prev_pos_y = self.pos_y
@@ -176,6 +192,8 @@ class TailSegment():
         self.screen = screen
         # Tail is dead or alive
         self.alive = True
+        # tail segment isn't player
+        self.player = False
         # obj ahead of this obj in the chain of tails/head
         self.ahead_obj = ahead_obj
         # position in the chain of tails/head
@@ -230,6 +248,8 @@ class Food():
         self.screen = screen
         # Food is dead or alive
         self.alive = False
+        # food isn't player
+        self.player = False
         # Size of the game screen
         self.screen_size = screen_size
         # Where the food is located
@@ -254,6 +274,7 @@ class Food():
         # Interact sound
         self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
         self.sound_interact.set_volume(base_game.effect_volume)
+        self.children = None
 
     def draw(self):
         '''
@@ -289,14 +310,14 @@ class Food():
                 16, self.screen_size[1], 16
             )
             # Check if the chosen random spawn location is taken
-            print(obj_dict["food"])
-            collision_objs = obj_dict["food"].rect.collidedictall(obj_dict, 1)
+            # print(obj_dict["food1"])
+            collision_objs = obj_dict["food1"].rect.collidedictall(obj_dict, 1)
             if len(collision_objs) < 1:
                 continue
             for _, obj in obj_dict.items():
                 try:
                     if obj.children:
-                        collision_obj = obj_dict["food"].rect.collidelist(obj.children)
+                        obj_dict["food1"].rect.collidelist(obj.children)
                 except AttributeError:
                     pass
             found_spawn = True
@@ -316,28 +337,31 @@ class SnakeGame():
         self.base_game = base_game
         # Game config file
         self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
-        print(self.game_config_file_path)
         with open(self.game_config_file_path) as json_data_file:
             self.game_config = json.load(json_data_file)
         # Window settings
-        self.title = base_game.title + "Snake"
+        self.title = base_game.title + "Snake1"
         pygame.display.set_caption(self.title)
         self.screen = screen
         self.game_font = game_font
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
         # Game settings
-        self.score = 0
         self.pause_game_music = False
         self.menu_option = 0
         self.prev_menu = 0
-        self.game_menus = [self.main_menu, self.pause_menu, 
-                           self.settings_menu, self.game_over_menu,]
+        self.root_menu = 0
+        self.game_menus = [self.main_menu, self.pause_menu,
+                           self.settings_menu, self.game_over_menu,
+                           self.display_menu, self.sound_menu,]
         # Game music
-        self.game_music_file = "assets/music/Cheerful_Piano_NES.wav"
-        pygame.mixer.music.load(self.game_music_file)
+        self.game_music_intro = "assets/music/8bit_Stage1_Intro.wav"
+        self.game_music_loop = "assets/music/8bit_Stage1_Loop.wav"
+        self.playlist = [self.game_music_loop]
+        self.current_track = 0
+        pygame.mixer.music.load(self.game_music_intro)
         pygame.mixer.music.set_volume(base_game.music_volume)
-        
+
         # Game object list
         self.obj_dict = {}
 
@@ -354,21 +378,19 @@ class SnakeGame():
 
         # Check if in a menu
         if self.menu_option is None:
-            self.check_settings()
-
             # Spawn a new food after it's eaten
-            if not self.obj_dict["food"].alive:
-                self.obj_dict["food"].spawn(self.obj_dict)
+            if not self.obj_dict["food1"].alive:
+                self.obj_dict["food1"].spawn(self.obj_dict)
 
             ## Draw game Objects
-            self.obj_dict["food"].draw()
-            self.obj_dict["snake"].draw()
+            self.obj_dict["food1"].draw()
+            self.obj_dict["snake1"].draw()
             pygame.display.update()
 
             ## Game logic
             # Snake control and movement
-            self.obj_dict["snake"].choose_direction()
-            self.obj_dict["snake"].move()
+            self.obj_dict["snake1"].choose_direction()
+            self.obj_dict["snake1"].move()
             # collision of objects
             self.collision_checks()
         else:
@@ -384,6 +406,12 @@ class SnakeGame():
             elif self.menu_option == 3:
                 # show the pause menu
                 return self.game_over_menu(self.prev_menu)
+            elif self.menu_option == 4:
+                # show the display menu
+                return self.display_menu(self.prev_menu)
+            elif self.menu_option == 5:
+                # show the display menu
+                return self.sound_menu(self.prev_menu)
 
     def start(self, prev_menu):
         '''
@@ -394,17 +422,20 @@ class SnakeGame():
         '''
         # Start the game music
         if self.game_config["settings"]["music"]:
-            pygame.mixer.music.play(-1)
+            self.current_track = 0
+            pygame.mixer.music.load(self.playlist[self.current_track])
+            pygame.mixer.music.play(0, 0, 1)
+
         # Starting variables
-        self.score = 0
         self.menu_option = None
         self.pause_game_music = False
+
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
         snake = Snake(self.screen, self.base_game)
         self.obj_dict = {
-            "snake": snake,
-            "food": food,
+            "snake1": snake,
+            "food1": food,
         }
 
     def collision_checks(self):
@@ -414,29 +445,53 @@ class SnakeGame():
 
         collision_checks does stuff
         '''
-        # Collision check between snake and food
-        if self.obj_dict["snake"].rect.colliderect(self.obj_dict["food"]):
-            pygame.mixer.Sound.play(self.obj_dict["food"].sound_interact)
-            self.obj_dict["food"].alive = False
-            self.obj_dict["snake"].grow(self.obj_dict["food"])
-            self.up_score(self.obj_dict["food"].point_value)
-        # Collision check for edge of screen
-        if (self.obj_dict["snake"].pos_x > self.screen_size[0]-self.obj_dict["snake"].size) or (
-                self.obj_dict["snake"].pos_y > self.screen_size[1]-self.obj_dict["snake"].size):
-            pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
-            self.menu_option = 3
-        elif self.obj_dict["snake"].pos_x < 0 or self.obj_dict["snake"].pos_y < 0:
-            pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
-            self.menu_option = 3
-        # Collision check between snake and tails
-        i = 0
-        for tail in self.obj_dict["snake"].children:
-            # Skip the first tail segment
-            if i > 0:
-                if self.obj_dict["snake"].rect.colliderect(tail):
-                    pygame.mixer.Sound.play(self.obj_dict["snake"].sound_death)
-                    self.menu_option = 3
-            i += 1
+        items = self.obj_dict.items()
+        # Collision check for all entities
+        for name1, obj1 in items:
+            for name2, obj2 in items:
+                if obj1 != obj2 and obj1.alive:
+                    # Collision check between obj and other obj
+                    if obj1.rect.colliderect(obj2):
+                        # Kill second obj
+                        obj2.alive = False
+                        # Play second obj's interact sound
+                        pygame.mixer.Sound.play(obj2.sound_interact)
+                        # Grow obj1 if obj2 is food and up obj1 score
+                        if "food" in name2:
+                            obj1.grow(obj2)
+                            obj1.up_score(obj2.point_value)
+                    # Collision check for edge of screen (Right and Bottom)
+                    if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
+                            self.obj_dict["snake1"].pos_y > self.screen_size[1]-self.obj_dict["snake1"].size):
+                        pygame.mixer.Sound.play(self.obj_dict["snake1"].sound_death)
+                        # Loose the game if obj1 is the player
+                        if obj1.player:
+                            self.menu_option = 3
+                        # Kill obj1
+                        obj1.alive = False
+                    # Collision check for edge of screen (Left and Top)
+                    elif obj1.pos_x < 0 or obj1.pos_y < 0:
+                        pygame.mixer.Sound.play(obj1.sound_death)
+                        # Loose the game if obj1 is the player
+                        if obj1.player:
+                            self.menu_option = 3
+                        # Kill obj1
+                        obj1.alive = False
+                    # Collision check between obj1 and obj1's children
+                    if obj1.children:
+                        i = 0
+                        for child in obj1.children:
+                            # Skip the first child segment
+                            if i > 0:
+                                if obj1.rect.colliderect(child):
+                                    # Play obj1 death sound
+                                    pygame.mixer.Sound.play(obj1.sound_death)
+                                    # Loose the game if obj1 is the player
+                                    if obj1.player:
+                                        self.menu_option = 3
+                                    # Kill obj1
+                                    obj1.alive = False
+                            i += 1
 
     def check_settings(self):
         '''
@@ -446,27 +501,12 @@ class SnakeGame():
         check_settings does stuff
         '''
         # Check game music status
+        print(self.game_config["settings"]["music"], self.pause_game_music)
         if self.game_config["settings"]["music"]:
-            if self.pause_game_music:
-                pygame.mixer.music.pause()
-            else:
-                if self.pause_game_music is None:
-                    pygame.mixer.music.play(-1)
-                else:
-                    pygame.mixer.music.unpause()
+            pygame.mixer.music.unpause()
         else:
-            pygame.mixer.music.stop()
+            pygame.mixer.music.pause()
 
-    def up_score(self, point_value):
-        '''
-        up_score
-        ~~~~~~~~~~
-
-        up_score does stuff
-        '''
-        # Increase the score
-        self.score += point_value
-        
     def quit_game(self, prev_menu):
         '''
         quit_game
@@ -490,7 +530,7 @@ class SnakeGame():
         '''
         self.menu_option = None
         self.pause_game_music = True
-    
+
     def toggle_game_music(self, prev_menu):
         '''
         toggle_game_music
@@ -514,6 +554,7 @@ class SnakeGame():
 
         # Make sure the right menu option is selected
         self.menu_option = 0
+        self.root_menu = 0
 
         # Check settings if just left settings page
         if prev_menu == 2:
@@ -571,6 +612,8 @@ class SnakeGame():
             (quit_obj, self.quit_game, 0),
         ]
 
+        self.prev_menu = None
+
         return menu
 
     def pause_menu(self, prev_menu):
@@ -583,6 +626,7 @@ class SnakeGame():
 
         # Make sure the right menu option is selected
         self.menu_option = 1
+        self.root_menu = 1
 
         # Check settings if just left settings page
         if prev_menu == 2:
@@ -591,9 +635,9 @@ class SnakeGame():
         # Pause game music
         self.pause_game_music = True
         # Render the Game Over text
-        text_str = 'Paused'
+        text_str = '-Paused-'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*8)
+                    self.screen_size[1]/2 - self.game_font.size*10)
         _ = self.game_font.render_to(
             self.screen,
             position,
@@ -601,10 +645,15 @@ class SnakeGame():
             (255, 0, 0)
         )
 
+        # Get the player score
+        score = "NA"
+        for name, obj in self.obj_dict.items():
+            if obj.player:
+                score = obj.score
         # Render the score
-        text_str = 'Score: ' + str(self.score)
+        text_str = 'Score: ' + str(score)
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*6)
+                    self.screen_size[1]/2 - self.game_font.size*8)
         _ = self.game_font.render_to(
             self.screen,
             position,
@@ -615,7 +664,7 @@ class SnakeGame():
         # Render the quit button
         text_str = 'Resume'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*1)
+                    self.screen_size[1]/2 - self.game_font.size)
         resume_obj = self.game_font.render_to(
             self.screen,
             position,
@@ -654,6 +703,8 @@ class SnakeGame():
             (return_obj, self.main_menu, 1),
         ]
 
+        self.prev_menu = None
+
         return menu
 
     def settings_menu(self, prev_menu):
@@ -670,20 +721,31 @@ class SnakeGame():
         self.menu_option = 2
 
         # Render the Settings Menu text
-        text_str = 'Settings Menu'
+        text_str = 'Settings'
         _ = self.game_font.render_to(
             self.screen,
             (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-             self.screen_size[1]/2 - self.game_font.size*8),
+             self.screen_size[1]/2 - self.game_font.size*10),
             text_str,
             (255, 0, 0)
         )
 
-        # Render the play button
-        text_str = 'Music: ' + str(self.game_config["settings"]["music"])
+        # Render the display button
+        text_str = 'Display'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*2)
-        music_obj = self.game_font.render_to(
+                    self.screen_size[1]/2 - self.game_font.size)
+        display_obj = self.game_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            (255, 255, 255)
+        )
+
+        # Render the Sound button
+        text_str = 'Sound'
+        position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/2 + self.game_font.size)
+        sound_obj = self.game_font.render_to(
             self.screen,
             position,
             text_str,
@@ -691,10 +753,10 @@ class SnakeGame():
         )
 
         # Render the Return button
-        text_str = 'Return'
+        text_str = 'Back'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 + self.game_font.size*6)
-        return_obj = self.game_font.render_to(
+                    self.screen_size[1]/2 + self.game_font.size*8)
+        back_obj = self.game_font.render_to(
             self.screen,
             position,
             text_str,
@@ -705,9 +767,9 @@ class SnakeGame():
         pygame.display.update()
 
         menu = [
-            (music_obj, self.toggle_game_music, prev_menu),
-            # (settings_obj, psudo_func),
-            (return_obj, self.game_menus[prev_menu], 2),
+            (display_obj, self.display_menu, 2),
+            (sound_obj, self.sound_menu, 2),
+            (back_obj, self.game_menus[self.root_menu], 2),
         ]
 
         return menu
@@ -725,20 +787,27 @@ class SnakeGame():
 
         # Stop the music
         pygame.mixer.music.stop()
+
         # Render the Game Over text
         text_str = 'Game Over'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*8)
+                    self.screen_size[1]/2 - self.game_font.size*10)
         _ = self.game_font.render_to(
             self.screen,
             position,
             text_str,
             (255, 0, 0)
         )
+
+        # Get the player score
+        score = "NA"
+        for name, obj in self.obj_dict.items():
+            if obj.player:
+                score = obj.score
         # Render the score
-        text_str = 'Score: ' + str(self.score)
+        text_str = 'Score: ' + str(score)
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 - self.game_font.size*6)
+                    self.screen_size[1]/2 - self.game_font.size*9)
         _ = self.game_font.render_to(
             self.screen,
             position,
@@ -749,7 +818,7 @@ class SnakeGame():
         # Render the restart button
         text_str = 'Restart'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 + self.game_font.size)
+                    self.screen_size[1]/2 - self.game_font.size)
         restart_obj = self.game_font.render_to(
             self.screen,
             position,
@@ -760,7 +829,7 @@ class SnakeGame():
         # Render the quit button
         text_str = 'Quit'
         position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
-                    self.screen_size[1]/2 + self.game_font.size*3)
+                    self.screen_size[1]/2 + self.game_font.size*2)
         return_obj = self.game_font.render_to(
             self.screen,
             position,
@@ -774,6 +843,95 @@ class SnakeGame():
         menu = [
             (restart_obj, self.start, 3),
             (return_obj, self.main_menu, 3),
+        ]
+
+        return menu
+
+    def display_menu(self, prev_menu):
+        '''
+        display_menu
+        ~~~~~~~~~~
+
+        display_menu does stuff
+        '''
+        # Clear previous frame render
+        self.screen.fill((0, 0, 0, 0))
+
+        # Make sure the right menu option is selected
+        self.menu_option = 4
+
+        # Render the Display text
+        text_str = 'Display'
+        position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/2 - self.game_font.size*10)
+        _ = self.game_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            (255, 0, 0)
+        )
+
+        # Render the Return button
+        text_str = 'Back'
+        position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/2 + self.game_font.size*8)
+        back_obj = self.game_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            (255, 255, 255)
+        )
+
+        # Update the screen display
+        pygame.display.update()
+
+        menu = [
+            (back_obj, self.game_menus[prev_menu], 4),
+        ]
+
+        return menu
+
+    def sound_menu(self, prev_menu):
+        '''
+        sound_menu
+        ~~~~~~~~~~
+
+        sound_menu does stuff
+        '''
+        # Clear previous frame render
+        self.screen.fill((0, 0, 0, 0))
+
+        # Make sure the right menu option is selected
+        self.menu_option = 5
+
+        # Render the music button
+        text_str = 'Music: ' + str(self.game_config["settings"]["music"])
+        position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/2 - self.game_font.size)
+        music_obj = self.game_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            (255, 255, 255)
+        )
+
+        # Render the Return button
+        text_str = 'Back'
+        position = (self.screen_size[0]/2-(len(text_str)*self.game_font.size)/2,
+                    self.screen_size[1]/2 + self.game_font.size*8)
+        back_obj = self.game_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            (255, 255, 255)
+        )
+
+        # Update the screen display
+        pygame.display.update()
+
+        menu = [
+            (music_obj, self.toggle_game_music, prev_menu),
+            (back_obj, self.game_menus[prev_menu], 5),
         ]
 
         return menu
