@@ -20,6 +20,8 @@ import sys
 # import time
 # import re
 # import queue as q
+from itertools import product
+import multiprocessing
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
 import json
 import random
@@ -30,6 +32,8 @@ from pygame.constants import (
 )
 # pylint: enable=no-name-in-module
 
+SNAKE_DEATH = 0
+PICK_UP_SOUND = 1
 
 class Snake():
     '''
@@ -39,8 +43,6 @@ class Snake():
     AI for the snake
     '''
     def __init__(self, screen, base_game):
-        # Window to draw to
-        self.screen = screen
         # Snake is dead or alive
         self.alive = True
         # Snake is player
@@ -69,10 +71,10 @@ class Snake():
         # head color = red
         self.head_color = (255, 0, 0)
         # Snake is a rectangle object
-        self.rect = pygame.draw.rect(self.screen, self.head_color, self.head)
+        self.rect = pygame.draw.rect(screen, self.head_color, self.head)
         # Snake death sound
-        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
-        self.sound_death.set_volume(base_game.effect_volume/3.5)
+        self.sound_death = SNAKE_DEATH
+        self.sound_death_volume = base_game.effect_volume/3.5
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
@@ -82,11 +84,11 @@ class Snake():
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(self.screen, self, pos))
+                self.children.append(TailSegment(screen, self, pos))
             else:
-                self.children.append(TailSegment(self.screen, self.children[pos-1], pos))
+                self.children.append(TailSegment(screen, self.children[pos-1], pos))
 
-    def draw(self):
+    def draw(self, screen):
         '''
         draw
         ~~~~~~~~~~
@@ -94,17 +96,15 @@ class Snake():
         draw does stuff
         '''
         if self.alive:
-
             # Draw each tail
             for tail in self.children:
-                tail.draw()
-
+                tail.draw(screen)
              # head pos/size  = (left, top, width, height)
             self.head = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the snake's head based on it's parameters
-            self.rect = pygame.draw.rect(self.screen, self.head_color, self.head)
+            self.rect = pygame.draw.rect(screen, self.head_color, self.head)
 
-    def grow(self, food):
+    def grow(self, screen, food):
         '''
         grow
         ~~~~~~~~~~
@@ -114,7 +114,7 @@ class Snake():
         # Add a new tail segment
         for _ in range(food.growth):
             self.children.append(TailSegment(
-                self.screen,
+                screen,
                 self.children[self.num_tails - 1],
                 self.num_tails + 1
             ))
@@ -188,8 +188,6 @@ class TailSegment():
     Tail Segment for the snake
     '''
     def __init__(self, screen, ahead_obj, position):
-        # Window to draw to
-        self.screen = screen
         # Tail is dead or alive
         self.alive = True
         # tail segment isn't player
@@ -214,9 +212,9 @@ class TailSegment():
         # tail color = white
         self.tail_color = (255, 255, 255)
         # Tail is a rectangle object
-        self.rect = pygame.draw.rect(self.screen, self.tail_color, self.tail)
+        self.rect = pygame.draw.rect(screen, self.tail_color, self.tail)
 
-    def draw(self):
+    def draw(self, screen):
         '''
         draw
         ~~~~~~~~~~
@@ -233,7 +231,7 @@ class TailSegment():
             # Set the current tail position and size
             self.tail = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the tail segment based on it's parameters
-            self.rect = pygame.draw.rect(self.screen, self.tail_color, self.tail)
+            self.rect = pygame.draw.rect(screen, self.tail_color, self.tail)
 
 
 class Food():
@@ -244,8 +242,6 @@ class Food():
     Food for the snake
     '''
     def __init__(self, screen, screen_size, base_game):
-        # Window to draw to
-        self.screen = screen
         # Food is dead or alive
         self.alive = False
         # food isn't player
@@ -266,17 +262,17 @@ class Food():
         # food color = green
         self.food_color = (0, 255, 0)
         # Food is rect obj
-        self.rect = pygame.draw.rect(self.screen, self.food_color, self.food)
+        self.rect = pygame.draw.rect(screen, self.food_color, self.food)
         # How much a snake grows from eating food
         self.growth = 5
         # Point value of the food
         self.point_value = 10
         # Interact sound
-        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
-        self.sound_interact.set_volume(base_game.effect_volume)
+        self.sound_interact = PICK_UP_SOUND
+        self.sound_interact_volume = base_game.effect_volume
         self.children = None
 
-    def draw(self):
+    def draw(self, screen):
         '''
         draw
         ~~~~~~~~~~
@@ -287,7 +283,7 @@ class Food():
             # food pos/size = (left, top, width, height)
             self.food = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the food segment based on it's parameters
-            self.rect = pygame.draw.rect(self.screen, self.food_color, self.food)
+            self.rect = pygame.draw.rect(screen, self.food_color, self.food)
 
     def spawn(self, obj_dict):
         '''
@@ -361,7 +357,11 @@ class SnakeGame():
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
         pygame.mixer.music.set_volume(base_game.music_volume)
-
+        # Sounds
+        self.sounds = [
+            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
+            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
+        ]
         # Game object list
         self.obj_dict = {}
 
@@ -383,8 +383,8 @@ class SnakeGame():
                 self.obj_dict["food1"].spawn(self.obj_dict)
 
             ## Draw game Objects
-            self.obj_dict["food1"].draw()
-            self.obj_dict["snake1"].draw()
+            self.obj_dict["food1"].draw(self.screen)
+            self.obj_dict["snake1"].draw(self.screen)
             pygame.display.update()
 
             ## Game logic
@@ -449,49 +449,61 @@ class SnakeGame():
         # Collision check for all entities
         for name1, obj1 in items:
             for name2, obj2 in items:
-                if obj1 != obj2 and obj1.alive:
-                    # Collision check between obj and other obj
-                    if obj1.rect.colliderect(obj2):
-                        # Kill second obj
-                        obj2.alive = False
-                        # Play second obj's interact sound
-                        pygame.mixer.Sound.play(obj2.sound_interact)
-                        # Grow obj1 if obj2 is food and up obj1 score
-                        if "food" in name2:
-                            obj1.grow(obj2)
-                            obj1.up_score(obj2.point_value)
-                    # Collision check for edge of screen (Right and Bottom)
-                    if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
-                            self.obj_dict["snake1"].pos_y > self.screen_size[1]-self.obj_dict["snake1"].size):
-                        pygame.mixer.Sound.play(self.obj_dict["snake1"].sound_death)
-                        # Loose the game if obj1 is the player
-                        if obj1.player:
-                            self.menu_option = 3
-                        # Kill obj1
-                        obj1.alive = False
-                    # Collision check for edge of screen (Left and Top)
-                    elif obj1.pos_x < 0 or obj1.pos_y < 0:
-                        pygame.mixer.Sound.play(obj1.sound_death)
-                        # Loose the game if obj1 is the player
-                        if obj1.player:
-                            self.menu_option = 3
-                        # Kill obj1
-                        obj1.alive = False
-                    # Collision check between obj1 and obj1's children
-                    if obj1.children:
+                # Make sure not checking collision with dead obj's
+                if obj1.alive and obj2.alive:
+                    # Make sure not checking collision with self
+                    if obj1 != obj2:
+                        # Collision check between obj and other obj
+                        if obj1.rect.colliderect(obj2):
+                            # Kill second obj
+                            obj2.alive = False
+                            # Play second obj's interact sound
+                            sound = self.sounds[obj2.sound_interact]
+                            sound.set_volume(obj2.sound_interact_volume)
+                            pygame.mixer.Sound.play(sound)
+                            # Grow obj1 if obj2 is food and up obj1 score
+                            if "food" in name2:
+                                obj1.grow(self.screen, obj2)
+                                obj1.up_score(obj2.point_value)
+                        # Collision check for edge of screen (Right and Bottom)
+                        if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
+                                obj1.pos_y > self.screen_size[1]-obj1.size):
+                            sound = self.sounds[obj1.sound_death]
+                            sound.set_volume(obj1.sound_death_volume)
+                            pygame.mixer.Sound.play(sound)
+                            # Loose the game if obj1 is the player
+                            if obj1.player:
+                                self.menu_option = 3
+                            # Kill obj1
+                            obj1.alive = False
+                        # Collision check for edge of screen (Left and Top)
+                        elif obj1.pos_x < 0 or obj1.pos_y < 0:
+                            sound = self.sounds[obj1.sound_death]
+                            sound.set_volume(obj1.sound_death_volume)
+                            pygame.mixer.Sound.play(sound)
+                            # Loose the game if obj1 is the player
+                            if obj1.player:
+                                self.menu_option = 3
+                            # Kill obj1
+                            obj1.alive = False
+                    # Collision check between obj1 and obj2's children even if obj1=obj2
+                    if obj2.children:
                         i = 0
-                        for child in obj1.children:
-                            # Skip the first child segment
-                            if i > 0:
-                                if obj1.rect.colliderect(child):
-                                    # Play obj1 death sound
-                                    pygame.mixer.Sound.play(obj1.sound_death)
-                                    # Loose the game if obj1 is the player
-                                    if obj1.player:
-                                        self.menu_option = 3
-                                    # Kill obj1
-                                    obj1.alive = False
-                            i += 1
+                        for child in obj2.children:
+                            # Skip the first child segment if it's a snake
+                            if "snake" in name2 and i == 0:
+                                i += 1
+                                continue
+                            if obj1.rect.colliderect(child):
+                                # Play obj1 death sound
+                                sound = self.sounds[obj1.sound_death]
+                                sound.set_volume(obj1.sound_death_volume)
+                                pygame.mixer.Sound.play(sound)
+                                # Loose the game if obj1 is the player
+                                if obj1.player:
+                                    self.menu_option = 3
+                                # Kill obj1
+                                obj1.alive = False
 
     def check_settings(self):
         '''
@@ -937,5 +949,5 @@ class SnakeGame():
         return menu
 
 
-def psudo_func():
+def psudo_func(name1, name2):
     pass
