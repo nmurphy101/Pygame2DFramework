@@ -18,7 +18,7 @@ __version__ = '1.0.0-alpha'
 # from multiprocessing import Manager
 # from multiprocessing import freeze_support
 from pkg.snake_game.game import SnakeGame
-from pkg.game import BaseGame
+from pkg.app import BaseGame
 
 # freeze_support()
 
