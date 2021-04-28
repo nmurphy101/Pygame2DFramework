@@ -20,23 +20,17 @@ import sys
 # import time
 # import re
 # import queue as q
-from itertools import product
-import multiprocessing
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
 import json
-import random
 import pygame
-# pylint: disable=no-name-in-module
-from pygame.constants import (
-    K_UP, K_DOWN, K_LEFT, K_RIGHT,
-)
-# pylint: enable=no-name-in-module
+# pylint: disable=relative-beyond-top-level
 # All the game entities
 from .entities.entities import (
     Snake, Food
 )
 # All the game menus
 from .menus.menus import Menu
+# pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
 PICK_UP_SOUND = 1
@@ -72,11 +66,6 @@ class SnakeGame():
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
         pygame.mixer.music.set_volume(base_game.music_volume)
-        # Sounds
-        self.sounds = [
-            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
-            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
-        ]
         # Game object list
         self.obj_dict = {}
         # Menu Obj
@@ -137,11 +126,8 @@ class SnakeGame():
 
         start does stuff
         '''
-        # Start the game music
-        if self.game_config["settings"]["music"]:
-            self.current_track = 0
-            pygame.mixer.music.load(self.playlist[self.current_track])
-            pygame.mixer.music.play(0, 0, 1)
+        # Check settings
+        self.check_settings()
 
         # Starting variables
         self.menu.menu_option = None
@@ -164,7 +150,7 @@ class SnakeGame():
         '''
         items = self.obj_dict.items()
         # Collision check for all entities
-        for name1, obj1 in items:
+        for _, obj1 in items:
             for name2, obj2 in items:
                 # Make sure not checking collision with dead obj's
                 if obj1.alive and obj2.alive:
@@ -175,7 +161,7 @@ class SnakeGame():
                             # Kill second obj
                             obj2.alive = False
                             # Play second obj's interact sound
-                            sound = self.sounds[obj2.sound_interact]
+                            sound = obj2.sound_interact
                             sound.set_volume(obj2.sound_interact_volume)
                             pygame.mixer.Sound.play(sound)
                             # Grow obj1 if obj2 is food and up obj1 score
@@ -185,7 +171,7 @@ class SnakeGame():
                         # Collision check for edge of screen (Right and Bottom)
                         if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
                                 obj1.pos_y > self.screen_size[1]-obj1.size):
-                            sound = self.sounds[obj1.sound_death]
+                            sound = obj1.sound_death
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
                             # Loose the game if obj1 is the player
@@ -195,7 +181,7 @@ class SnakeGame():
                             obj1.alive = False
                         # Collision check for edge of screen (Left and Top)
                         elif obj1.pos_x < 0 or obj1.pos_y < 0:
-                            sound = self.sounds[obj1.sound_death]
+                            sound = obj1.sound_death
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
                             # Loose the game if obj1 is the player
@@ -213,7 +199,7 @@ class SnakeGame():
                                 continue
                             if obj1.rect.colliderect(child):
                                 # Play obj1 death sound
-                                sound = self.sounds[obj1.sound_death]
+                                sound = obj1.sound_death
                                 sound.set_volume(obj1.sound_death_volume)
                                 pygame.mixer.Sound.play(sound)
                                 # Loose the game if obj1 is the player
@@ -231,9 +217,14 @@ class SnakeGame():
         '''
         # Check game music status
         print(self.game_config["settings"]["music"], self.pause_game_music)
+        # Start the game music
         if self.game_config["settings"]["music"]:
-            pygame.mixer.music.unpause()
+            print("starting music")
+            self.current_track = 0
+            pygame.mixer.music.load(self.playlist[self.current_track])
+            pygame.mixer.music.play(0, 0, 1)
         else:
+            print("stopping music")
             pygame.mixer.music.pause()
 
     def quit_game(self):

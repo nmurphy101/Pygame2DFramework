@@ -48,7 +48,7 @@ class Menu():
         self.root_menu = 0
 
         # Check settings if just left settings page
-        if self.prev_menu == 2:
+        if self.prev_menu != 1 and self.prev_menu != 0:
             self.game.check_settings()
 
         # Render the Main Menu text
@@ -103,8 +103,6 @@ class Menu():
             (quit_obj, self.game.quit_game, 0),
         ]
 
-        self.prev_menu = 0
-
         return menu
 
     def pause_menu(self):
@@ -135,7 +133,7 @@ class Menu():
 
         # Get the player score
         score = "NA"
-        for name, obj in self.game.obj_dict.items():
+        for _, obj in self.game.obj_dict.items():
             if obj.player:
                 score = obj.score
         # Render the score
@@ -191,8 +189,6 @@ class Menu():
             (return_obj, self.main_menu, 1),
         ]
 
-        self.prev_menu = 1
-
         return menu
 
     def settings_menu(self):
@@ -209,7 +205,6 @@ class Menu():
         self.menu_option = 2
 
         # Check settings if just left settings page
-        print("CHECK: ", self.prev_menu)
         if self.prev_menu != 1 and self.prev_menu != 2:
             self.game.check_settings()
 
@@ -265,8 +260,6 @@ class Menu():
             (back_obj, self.game_menus[self.root_menu], 2),
         ]
 
-        self.prev_menu = 2
-
         return menu
 
     def game_over_menu(self):
@@ -296,7 +289,7 @@ class Menu():
 
         # Get the player score
         score = "NA"
-        for name, obj in self.game.obj_dict.items():
+        for _, obj in self.game.obj_dict.items():
             if obj.player:
                 score = obj.score
         # Render the score
@@ -339,8 +332,6 @@ class Menu():
             (restart_obj, self.game.start, 3),
             (return_obj, self.main_menu, 3),
         ]
-
-        self.prev_menu = 3
 
         return menu
 
@@ -386,8 +377,6 @@ class Menu():
             (back_obj, self.settings_menu, 4),
         ]
 
-        self.prev_menu = 4
-
         return menu
 
     def sound_menu(self):
@@ -432,7 +421,5 @@ class Menu():
             (music_obj, self.game.toggle_game_music, self.prev_menu),
             (back_obj, self.settings_menu, 5),
         ]
-
-        self.prev_menu = 5
 
         return menu

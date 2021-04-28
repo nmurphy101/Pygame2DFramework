@@ -61,7 +61,7 @@ class Snake():
         # Snake is a rectangle object
         self.rect = pygame.draw.rect(screen, self.head_color, self.head)
         # Snake death sound
-        self.sound_death = SNAKE_DEATH
+        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_death_volume = base_game.effect_volume/4.5
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
@@ -256,7 +256,7 @@ class Food():
         # Point value of the food
         self.point_value = 10
         # Interact sound
-        self.sound_interact = PICK_UP_SOUND
+        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
         self.sound_interact_volume = base_game.effect_volume/1.5
         self.children = None
 

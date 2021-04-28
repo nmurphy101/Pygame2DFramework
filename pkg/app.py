@@ -125,10 +125,13 @@ class BaseGame():
                     # If not game over
                     if self.game.menu.menu_option != 3:
                         # If already paused
+                        print(self.game.menu.menu_option, self.game.menu.prev_menu)
                         if self.game.menu.menu_option == 1:
                             self.game.menu.menu_option = None
-                        else:
+                        elif self.game.menu.menu_option is None:
                             self.game.menu.menu_option = 1
+                        elif self.game.menu.menu_option != 0:
+                            self.game.menu.menu_option = self.game.menu.prev_menu
                         # self.game.pause_game_music = not self.game.pause_game_music
                     # Is game over
                     else:
@@ -152,5 +155,5 @@ class BaseGame():
                     for button in menu:
                         if button[0].collidepoint(event.pos):
                             # print(button)
-                            self.game.prev_menu = button[2]
+                            self.game.menu.prev_menu = button[2]
                             button[1]()
