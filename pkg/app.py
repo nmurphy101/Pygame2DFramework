@@ -51,7 +51,8 @@ class BaseGame():
         self.effect_volume = .4
         mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
         init()
-        mixer.init()
+        mixer.quit()
+        mixer.init(44100, -16, 2, 2048)
 
     def run(self):
         '''
@@ -136,7 +137,7 @@ class BaseGame():
                     # Is game over
                     else:
                         self.game.menu.menu_option = None
-                        self.game.start(None)
+                        self.game.start()
             elif event.type == WINDOWFOCUSGAINED:
                 self.game.focus_pause = False
             elif event.type == WINDOWFOCUSLOST:

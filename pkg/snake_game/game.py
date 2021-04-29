@@ -102,22 +102,22 @@ class SnakeGame():
         else:
             if self.menu.menu_option == 0:
                 # show the game main menu
-                return self.menu.main_menu()
+                return self.menu.MainMenu()
             elif self.menu.menu_option == 1:
                 # show the pause menu
-                return self.menu.pause_menu()
+                return self.menu.PauseMenu()
             elif self.menu.menu_option == 2:
                 # show the pause menu
-                return self.menu.settings_menu()
+                return self.menu.SettingsMenu()
             elif self.menu.menu_option == 3:
                 # show the pause menu
-                return self.menu.game_over_menu()
+                return self.menu.GameOverMenu()
             elif self.menu.menu_option == 4:
                 # show the display menu
-                return self.menu.display_menu()
+                return self.menu.DisplayMenu()
             elif self.menu.menu_option == 5:
                 # show the display menu
-                return self.menu.sound_menu()
+                return self.menu.SettingsMenu()
 
     def start(self):
         '''
