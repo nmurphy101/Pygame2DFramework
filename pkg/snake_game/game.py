@@ -32,9 +32,6 @@ from .entities.entities import (
 from .menus.menus import Menu
 # pylint: enable=relative-beyond-top-level
 
-SNAKE_DEATH = 0
-PICK_UP_SOUND = 1
-
 
 class SnakeGame():
     '''
