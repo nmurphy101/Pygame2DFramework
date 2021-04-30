@@ -55,7 +55,7 @@ class Food():
         self.sound_interact_volume = base_game.effect_volume/1.5
         self.children = None
 
-    def draw(self, screen):
+    def draw(self, screen, obj_dict):
         '''
         draw
         ~~~~~~~~~~
@@ -67,6 +67,9 @@ class Food():
             self.food = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the food segment based on it's parameters
             self.rect = pygame.draw.rect(screen, self.food_color, self.food)
+        else:
+            # Spawn a new food after it's eaten
+            self.spawn(obj_dict)
 
     def spawn(self, obj_dict):
         '''

@@ -74,7 +74,7 @@ class Snake():
             else:
                 self.children.append(TailSegment(screen, self.children[pos-1], pos))
 
-    def draw(self, screen):
+    def draw(self, screen, obj_dict):
         '''
         draw
         ~~~~~~~~~~
@@ -90,7 +90,7 @@ class Snake():
             # Render the snake's head based on it's parameters
             self.rect = pygame.draw.rect(screen, self.head_color, self.head)
 
-    def grow(self, screen, food):
+    def grow(self, screen, obj):
         '''
         grow
         ~~~~~~~~~~
@@ -98,15 +98,16 @@ class Snake():
         grow does stuff
         '''
         # Add a new tail segment
-        for _ in range(food.growth):
-            self.children.append(TailSegment(
-                screen,
-                self.children[self.num_tails - 1],
-                self.num_tails + 1
-            ))
-            self.num_tails += 1
+        if obj.alive:
+            for _ in range(obj.growth):
+                self.children.append(TailSegment(
+                    screen,
+                    self.children[self.num_tails - 1],
+                    self.num_tails + 1
+                ))
+                self.num_tails += 1
 
-    def up_score(self, point_value):
+    def up_score(self, obj):
         '''
         up_score
         ~~~~~~~~~~
@@ -114,7 +115,8 @@ class Snake():
         up_score does stuff
         '''
         # Increase the score
-        self.score += point_value
+        if obj.alive:
+            self.score += obj.point_value
 
     def choose_direction(self):
         '''

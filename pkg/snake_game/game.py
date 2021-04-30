@@ -81,21 +81,21 @@ class SnakeGame():
 
         # Check if in a menu
         if self.menu.menu_option is None:
-            # Spawn a new food after it's eaten
-            if not self.obj_dict["food1"].alive:
-                self.obj_dict["food1"].spawn(self.obj_dict)
+            for name, obj in self.obj_dict.items():
+                # Draw game objects
+                obj.draw(self.screen, self.obj_dict)
+                try:
+                    obj.choose_direction()
+                    obj.move()
+                except AttributeError:
+                    pass
 
-            ## Draw game Objects
-            self.obj_dict["food1"].draw(self.screen)
-            self.obj_dict["snake1"].draw(self.screen)
+            # update the display
             pygame.display.update()
 
-            ## Game logic
-            # Snake control and movement
-            self.obj_dict["snake1"].choose_direction()
-            self.obj_dict["snake1"].move()
             # collision of objects
             self.collision_checks()
+
         else:
             if self.menu.menu_option == 0:
                 # show the game main menu
@@ -155,8 +155,6 @@ class SnakeGame():
                     if obj1 != obj2:
                         # Collision check between obj and other obj
                         if obj1.rect.colliderect(obj2):
-                            # Kill second obj
-                            obj2.alive = False
                             # Play second obj's interact sound
                             sound = obj2.sound_interact
                             sound.set_volume(obj2.sound_interact_volume)
@@ -164,7 +162,9 @@ class SnakeGame():
                             # Grow obj1 if obj2 is food and up obj1 score
                             if "food" in name2:
                                 obj1.grow(self.screen, obj2)
-                                obj1.up_score(obj2.point_value)
+                                obj1.up_score(obj2)
+                            # Kill second obj
+                            obj2.alive = False
                         # Collision check for edge of screen (Right and Bottom)
                         if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
                                 obj1.pos_y > self.screen_size[1]-obj1.size):
