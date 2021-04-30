@@ -14,6 +14,7 @@
 
 import os
 import sys
+import time
 # import threading
 # import logging
 # import sys
@@ -26,7 +27,7 @@ import pygame
 # pylint: disable=relative-beyond-top-level
 # All the game entities
 from .entities.entities import (
-    Snake, Food
+    Snake, Food, TelePortal,
 )
 # All the game menus
 from .menus.menus import Menu
@@ -63,6 +64,8 @@ class SnakeGame():
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
         pygame.mixer.music.set_volume(base_game.music_volume)
+        # Game timer
+        # self.timer = time.time()
         # Game object list
         self.obj_dict = {}
         # Menu Obj
@@ -146,9 +149,11 @@ class SnakeGame():
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
         snake = Snake(self.screen,  self.screen_size, self.base_game)
+        tele_portal = TelePortal(self.screen,  self.screen_size, self.base_game)
         self.obj_dict = {
             snake.ID: snake,
             food.ID: food,
+            tele_portal.ID: tele_portal,
         }
 
     def collision_checks(self):
@@ -168,19 +173,12 @@ class SnakeGame():
                     if obj1 != obj2:
                         # Collision check between obj and other obj
                         if obj1.rect.colliderect(obj2):
-                            # Play second obj's interact sound
-                            sound = obj2.sound_interact
-                            sound.set_volume(obj2.sound_interact_volume)
-                            pygame.mixer.Sound.play(sound)
-                            # Grow obj1 if obj2 is food and up obj1 score
-                            if "food" in name2:
-                                obj1.grow(self.screen, obj2)
-                                obj1.up_score(obj2)
-                            # Kill second obj
-                            obj2.alive = False
+                            print(obj2, " Interacting with ", obj1)
+                            obj2.interact(obj1)
                         # Collision check for edge of screen (Right and Bottom)
                         if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
                                 obj1.pos_y > self.screen_size[1]-obj1.size):
+                            print("Edge of screen 1")
                             sound = obj1.sound_death
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
@@ -191,6 +189,7 @@ class SnakeGame():
                             obj1.alive = False
                         # Collision check for edge of screen (Left and Top)
                         elif obj1.pos_x < 0 or obj1.pos_y < 0:
+                            print("Edge of screen 2")
                             sound = obj1.sound_death
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
@@ -200,23 +199,7 @@ class SnakeGame():
                             # Kill obj1
                             obj1.alive = False
                     # Collision check between obj1 and obj2's children even if obj1=obj2
-                    if obj2.children:
-                        i = 0
-                        for child in obj2.children:
-                            # Skip the first child segment if it's a snake
-                            if "snake" in name2 and i == 0:
-                                i += 1
-                                continue
-                            if obj1.rect.colliderect(child):
-                                # Play obj1 death sound
-                                sound = obj1.sound_death
-                                sound.set_volume(obj1.sound_death_volume)
-                                pygame.mixer.Sound.play(sound)
-                                # Loose the game if obj1 is the player
-                                if obj1.player:
-                                    self.menu.menu_option = 3
-                                # Kill obj1
-                                obj1.alive = False
+                    obj2.interact_children(obj1)
 
     def check_settings(self):
         '''

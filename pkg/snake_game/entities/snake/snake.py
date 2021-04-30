@@ -35,7 +35,9 @@ class Snake(Entity):
          # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
-        super().__init__(screen, screen_size, self.name)
+        super().__init__(screen, screen_size, self.name, base_game)
+        # Default set snake to alive
+        self.alive = True
         # Snake is player
         self.player = True
         # Where the snake was located
@@ -63,22 +65,6 @@ class Snake(Entity):
                 self.children.append(TailSegment(screen, self, pos))
             else:
                 self.children.append(TailSegment(screen, self.children[pos-1], pos))
-
-    def draw(self, screen, obj_dict):
-        '''
-        draw
-        ~~~~~~~~~~
-
-        draw does stuff
-        '''
-        if self.alive:
-            # Draw each tail
-            for tail in self.children:
-                tail.draw(screen)
-             # head pos/size  = (left, top, width, height)
-            self.obj = (self.pos_x, self.pos_y, self.size, self.size)
-            # Render the snake's head based on it's parameters
-            self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
 
     def grow(self, screen, obj):
         '''
@@ -162,6 +148,26 @@ class Snake(Entity):
         else:
             self.moved_last_cnt += 1
 
+    def interact_children(self, obj1):
+        i = 0
+        if self.children:
+            for child in self.children:
+                # Skip the first tail segment
+                if i == 0:
+                    i += 1
+                    continue
+                if obj1.rect.colliderect(child):
+                    print("Tail segment collision")
+                    # Play obj1 death sound
+                    sound = obj1.sound_death
+                    sound.set_volume(obj1.sound_death_volume)
+                    pygame.mixer.Sound.play(sound)
+                    # Loose the game if obj1 is the player
+                    if obj1.player:
+                        self.base_game.game.menu.menu_option = 3
+                    # Kill obj1
+                    obj1.alive = False
+
 
 class TailSegment():
     '''
@@ -197,7 +203,7 @@ class TailSegment():
         # Tail is a rectangle object
         self.rect = pygame.draw.rect(screen, self.tail_color, self.tail)
 
-    def draw(self, screen):
+    def draw(self, screen, obj_dict):
         '''
         draw
         ~~~~~~~~~~

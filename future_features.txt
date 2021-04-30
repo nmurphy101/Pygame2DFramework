@@ -1,6 +1,4 @@
 
-Critical:
-1. ?
 
 Major:
 1. Working Main menu - DONE
@@ -20,25 +18,26 @@ Major:
 
 
 Minor:
-1. immobile enemies
+9. immobile enemies
     a. "walls" for future level design
     b. explosive mine
-2. moving enemies
-3. shooting enemies
+10. moving enemies
+11. shooting enemies
     a. Only does damage to hit section (tail segment or head)
-4. consumable-items/pick-ups in level
-5. Level design
+12. consumable-items/pick-ups in level
+13. Level design
     a. Win condition to get to next level (probably reach a certain score)
     b. window shifts towards the direction of the edge of the window the player
        goes.
     c. level generated with different "scenes"/"windows" as tiles connected.
         i. Procedual generation of levels
-6. Environmental effects
+14. Environmental effects
     a. wormhole/teleportation to different areas/challenges
 
 
 Bugs:
 1. pressing escape when in a menu pauses instead of returns back a menu/unpauses
 2. unknown random crash while playing.
-3. going back to the settings menu from a sub-settings menu always restarts the music even if it
-   doesn't change...
+
+3. work on teleport portals not working correctly
+   in the interact func

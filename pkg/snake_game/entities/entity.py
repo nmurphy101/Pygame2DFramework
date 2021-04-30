@@ -22,13 +22,17 @@ class Entity():
 
     base obj for all entities
     '''
-    def __init__(self, screen, screen_size, name):
+    def __init__(self, screen, screen_size, name, base_game):
+        # Base game obj
+        self.base_game = base_game
         # Unique identifier
         self.ID = name + str(uuid.uuid4())
         # Entity is dead or alive
-        self.alive = True
+        self.alive = False
         # Entity is player
         self.player = False
+        # Screen obj
+        self.screen = screen
         # Score this entity has accumulated
         self.score = 0
         # Where the entity was located
@@ -70,8 +74,27 @@ class Entity():
             # Draw each child if there are any
             if self.children:
                 for child in self.children:
-                    child.draw(screen)
-             # obj pos/size  = (left, top, width, height)
+                    child.draw(screen, obj_dict)
+            # obj pos/size  = (left, top, width, height)
             self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the entity's obj based on it's parameters
             self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+
+    def interact(self, obj1):
+        pass
+
+    def interact_children(self, obj1):
+        i = 0
+        if self.children:
+            for child in self.children:
+                if obj1.rect.colliderect(child):
+                    print("Child collision")
+                    # Play obj1 death sound
+                    sound = obj1.sound_death
+                    sound.set_volume(obj1.sound_death_volume)
+                    pygame.mixer.Sound.play(sound)
+                    # Loose the game if obj1 is the player
+                    if obj1.player:
+                        self.base_game.game.menu.menu_option = 3
+                    # Kill obj1
+                    obj1.alive = False
