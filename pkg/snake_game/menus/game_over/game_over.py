@@ -46,7 +46,7 @@ def game_over(self):
     # Render the score
     text_str = 'Score: ' + str(score)
     position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size*9)
+                self.game.screen_size[1]/2 - self.game.game_font.size*8)
     _ = self.game.game_font.render_to(
         self.game.screen,
         position,

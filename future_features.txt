@@ -40,3 +40,5 @@ Minor:
 Bugs:
 1. pressing escape when in a menu pauses instead of returns back a menu/unpauses
 2. unknown random crash while playing.
+3. going back to the settings menu from a sub-settings menu always restarts the music even if it
+   doesn't change...

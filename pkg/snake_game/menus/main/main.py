@@ -29,8 +29,10 @@ def main_menu(self):
     self.root_menu = 0
 
     # Check settings if just left settings page
-    if self.prev_menu != 1 and self.prev_menu != 0:
+    if self.prev_menu not in [1, 2]:
         self.game.check_settings()
+        # just to prevent a check settings inf. loop
+        self.prev_menu = 2
 
     # Render the Main Menu text
     text_str = 'Main Menu'

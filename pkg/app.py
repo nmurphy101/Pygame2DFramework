@@ -71,7 +71,7 @@ class BaseGame():
 
          # Game loop
         while self.running:
-            # send event NEXT every time music tracks ends
+            # Send event NEXT every time music tracks ends
             mixer.music.set_endevent(NEXT)
             # Gameplay logic
             menu = self.game.play()
@@ -80,8 +80,8 @@ class BaseGame():
             # The game loop FPS
             clock.tick(self.fps)
 
-        # Quit the game
         #pylint: disable=no-member
+        # Quit the game
         pygame.quit()
         #pylint: enable=no-member
 
@@ -116,27 +116,23 @@ class BaseGame():
         event_checks for the game
         '''
         for event in pygame.event.get():
-            # print(event)
             # Game window closes
             if event.type == QUIT:
                 self.running = False
-            # Press escape to pause the game
+            # Press escape to pause/unpause/back
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     # If not game over
                     if self.game.menu.menu_option != 3:
                         # If already paused
-                        print(self.game.menu.menu_option, self.game.menu.prev_menu)
                         if self.game.menu.menu_option == 1:
                             self.game.menu.menu_option = None
                         elif self.game.menu.menu_option is None:
                             self.game.menu.menu_option = 1
                         elif self.game.menu.menu_option != 0:
                             self.game.menu.menu_option = self.game.menu.prev_menu
-                        # self.game.pause_game_music = not self.game.pause_game_music
-                    # Is game over
+                    # If game over
                     else:
-                        self.game.menu.menu_option = None
                         self.game.start()
             elif event.type == WINDOWFOCUSGAINED:
                 self.game.focus_pause = False
@@ -145,16 +141,13 @@ class BaseGame():
             elif event.type == NEXT:
                 # If not game over
                 if self.game.menu.menu_option != 3:
-                    # get next track (modulo number of tracks)
+                    # Get next track (modulo number of tracks)
                     self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
-                    # print("Play:", self.game.playlist[self.game.current_track])
                     pygame.mixer.music.load(self.game.playlist[self.game.current_track])
                     pygame.mixer.music.play(0, 0, 1)
-
             elif event.type == MOUSEBUTTONDOWN:
                 if menu:
                     for button in menu:
                         if button[0].collidepoint(event.pos):
-                            # print(button)
                             self.game.menu.prev_menu = button[2]
                             button[1]()

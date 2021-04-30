@@ -17,47 +17,39 @@ from pygame.constants import (
     K_UP, K_DOWN, K_LEFT, K_RIGHT,
 )
 # pylint: enable=no-name-in-module
+# pylint: disable=relative-beyond-top-level
+from ..entity import Entity
+# pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
 
 
-class Snake():
+class Snake(Entity):
     '''
     Snake
     ~~~~~~~~~~
 
     obj for the snake
     '''
-    def __init__(self, screen, base_game):
-        # Snake is dead or alive
-        self.alive = True
+    def __init__(self, screen, screen_size, base_game):
+         # Name for this type of object
+        self.name = "snake_"
+        # Initilize parent init
+        super().__init__(screen, screen_size, self.name)
         # Snake is player
         self.player = True
-        # Score this entity has accumulated
-        self.score = 0
         # Where the snake was located
         self.prev_pos_x = 96
         self.prev_pos_y = 96
-        # Where the snake is located
+        # Where the snake is started located
         self.pos_x = 96
         self.pos_y = 112
         # How big snake parts are
         self.size = 16
         # How fast the snake can move per loop-tick
         self.speed = 1.5
-        self.moved_last_cnt = 0
-        # Where snake was looking = (North = 0, East = 1, South = 2, West = 3)
-        self.prev_direction = 2
-        # Where snake is looking = (North = 0, East = 1, South = 2, West = 3)
-        self.direction = 2
-        # Determines how far the snake can see ahead of itself in the direction it's looking
-        self.sight = 5
-        # head pos/size  = (left, top, width, height)
-        self.head = (self.pos_x, self.pos_y, self.size+8, self.size)
         # head color = red
-        self.head_color = (255, 0, 0)
-        # Snake is a rectangle object
-        self.rect = pygame.draw.rect(screen, self.head_color, self.head)
+        self.obj_color = (255, 0, 0)
         # Snake death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_death_volume = base_game.effect_volume/4.5
@@ -65,8 +57,6 @@ class Snake():
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
         self.num_tails = 5
-        # tail segment list
-        self.children = []
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
@@ -86,9 +76,9 @@ class Snake():
             for tail in self.children:
                 tail.draw(screen)
              # head pos/size  = (left, top, width, height)
-            self.head = (self.pos_x, self.pos_y, self.size, self.size)
+            self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the snake's head based on it's parameters
-            self.rect = pygame.draw.rect(screen, self.head_color, self.head)
+            self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
 
     def grow(self, screen, obj):
         '''
@@ -116,7 +106,9 @@ class Snake():
         '''
         # Increase the score
         if obj.alive:
+            # pylint: disable=no-member
             self.score += obj.point_value
+            # pylint: enable=no-member
 
     def choose_direction(self):
         '''
@@ -126,8 +118,9 @@ class Snake():
         choose_direction does stuff
         '''
         key = pygame.key.get_pressed()
-
+        # pylint: disable=access-member-before-definition
         if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+            # pylint: disable=access-member-before-definition
             self.direction = 0
         elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
             self.direction = 2
@@ -143,7 +136,9 @@ class Snake():
 
         move does stuff
         '''
+        # pylint: disable=access-member-before-definition
         if self.moved_last_cnt > self.speed and self.alive:
+            # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_pos_x = self.pos_x
             self.prev_pos_y = self.pos_y

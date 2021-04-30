@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 
 '''
-    Entities
+    Entitie
     ~~~~~~~~~~
 
-    All the entities in the game
+    Base entity in the game
 
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 '''
 
+import uuid
 import pygame
-# pylint: disable=relative-beyond-top-level
-from .snake.snake import Snake
-from .food.food import Food
-# pylint: enable=relative-beyond-top-level
+
 
 class Entity():
     '''
@@ -24,7 +22,9 @@ class Entity():
 
     base obj for all entities
     '''
-    def __init__(self, screen, screen_size):
+    def __init__(self, screen, screen_size, name):
+        # Unique identifier
+        self.ID = name + str(uuid.uuid4())
         # Entity is dead or alive
         self.alive = True
         # Entity is player
@@ -32,8 +32,8 @@ class Entity():
         # Score this entity has accumulated
         self.score = 0
         # Where the entity was located
-        self.prev_pos_x = 96
-        self.prev_pos_y = 96
+        self.prev_pos_x = -20
+        self.prev_pos_y = -20
         # Size of the game screen
         self.screen_size = screen_size
         # Where the entity is located
@@ -52,8 +52,8 @@ class Entity():
         self.sight = 5
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
-        # Bbj color = red
-        self.obj_color = (255, 0, 0)
+        # RGB color = pink default
+        self.obj_color = (255,105,180)
         # Entity is a rectangle object
         self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
         # children list

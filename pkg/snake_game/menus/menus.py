@@ -11,13 +11,14 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
+# pylint: disable=relative-beyond-top-level
 from .main.main import main_menu
 from .pause.pause import pause_menu
 from .settings.settings import settings_menu
 from .game_over.game_over import game_over
 from .display.display import display_menu
 from .sound.sound import sound_menu
+# pylint: enable=relative-beyond-top-level
 
 class Menu():
     '''

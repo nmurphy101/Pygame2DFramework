@@ -48,7 +48,7 @@ class SnakeGame():
         with open(self.game_config_file_path) as json_data_file:
             self.game_config = json.load(json_data_file)
         # Window settings
-        self.title = base_game.title + "Snake1"
+        self.title = base_game.title + "Snake"
         pygame.display.set_caption(self.title)
         self.screen = screen
         self.game_font = game_font
@@ -79,13 +79,26 @@ class SnakeGame():
         # Clear previous frame render
         self.screen.fill((0, 0, 0, 0))
 
-        # Check if in a menu
+        # Check if not in a menu
         if self.menu.menu_option is None:
-            for name, obj in self.obj_dict.items():
+            for _, obj in self.obj_dict.items():
+                try:
+                    # try to spawn if obj can
+                    obj.spawn(self.obj_dict)
+                except AttributeError:
+                    pass
+
                 # Draw game objects
                 obj.draw(self.screen, self.obj_dict)
+
                 try:
+                    # try to choose a direction if obj can
                     obj.choose_direction()
+                except AttributeError:
+                    pass
+
+                try:
+                    # Try to move if obj can
                     obj.move()
                 except AttributeError:
                     pass
@@ -97,24 +110,24 @@ class SnakeGame():
             self.collision_checks()
 
         else:
+            # show the game main menu
             if self.menu.menu_option == 0:
-                # show the game main menu
                 return self.menu.MainMenu()
+            # show the pause menu
             elif self.menu.menu_option == 1:
-                # show the pause menu
                 return self.menu.PauseMenu()
+            # show the pause menu
             elif self.menu.menu_option == 2:
-                # show the pause menu
                 return self.menu.SettingsMenu()
+            # show the pause menu
             elif self.menu.menu_option == 3:
-                # show the pause menu
                 return self.menu.GameOverMenu()
+            # show the display menu
             elif self.menu.menu_option == 4:
-                # show the display menu
                 return self.menu.DisplayMenu()
+            # show the display menu
             elif self.menu.menu_option == 5:
-                # show the display menu
-                return self.menu.SettingsMenu()
+                return self.menu.SoundMenu()
 
     def start(self):
         '''
@@ -132,10 +145,10 @@ class SnakeGame():
 
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
-        snake = Snake(self.screen, self.base_game)
+        snake = Snake(self.screen,  self.screen_size, self.base_game)
         self.obj_dict = {
-            "snake1": snake,
-            "food1": food,
+            snake.ID: snake,
+            food.ID: food,
         }
 
     def collision_checks(self):
@@ -212,16 +225,12 @@ class SnakeGame():
 
         check_settings does stuff
         '''
-        # Check game music status
-        print(self.game_config["settings"]["music"], self.pause_game_music)
         # Start the game music
         if self.game_config["settings"]["music"]:
-            print("starting music")
             self.current_track = 0
             pygame.mixer.music.load(self.playlist[self.current_track])
             pygame.mixer.music.play(0, 0, 1)
-        else:
-            print("stopping music")
+        elif not self.game_config["settings"]["music"]:
             pygame.mixer.music.pause()
 
     def quit_game(self):
@@ -256,8 +265,8 @@ class SnakeGame():
         toggle_game_music does stuff
         '''
         self.game_config["settings"]["music"] = not self.game_config["settings"]["music"]
-        with open(self.game_config_file_path, 'w', encoding='utf-8') as f:
-            json.dump(self.game_config, f, ensure_ascii=False, indent=4)
+        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
 
 
 def psudo_func(name1, name2):

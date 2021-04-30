@@ -35,7 +35,7 @@ def settings_menu(self):
     _ = self.game.game_font.render_to(
         self.game.screen,
         (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*10),
+         self.game.screen_size[1]/2 - self.game.game_font.size*10),
         text_str,
         (255, 0, 0)
     )
@@ -81,5 +81,7 @@ def settings_menu(self):
         (sound_obj, self.SoundMenu, 2),
         (back_obj, self.game_menus[self.root_menu], 2),
     ]
+
+    self.prev_menu = 2
 
     return menu
