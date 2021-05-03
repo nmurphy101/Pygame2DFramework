@@ -33,6 +33,7 @@ Minor:
         i. Procedual generation of levels
 14. Environmental effects
     a. wormhole/teleportation to different areas/challenges
+        i. Teleport to other portal - DONE
 
 
 Bugs:

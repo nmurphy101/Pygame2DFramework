@@ -29,6 +29,10 @@ class Entity():
         self.ID = name + str(uuid.uuid4())
         # Entity is dead or alive
         self.alive = False
+        # Determines if entity can be killed
+        self.killable = True
+        # Entity ability cooldown timer
+        self.abilty_cooldown = 1
         # Entity is player
         self.player = False
         # Screen obj
@@ -88,13 +92,14 @@ class Entity():
         if self.children:
             for child in self.children:
                 if obj1.rect.colliderect(child):
-                    print("Child collision")
-                    # Play obj1 death sound
-                    sound = obj1.sound_death
-                    sound.set_volume(obj1.sound_death_volume)
-                    pygame.mixer.Sound.play(sound)
-                    # Loose the game if obj1 is the player
-                    if obj1.player:
-                        self.base_game.game.menu.menu_option = 3
-                    # Kill obj1
-                    obj1.alive = False
+                    if obj1.killable:
+                        print("Child collision")
+                        # Play obj1 death sound
+                        sound = obj1.sound_death
+                        sound.set_volume(obj1.sound_death_volume)
+                        pygame.mixer.Sound.play(sound)
+                        # Loose the game if obj1 is the player
+                        if obj1.player:
+                            self.base_game.game.menu.menu_option = 3
+                        # Kill obj1
+                        obj1.alive = False

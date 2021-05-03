@@ -11,7 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import time
+from datetime import datetime, timedelta
 import random
 import pygame
 # pylint: disable=relative-beyond-top-level
@@ -24,16 +24,20 @@ class TelePortal(Entity):
     TelePortal
     ~~~~~~~~~~
 
-    Teleport portal that objects can use to go to a connected portal elsewhere
+    Teleport portal that entities can use to go to a connected portal elsewhere
     '''
     def __init__(self, screen, screen_size, base_game, parent=None):
         self.name = "portal_"
         # Initilize parent init
         super().__init__(screen, screen_size, self.name, base_game)
+        # Determines if entity can be killed
+        self.killable = False
+        # Ability cooldown timer
+        self.abilty_cooldown = 1
         # Parent obj (means self is a child of said parent)
         self.parent = parent
         # When obj should be spawned
-        self.spawn_timer = random.randint(1, 5)
+        self.spawn_timer = datetime.now() + timedelta(seconds=random.randint(1, 5))
         # Where the portal is located
         self.pos_x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
@@ -44,8 +48,10 @@ class TelePortal(Entity):
         # TelePortal color = blue
         self.obj_color = (0, 0, 255)
         # Interact sound
-        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
+        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav")
         self.sound_interact_volume = base_game.effect_volume/1.5
+        # Active trigger
+        self.activated = datetime.now()
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
             self.children.append(TelePortal(screen, screen_size, base_game, parent=self))
@@ -59,7 +65,7 @@ class TelePortal(Entity):
         '''
         found_spawn = False
         # pylint: disable=access-member-before-definition
-        if not self.alive and time.time() > self.spawn_timer:
+        if not self.alive and datetime.now() > self.spawn_timer:
             # pylint: enable=access-member-before-definition
             while not found_spawn:
                 # Where the portal is located
@@ -78,7 +84,7 @@ class TelePortal(Entity):
                         break
 
                 if collision_bool:
-                        continue
+                    continue
 
                 for _, oth_obj in obj_dict.items():
                     try:
@@ -91,9 +97,9 @@ class TelePortal(Entity):
 
             self.alive = True
 
-            if self.children:
-                for child in self.children:
-                    child.spawn(obj_dict)
+        if self.children:
+            for child in self.children:
+                child.spawn(obj_dict)
 
 
     def teleport(self, oth_obj):
@@ -108,30 +114,45 @@ class TelePortal(Entity):
             # move obj to the child portal
             oth_obj.pos_x = self.children[0].pos_x
             oth_obj.pos_y = self.children[0].pos_y
+            self.children[0].activated = datetime.now()
         # Is the child portal
         else:
             # move obj to the parent portal
-            oth_obj.pos_x = self.pos_x
-            oth_obj.pos_y = self.pos_y
+            oth_obj.pos_x = self.parent.pos_x
+            oth_obj.pos_y = self.parent.pos_y
+            self.parent.activated = datetime.now()
+
+        self.activated = datetime.now()
 
     def interact(self, obj1):
-        print((obj1.pos_x, obj1.pos_y), (self.parent.pos_x, self.parent.pos_y))
-        if self.parent and self.parent.rect.collidepoint(obj1.prev_pos_x, obj1.prev_pos_y):
-            print("Was at parent portal")
-            return
-        elif self.children and self.children[0].rect.collidepoint(obj1.prev_pos_x, obj1.prev_pos_y):
-            print("Was at child portal")
+        '''
+        interact
+        ~~~~~~~~~~
+
+        interact does stuff
+        '''
+        if self.activated + timedelta(seconds=self.abilty_cooldown) < datetime.now():
+            # teleport not on cooldown
+            self.activated = datetime.now()
+        else:
+            # Teleport on cooldown
             return
 
         # Play second obj's interact sound
         sound = self.sound_interact
         sound.set_volume(self.sound_interact_volume)
         pygame.mixer.Sound.play(sound)
+
         # Teleport the obj to the paired portal
         self.teleport(obj1)
 
     def interact_children(self, obj1):
-        if self.children:
-            for child in self.children:
-                if obj1.rect.colliderect(child):
-                    child.interact(obj1)
+        '''
+        interact_children
+        ~~~~~~~~~~
+
+        interact_children does stuff
+        '''
+        for child in self.children:
+            if obj1.rect.colliderect(child):
+                child.interact(obj1)

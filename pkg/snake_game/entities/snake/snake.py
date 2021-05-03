@@ -49,7 +49,8 @@ class Snake(Entity):
         # How big snake parts are
         self.size = 16
         # How fast the snake can move per loop-tick
-        self.speed = 1.5
+        # 1 = 100%, 0 = 0%, speed can't be greater than 1
+        self.speed = .75
         # head color = red
         self.obj_color = (255, 0, 0)
         # Snake death sound
@@ -123,7 +124,7 @@ class Snake(Entity):
         move does stuff
         '''
         # pylint: disable=access-member-before-definition
-        if self.moved_last_cnt > self.speed and self.alive:
+        if self.moved_last_cnt >= 1 and self.alive:
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_pos_x = self.pos_x
@@ -146,7 +147,7 @@ class Snake(Entity):
                 self.pos_x += self.size
             self.moved_last_cnt = 0
         else:
-            self.moved_last_cnt += 1
+            self.moved_last_cnt += 1 * self.speed
 
     def interact_children(self, obj1):
         i = 0
@@ -157,16 +158,18 @@ class Snake(Entity):
                     i += 1
                     continue
                 if obj1.rect.colliderect(child):
-                    print("Tail segment collision")
-                    # Play obj1 death sound
-                    sound = obj1.sound_death
-                    sound.set_volume(obj1.sound_death_volume)
-                    pygame.mixer.Sound.play(sound)
-                    # Loose the game if obj1 is the player
-                    if obj1.player:
-                        self.base_game.game.menu.menu_option = 3
-                    # Kill obj1
-                    obj1.alive = False
+                    if obj1.killable:
+                        print("Tail segment collision")
+                        print(self, " killed on ", obj1)
+                        # Play obj1 death sound
+                        sound = obj1.sound_death
+                        sound.set_volume(obj1.sound_death_volume)
+                        pygame.mixer.Sound.play(sound)
+                        # Loose the game if obj1 is the player
+                        if obj1.player:
+                            self.base_game.game.menu.menu_option = 3
+                        # Kill obj1
+                        obj1.alive = False
 
 
 class TailSegment():

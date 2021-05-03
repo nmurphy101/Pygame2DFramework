@@ -148,8 +148,8 @@ class SnakeGame():
 
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
-        snake = Snake(self.screen,  self.screen_size, self.base_game)
-        tele_portal = TelePortal(self.screen,  self.screen_size, self.base_game)
+        snake = Snake(self.screen, self.screen_size, self.base_game)
+        tele_portal = TelePortal(self.screen, self.screen_size, self.base_game)
         self.obj_dict = {
             snake.ID: snake,
             food.ID: food,
@@ -166,7 +166,7 @@ class SnakeGame():
         items = self.obj_dict.items()
         # Collision check for all entities
         for _, obj1 in items:
-            for name2, obj2 in items:
+            for _, obj2 in items:
                 # Make sure not checking collision with dead obj's
                 if obj1.alive and obj2.alive:
                     # Make sure not checking collision with self
@@ -178,26 +178,28 @@ class SnakeGame():
                         # Collision check for edge of screen (Right and Bottom)
                         if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
                                 obj1.pos_y > self.screen_size[1]-obj1.size):
-                            print("Edge of screen 1")
-                            sound = obj1.sound_death
-                            sound.set_volume(obj1.sound_death_volume)
-                            pygame.mixer.Sound.play(sound)
-                            # Loose the game if obj1 is the player
-                            if obj1.player:
-                                self.menu.menu_option = 3
-                            # Kill obj1
-                            obj1.alive = False
+                            if obj1.killable:
+                                print("Edge of screen 1")
+                                sound = obj1.sound_death
+                                sound.set_volume(obj1.sound_death_volume)
+                                pygame.mixer.Sound.play(sound)
+                                # Loose the game if obj1 is the player
+                                if obj1.player:
+                                    self.menu.menu_option = 3
+                                # Kill obj1
+                                obj1.alive = False
                         # Collision check for edge of screen (Left and Top)
                         elif obj1.pos_x < 0 or obj1.pos_y < 0:
-                            print("Edge of screen 2")
-                            sound = obj1.sound_death
-                            sound.set_volume(obj1.sound_death_volume)
-                            pygame.mixer.Sound.play(sound)
-                            # Loose the game if obj1 is the player
-                            if obj1.player:
-                                self.menu.menu_option = 3
-                            # Kill obj1
-                            obj1.alive = False
+                            if obj1.killable:
+                                print("Edge of screen 2")
+                                sound = obj1.sound_death
+                                sound.set_volume(obj1.sound_death_volume)
+                                pygame.mixer.Sound.play(sound)
+                                # Loose the game if obj1 is the player
+                                if obj1.player:
+                                    self.menu.menu_option = 3
+                                # Kill obj1
+                                obj1.alive = False
                     # Collision check between obj1 and obj2's children even if obj1=obj2
                     obj2.interact_children(obj1)
 

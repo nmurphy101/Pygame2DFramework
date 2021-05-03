@@ -89,12 +89,13 @@ class Food(Entity):
             self.alive = True
 
     def interact(self, obj1):
-        # Play interact sound
-        sound = self.sound_interact
-        sound.set_volume(self.sound_interact_volume)
-        pygame.mixer.Sound.play(sound)
-        # Grow obj1 if obj2 is food and up obj1 score
-        obj1.grow(self.screen, self)
-        obj1.up_score(self)
-        # Kill second obj
-        self.alive = False
+        if obj1.killable:
+            # Play interact sound
+            sound = self.sound_interact
+            sound.set_volume(self.sound_interact_volume)
+            pygame.mixer.Sound.play(sound)
+            # Grow obj1 if obj2 is food and up obj1 score
+            obj1.grow(self.screen, self)
+            obj1.up_score(self)
+            # Kill second obj
+            self.alive = False
