@@ -68,6 +68,8 @@ class SnakeGame():
         # self.timer = time.time()
         # Game object list
         self.obj_dict = {}
+        # Navigation Graph for pathfinding
+        self.graph = Graph(self.screen_size, (screen_w/2, screen_h/2))
         # Menu Obj
         self.menu = Menu(self)
 
@@ -154,6 +156,7 @@ class SnakeGame():
             snake.ID: snake,
             food.ID: food,
             tele_portal.ID: tele_portal,
+            "graph": self.graph,
         }
 
     def collision_checks(self):

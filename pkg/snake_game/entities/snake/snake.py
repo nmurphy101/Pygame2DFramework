@@ -19,6 +19,7 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
+from ...ai.a_star import a_star_search, reconstruct_path
 # pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
@@ -105,18 +106,21 @@ class Snake(Entity):
         ~~~~~~~~~~
 
         choose_direction does stuff
-        '''
-        key = pygame.key.get_pressed()
-        # pylint: disable=access-member-before-definition
-        if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+        ''''
+        if self.player:
+            key = pygame.key.get_pressed()
             # pylint: disable=access-member-before-definition
-            self.direction = 0
-        elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
-            self.direction = 2
-        elif key[K_LEFT] and self.direction != 3 and self.prev_direction != 1:
-            self.direction = 3
-        elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
-            self.direction = 1
+            if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+                # pylint: disable=access-member-before-definition
+                self.direction = 0
+            elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
+                self.direction = 2
+            elif key[K_LEFT] and self.direction != 3 and self.prev_direction != 1:
+                self.direction = 3
+            elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
+                self.direction = 1
+        else:
+            pass
 
     def move(self):
         '''
@@ -125,31 +129,53 @@ class Snake(Entity):
 
         move does stuff
         '''
-        # pylint: disable=access-member-before-definition
-        if self.moved_last_cnt >= 1 and self.alive:
+        if self.player:
             # pylint: disable=access-member-before-definition
-            # Save current position as last position
-            self.prev_pos_x = self.pos_x
-            self.prev_pos_y = self.pos_y
-            # Moving up
-            if self.direction == 0:
-                self.prev_direction = self.direction
-                self.pos_y -= self.size
-            # Moving down
-            elif self.direction == 2:
-                self.prev_direction = self.direction
-                self.pos_y += self.size
-            # Moving left
-            elif self.direction == 3:
-                self.prev_direction = self.direction
-                self.pos_x -= self.size
-            # Moving right
-            elif self.direction == 1:
-                self.prev_direction = self.direction
-                self.pos_x += self.size
-            self.moved_last_cnt = 0
+            if self.moved_last_cnt >= 1 and self.alive:
+                # pylint: disable=access-member-before-definition
+                # Save current position as last position
+                self.prev_pos_x = self.pos_x
+                self.prev_pos_y = self.pos_y
+                # Moving up
+                if self.direction == 0:
+                    self.prev_direction = self.direction
+                    self.pos_y -= self.size
+                # Moving down
+                elif self.direction == 2:
+                    self.prev_direction = self.direction
+                    self.pos_y += self.size
+                # Moving left
+                elif self.direction == 3:
+                    self.prev_direction = self.direction
+                    self.pos_x -= self.size
+                # Moving right
+                elif self.direction == 1:
+                    self.prev_direction = self.direction
+                    self.pos_x += self.size
+                self.moved_last_cnt = 0
+            else:
+                self.moved_last_cnt += 1 * self.speed
         else:
-            self.moved_last_cnt += 1 * self.speed
+            if self.path:
+                current = self.path[0]
+                dt = self.clock.tick(60) / 1000.0
+                self.move_to(current, dt)
+                # Update current if we reached it
+                dx = current[0] - self.true_pos[0]
+                dy = current[1] - self.true_pos[1]
+                if pg.math.Vector2(dx, dy).length() < 1:
+                    self.path.popleft()
+
+    def move_to(self, pos, dt):
+        # Calculate distance between current pos and target, and direction
+        vec = pg.math.Vector2(pos[0] - self.true_pos[0], pos[1] - self.true_pos[1])
+        direction = vec.normalize()
+
+        # Progress towards the target
+        self.true_pos[0] += direction[0] * self.speed * dt
+        self.true_pos[1] += direction[1] * self.speed * dt
+
+        self.rect.center = self.true_pos
 
     def interact_children(self, obj1):
         i = 0
