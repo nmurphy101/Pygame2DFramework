@@ -28,7 +28,7 @@ def settings_menu(self):
 
     # Check settings if just left settings page
     if self.prev_menu != 1 and self.prev_menu != 2:
-        self.game.check_settings()
+        self.game.settings_checks()
 
     # Render the Settings Menu text
     text_str = 'Settings'
@@ -42,8 +42,10 @@ def settings_menu(self):
 
     # Render the display button
     text_str = 'Display'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size
+    )
     display_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -53,8 +55,10 @@ def settings_menu(self):
 
     # Render the Sound button
     text_str = 'Sound'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size
+    )
     sound_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -64,8 +68,10 @@ def settings_menu(self):
 
     # Render the Return button
     text_str = 'Back'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size*8)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size*8
+    )
     back_obj = self.game.game_font.render_to(
         self.game.screen,
         position,

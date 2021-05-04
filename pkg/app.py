@@ -49,10 +49,18 @@ class BaseGame():
         self.title = "Game Platform - "
         self.music_volume = .2
         self.effect_volume = .4
+        self.menu_volume = .4
         mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
         init()
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
+
+        UI1 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI01.wav")
+        UI2 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI02.wav")
+        UI3 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI03.wav")
+        self.menu_sounds = [
+            UI1, UI2, UI3
+        ]
 
     def run(self):
         '''
@@ -124,6 +132,7 @@ class BaseGame():
                 if event.key == K_ESCAPE:
                     # If not game over
                     if self.game.menu.menu_option != 3:
+                        self.play_UI(1)
                         # If already paused
                         if self.game.menu.menu_option == 1:
                             self.game.menu.menu_option = None
@@ -149,5 +158,21 @@ class BaseGame():
                 if menu:
                     for button in menu:
                         if button[0].collidepoint(event.pos):
+                            self.play_menu_sound(button)
                             self.game.menu.prev_menu = button[2]
                             button[1]()
+
+    def play_menu_sound(self, button):
+        if button[1] == self.game.start:
+            self.play_UI(2)
+        elif button[1] == self.game.quit_game:
+            self.play_UI(1)
+        elif button[1] == self.game.unpause:
+            self.play_UI(1)
+        else:
+            self.play_UI(0)
+
+    def play_UI(self, num):
+        menu_sound = self.menu_sounds[num]
+        menu_sound.set_volume(self.menu_volume/1.5)
+        pygame.mixer.Sound.play(menu_sound)

@@ -29,8 +29,10 @@ def game_over(self):
 
     # Render the Game Over text
     text_str = 'Game Over'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size*10)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size*10
+    )
     _ = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -45,8 +47,10 @@ def game_over(self):
             score = obj.score
     # Render the score
     text_str = 'Score: ' + str(score)
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size*8)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size*8
+    )
     _ = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -56,8 +60,10 @@ def game_over(self):
 
     # Render the restart button
     text_str = 'Restart'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size
+    )
     restart_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -67,8 +73,10 @@ def game_over(self):
 
     # Render the quit button
     text_str = 'Quit'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size*2)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size*2
+    )
     return_obj = self.game.game_font.render_to(
         self.game.screen,
         position,

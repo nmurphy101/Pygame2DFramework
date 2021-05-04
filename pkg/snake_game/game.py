@@ -140,7 +140,7 @@ class SnakeGame():
         start does stuff
         '''
         # Check settings
-        self.check_settings()
+        self.settings_checks()
 
         # Starting variables
         self.menu.menu_option = None
@@ -172,43 +172,46 @@ class SnakeGame():
                     # Make sure not checking collision with self
                     if obj1 != obj2:
                         # Collision check between obj and other obj
-                        if obj1.rect.colliderect(obj2):
-                            print(obj2, " Interacting with ", obj1)
-                            obj2.interact(obj1)
-                        # Collision check for edge of screen (Right and Bottom)
-                        if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
-                                obj1.pos_y > self.screen_size[1]-obj1.size):
-                            if obj1.killable:
-                                print("Edge of screen 1")
-                                sound = obj1.sound_death
-                                sound.set_volume(obj1.sound_death_volume)
-                                pygame.mixer.Sound.play(sound)
-                                # Loose the game if obj1 is the player
-                                if obj1.player:
-                                    self.menu.menu_option = 3
-                                # Kill obj1
-                                obj1.alive = False
-                        # Collision check for edge of screen (Left and Top)
-                        elif obj1.pos_x < 0 or obj1.pos_y < 0:
-                            if obj1.killable:
-                                print("Edge of screen 2")
-                                sound = obj1.sound_death
-                                sound.set_volume(obj1.sound_death_volume)
-                                pygame.mixer.Sound.play(sound)
-                                # Loose the game if obj1 is the player
-                                if obj1.player:
-                                    self.menu.menu_option = 3
-                                # Kill obj1
-                                obj1.alive = False
+                        self.check_obj_to_obj_collision(obj1, obj2)
+                        # Screen edge collision check
+                        self.check_edge_collision(obj1)
                     # Collision check between obj1 and obj2's children even if obj1=obj2
                     obj2.interact_children(obj1)
 
-    def check_settings(self):
+    def check_edge_collision(self, obj1):
         '''
-        check_settings
+        check_edge_collision
         ~~~~~~~~~~
 
-        check_settings does stuff
+        Check for obj1 collision/interaction to the edge of the screen
+        '''
+        # Collision check for edge of screen (Right and Bottom)
+        if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
+                obj1.pos_y > self.screen_size[1]-obj1.size):
+            obj1.die("Edge of screen")
+        # Collision check for edge of screen (Left and Top)
+        elif obj1.pos_x < 0 or obj1.pos_y < 0:
+            obj1.die("Edge of screen")
+
+    def check_obj_to_obj_collision(self, obj1, obj2):
+        '''
+        check_obj_to_obj_collision
+        ~~~~~~~~~~
+
+        Check for obj1 to obj2 collision/interaction
+        '''
+        # Collision check between obj1 and other obj2
+        if obj1.rect.colliderect(obj2):
+            print(obj1, " Interacting with ", obj2)
+            # Do obj2's interaction method
+            obj2.interact(obj1)
+
+    def settings_checks(self):
+        '''
+        settings_checks
+        ~~~~~~~~~~
+
+        settings_checks does stuff
         '''
         # Start the game music
         if self.game_config["settings"]["music"]:

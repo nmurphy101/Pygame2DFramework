@@ -49,7 +49,8 @@ class Entity():
         self.pos_y = -20
         # How big entity is
         self.size = 16
-        # How fast the entity can move per loop-tick
+        # How fast the snake can move per loop-tick
+        # 1 = 100%, 0 = 0%, speed can't be greater than 1
         self.speed = 1
         self.moved_last_cnt = 0
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
@@ -103,3 +104,16 @@ class Entity():
                             self.base_game.game.menu.menu_option = 3
                         # Kill obj1
                         obj1.alive = False
+
+    def die(self, death_reason):
+        if self.killable:
+            print(f"{self.ID} {death_reason}")
+            # Play death sound
+            sound = self.sound_death
+            sound.set_volume(self.sound_death_volume)
+            pygame.mixer.Sound.play(sound)
+            # Loose the game if self is the player
+            if self.player:
+                self.base_game.game.menu.menu_option = 3
+            # Kill self
+            self.alive = False

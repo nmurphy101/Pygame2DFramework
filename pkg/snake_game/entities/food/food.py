@@ -43,9 +43,9 @@ class Food(Entity):
         self.growth = 5
         # Point value of the food
         self.point_value = 10
-        # Interact sound
-        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
-        self.sound_interact_volume = base_game.effect_volume/1.5
+        # Death sound
+        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
+        self.sound_death_volume = base_game.effect_volume/1.5
         self.children = None
 
     def spawn(self, obj_dict):
@@ -89,13 +89,8 @@ class Food(Entity):
             self.alive = True
 
     def interact(self, obj1):
-        if obj1.killable:
-            # Play interact sound
-            sound = self.sound_interact
-            sound.set_volume(self.sound_interact_volume)
-            pygame.mixer.Sound.play(sound)
-            # Grow obj1 if obj2 is food and up obj1 score
-            obj1.grow(self.screen, self)
-            obj1.up_score(self)
-            # Kill second obj
-            self.alive = False
+        # Grow obj1 and up obj1's score
+        obj1.grow(self)
+        obj1.up_score(self)
+        # Kill self
+        self.die(f"Eaten by {obj1.ID}")

@@ -32,7 +32,7 @@ class Snake(Entity):
     obj for the snake
     '''
     def __init__(self, screen, screen_size, base_game):
-         # Name for this type of object
+        # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
         super().__init__(screen, screen_size, self.name, base_game)
@@ -63,11 +63,11 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(screen, self, pos))
+                self.children.append(TailSegment(screen, screen_size, base_game, self, pos))
             else:
-                self.children.append(TailSegment(screen, self.children[pos-1], pos))
+                self.children.append(TailSegment(screen, screen_size, base_game, self.children[pos-1], pos))
 
-    def grow(self, screen, obj):
+    def grow(self, eaten_obj):
         '''
         grow
         ~~~~~~~~~~
@@ -75,16 +75,18 @@ class Snake(Entity):
         grow does stuff
         '''
         # Add a new tail segment
-        if obj.alive:
-            for _ in range(obj.growth):
+        if self.alive:
+            for _ in range(eaten_obj.growth):
                 self.children.append(TailSegment(
-                    screen,
+                    self.screen,
+                    self.screen_size,
+                    self.base_game,
                     self.children[self.num_tails - 1],
                     self.num_tails + 1
                 ))
                 self.num_tails += 1
 
-    def up_score(self, obj):
+    def up_score(self, eaten_obj):
         '''
         up_score
         ~~~~~~~~~~
@@ -92,9 +94,9 @@ class Snake(Entity):
         up_score does stuff
         '''
         # Increase the score
-        if obj.alive:
+        if self.alive:
             # pylint: disable=no-member
-            self.score += obj.point_value
+            self.score += eaten_obj.point_value
             # pylint: enable=no-member
 
     def choose_direction(self):
@@ -158,38 +160,29 @@ class Snake(Entity):
                     i += 1
                     continue
                 if obj1.rect.colliderect(child):
-                    if obj1.killable:
-                        print("Tail segment collision")
-                        print(self, " killed on ", obj1)
-                        # Play obj1 death sound
-                        sound = obj1.sound_death
-                        sound.set_volume(obj1.sound_death_volume)
-                        pygame.mixer.Sound.play(sound)
-                        # Loose the game if obj1 is the player
-                        if obj1.player:
-                            self.base_game.game.menu.menu_option = 3
-                        # Kill obj1
-                        obj1.alive = False
+                    obj1.die(f"Collided with {child.ID}")
 
 
-class TailSegment():
+class TailSegment(Entity):
     '''
     TailSegment
     ~~~~~~~~~~
 
     Tail Segment for the snake
     '''
-    def __init__(self, screen, ahead_obj, position):
-        # Tail is dead or alive
+    def __init__(self, screen, screen_size, base_game, ahead_obj, position):
+        # Name for this type of object
+        self.name = "tail-segment_"
+        # Initilize parent init
+        super().__init__(screen, screen_size, self.name, base_game)
+        # Entity is dead or alive
         self.alive = True
-        # tail segment isn't player
-        self.player = False
-        # obj ahead of this obj in the chain of tails/head
+        # Determines if entity can be killed
+        self.killable = False
+        # Obj ahead of this obj in the chain of tails/head
         self.ahead_obj = ahead_obj
-        # position in the chain of tails/head
+        # Position in the chain of tails/head
         self.position = position
-        # How big tail parts are
-        self.size = 16
         # Where the tail was/is located
         self.prev_pos_x = ahead_obj.pos_x # was
         self.pos_x = ahead_obj.prev_pos_x # is
@@ -199,12 +192,8 @@ class TailSegment():
         else:
             self.prev_pos_y = ahead_obj.prev_pos_y # was
             self.pos_y = ahead_obj.prev_pos_y # is
-        # tail pos/size = (left, top, width, height)
-        self.tail = (self.pos_x, self.pos_y, self.size+8, self.size)
-        # tail color = white
-        self.tail_color = (255, 255, 255)
-        # Tail is a rectangle object
-        self.rect = pygame.draw.rect(screen, self.tail_color, self.tail)
+        # Tail color = white
+        self.obj_color = (255, 255, 255)
 
     def draw(self, screen, obj_dict):
         '''
@@ -221,6 +210,6 @@ class TailSegment():
             self.pos_x = self.ahead_obj.prev_pos_x
             self.pos_y = self.ahead_obj.prev_pos_y
             # Set the current tail position and size
-            self.tail = (self.pos_x, self.pos_y, self.size, self.size)
+            self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the tail segment based on it's parameters
-            self.rect = pygame.draw.rect(screen, self.tail_color, self.tail)
+            self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)

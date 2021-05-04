@@ -29,8 +29,10 @@ def sound_menu(self):
 
     # Render the music button
     text_str = 'Music: ' + str(self.game.game_config["settings"]["music"])
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size
+    )
     music_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -40,8 +42,10 @@ def sound_menu(self):
 
     # Render the Return button
     text_str = 'Back'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size*8)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size*8
+    )
     back_obj = self.game.game_font.render_to(
         self.game.screen,
         position,

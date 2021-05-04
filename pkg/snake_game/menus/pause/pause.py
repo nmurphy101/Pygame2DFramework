@@ -31,8 +31,10 @@ def pause_menu(self):
 
     # Render the Game Over text
     text_str = '-Paused-'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size*10)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size*10
+    )
     _ = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -47,8 +49,10 @@ def pause_menu(self):
             score = obj.score
     # Render the score
     text_str = 'Score: ' + str(score)
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size*8)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size*8
+    )
     _ = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -58,8 +62,10 @@ def pause_menu(self):
 
     # Render the quit button
     text_str = 'Resume'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 - self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 - self.game.game_font.size
+    )
     resume_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -69,8 +75,10 @@ def pause_menu(self):
 
     # Render the settings button
     text_str = 'Settings'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size)
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size
+    )
     settings_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
@@ -79,9 +87,11 @@ def pause_menu(self):
     )
 
     # Render the quit button
-    text_str = 'Quit'
-    position = (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-                self.game.screen_size[1]/2 + self.game.game_font.size*3)
+    text_str = 'Main Menu'
+    position = (
+        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
+        self.game.screen_size[1]/2 + self.game.game_font.size*3
+    )
     return_obj = self.game.game_font.render_to(
         self.game.screen,
         position,
