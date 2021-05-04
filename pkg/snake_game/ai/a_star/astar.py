@@ -11,7 +11,6 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
 import heapq
 
 

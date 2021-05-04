@@ -11,6 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+import random
 import pygame
 # pylint: disable=no-name-in-module
 from pygame.constants import (
@@ -19,7 +20,8 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
-from ...ai.a_star import a_star_search, reconstruct_path
+from ...ai.a_star.astar import a_star_search, reconstruct_path
+from ...ai.simple.simple import SimpleSearch
 # pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
@@ -32,26 +34,30 @@ class Snake(Entity):
 
     obj for the snake
     '''
-    def __init__(self, screen, screen_size, base_game):
+    def __init__(self, screen, screen_size, base_game, player=False):
         # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
         super().__init__(screen, screen_size, self.name, base_game)
         # Default set snake to alive
         self.alive = True
-        # Snake is player
-        self.player = True
-        # Where the snake was located
-        self.prev_pos_x = 96
-        self.prev_pos_y = 96
+        # Is this the player entity
+        self.player = player
         # Where the snake is started located
-        self.pos_x = 96
-        self.pos_y = 112
+        self.pos_x = self.screen_size[0] - random.randrange(
+            16, self.screen_size[0], 16
+        )
+        self.pos_y = self.screen_size[1] - random.randrange(
+            16, self.screen_size[1], 16
+        )
+        # Where the snake was located
+        self.prev_pos_x = self.pos_x
+        self.prev_pos_y = self.pos_y - 16
         # How big snake parts are
         self.size = 16
         # How fast the snake can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        self.speed = .75
+        self.speed = 1
         # head color = red
         self.obj_color = (255, 0, 0)
         # Snake death sound
@@ -64,9 +70,9 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(screen, screen_size, base_game, self, pos))
+                self.children.append(TailSegment(screen, screen_size, base_game, self, pos, player=self.player))
             else:
-                self.children.append(TailSegment(screen, screen_size, base_game, self.children[pos-1], pos))
+                self.children.append(TailSegment(screen, screen_size, base_game, self.children[pos-1], pos, player=self.player))
 
     def grow(self, eaten_obj):
         '''
@@ -78,13 +84,16 @@ class Snake(Entity):
         # Add a new tail segment
         if self.alive:
             for _ in range(eaten_obj.growth):
-                self.children.append(TailSegment(
+                tail = TailSegment(
                     self.screen,
                     self.screen_size,
                     self.base_game,
                     self.children[self.num_tails - 1],
-                    self.num_tails + 1
-                ))
+                    self.num_tails + 1,
+                    player=self.player
+                )
+                tail.player = self.player
+                self.children.append(tail)
                 self.num_tails += 1
 
     def up_score(self, eaten_obj):
@@ -106,21 +115,25 @@ class Snake(Entity):
         ~~~~~~~~~~
 
         choose_direction does stuff
-        ''''
-        if self.player:
-            key = pygame.key.get_pressed()
-            # pylint: disable=access-member-before-definition
-            if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+        '''
+        if self.alive:
+            if self.player:
+                key = pygame.key.get_pressed()
                 # pylint: disable=access-member-before-definition
-                self.direction = 0
-            elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
-                self.direction = 2
-            elif key[K_LEFT] and self.direction != 3 and self.prev_direction != 1:
-                self.direction = 3
-            elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
-                self.direction = 1
-        else:
-            pass
+                if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+                    # pylint: disable=access-member-before-definition
+                    self.direction = 0
+                elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
+                    self.direction = 2
+                elif key[K_LEFT] and self.direction != 3 and self.prev_direction != 1:
+                    self.direction = 3
+                elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
+                    self.direction = 1
+            else:
+                for name, obj in self.base_game.game.obj_dict.items():
+                    if "food" in name:
+                        self.target = (obj.pos_x, obj.pos_y)
+                self.direction = self.base_game.game.chosen_ai.decide_direction(self, self.target)
 
     def move(self):
         '''
@@ -129,46 +142,35 @@ class Snake(Entity):
 
         move does stuff
         '''
-        if self.player:
+        # pylint: disable=access-member-before-definition
+        if self.moved_last_cnt >= 1 and self.alive:
             # pylint: disable=access-member-before-definition
-            if self.moved_last_cnt >= 1 and self.alive:
-                # pylint: disable=access-member-before-definition
-                # Save current position as last position
-                self.prev_pos_x = self.pos_x
-                self.prev_pos_y = self.pos_y
-                # Moving up
-                if self.direction == 0:
-                    self.prev_direction = self.direction
-                    self.pos_y -= self.size
-                # Moving down
-                elif self.direction == 2:
-                    self.prev_direction = self.direction
-                    self.pos_y += self.size
-                # Moving left
-                elif self.direction == 3:
-                    self.prev_direction = self.direction
-                    self.pos_x -= self.size
-                # Moving right
-                elif self.direction == 1:
-                    self.prev_direction = self.direction
-                    self.pos_x += self.size
-                self.moved_last_cnt = 0
-            else:
-                self.moved_last_cnt += 1 * self.speed
+            # Save current position as last position
+            self.prev_pos_x = self.pos_x
+            self.prev_pos_y = self.pos_y
+            # Moving up
+            if self.direction == 0:
+                self.prev_direction = self.direction
+                self.pos_y -= self.size
+            # Moving down
+            elif self.direction == 2:
+                self.prev_direction = self.direction
+                self.pos_y += self.size
+            # Moving left
+            elif self.direction == 3:
+                self.prev_direction = self.direction
+                self.pos_x -= self.size
+            # Moving right
+            elif self.direction == 1:
+                self.prev_direction = self.direction
+                self.pos_x += self.size
+            self.moved_last_cnt = 0
         else:
-            if self.path:
-                current = self.path[0]
-                dt = self.clock.tick(60) / 1000.0
-                self.move_to(current, dt)
-                # Update current if we reached it
-                dx = current[0] - self.true_pos[0]
-                dy = current[1] - self.true_pos[1]
-                if pg.math.Vector2(dx, dy).length() < 1:
-                    self.path.popleft()
+            self.moved_last_cnt += 1 * self.speed
 
     def move_to(self, pos, dt):
         # Calculate distance between current pos and target, and direction
-        vec = pg.math.Vector2(pos[0] - self.true_pos[0], pos[1] - self.true_pos[1])
+        vec = pygame.math.Vector2(pos[0] - self.true_pos[0], pos[1] - self.true_pos[1])
         direction = vec.normalize()
 
         # Progress towards the target
@@ -196,13 +198,15 @@ class TailSegment(Entity):
 
     Tail Segment for the snake
     '''
-    def __init__(self, screen, screen_size, base_game, ahead_obj, position):
+    def __init__(self, screen, screen_size, base_game, ahead_obj, position, player=False):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
         super().__init__(screen, screen_size, self.name, base_game)
         # Entity is dead or alive
         self.alive = True
+        # Is this a entity part of the player obj?
+        self.player = player
         # Determines if entity can be killed
         self.killable = False
         # Obj ahead of this obj in the chain of tails/head
@@ -218,8 +222,12 @@ class TailSegment(Entity):
         else:
             self.prev_pos_y = ahead_obj.prev_pos_y # was
             self.pos_y = ahead_obj.prev_pos_y # is
-        # Tail color = white
-        self.obj_color = (255, 255, 255)
+        if self.player:
+            # Tail color = white
+            self.obj_color = (255, 255, 255)
+        else:
+            # Tail color = Red   (if not a player snake)
+            self.obj_color = (255, 0, 0)
 
     def draw(self, screen, obj_dict):
         '''

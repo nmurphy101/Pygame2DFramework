@@ -37,7 +37,7 @@ class TelePortal(Entity):
         # Parent obj (means self is a child of said parent)
         self.parent = parent
         # When obj should be spawned
-        self.spawn_timer = datetime.now() + timedelta(seconds=random.randint(1, 5))
+        self.spawn_timer = datetime.now() #+ timedelta(seconds=random.randint(1, 5))
         # Where the portal is located
         self.pos_x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16

@@ -1,31 +1,33 @@
-import pygame as pg
+import pygame
 from itertools import permutations as perm
 
-from .agent import Agent
+# pylint: disable=relative-beyond-top-level
 from .astar import a_star_search, reconstruct_path
+from ...entities.entity import Entity
+# pylint: enable=relative-beyond-top-level
 
 
 class Node:
-    SIZE = 50
-    BORDER = 5
+    SIZE = 16
+    BORDER = 0
 
     def __init__(self, pos, walkable):
         self.position = pos
         self.size = self.SIZE
         self.walkable = walkable
 
-        self.rect = pg.Rect(pos[0], pos[1], self.size, self.size)
+        self.rect = pygame.Rect(pos[0], pos[1], self.size, self.size)
 
     def set_size(self, val):
         self.size = val
         px, py = self.position
-        self.rect = pg.Rect(px, py, self.size, self.size)
+        self.rect = pygame.Rect(px, py, self.size, self.size)
 
     def draw(self, surface):
-        col = pg.Color('white') if self.walkable else pg.Color('black')
+        col = pygame.Color('black') if self.walkable else pygame.Color('white')
         px, py = self.position
         sx, sy = (self.size,) * 2
-        pg.draw.rect(surface, col, self.rect.inflate(-self.BORDER, -self.BORDER))
+        pygame.draw.rect(surface, col, self.rect.inflate(-self.BORDER, -self.BORDER))
 
     def get_neighbours(self):
         refx, refy = self.rect.center
@@ -40,16 +42,19 @@ class Node:
         return neighs
 
 
-class Graph:
-    def __init__(self, size, pos):
-        self.size = size
+class Graph(Entity):
+    def __init__(self, base_game, screen, size, pos):
+        self.name = "graph_"
+        # Initilize parent init
+        super().__init__(screen, size, self.name, base_game)
+        self.alive = True
+        self.killable = False
+        self.graph_size = size
         self.position = pos
         self.nodes = self.make()
 
-        self.target = None
-
     def make(self):
-        cx, cy = [gs // ns for ns, gs in zip((Node.SIZE, Node.SIZE), self.size)]
+        cx, cy = [gs // ns for ns, gs in zip((Node.SIZE, Node.SIZE), self.graph_size)]
         offx, offy = self.position
 
         res = []
@@ -65,72 +70,33 @@ class Graph:
         for node in self.nodes:
             node.draw(surface)
 
-    def event(self, ev):
-        if ev.type == pg.MOUSEBUTTONDOWN:
-            if ev.button == 1:
-                self.add_agent(ev.pos)
-            if ev.button == 2:
-                self.set_node_walkable(ev.pos)
-            if ev.button == 3:
-                self.set_agent_target(ev.pos)
+    # def update(self, dt):
+    #     for ag in self.agents:
+    #         ag.update(dt)
 
-        if ev.type == pg.KEYDOWN:
-            if ev.key == pg.K_SPACE:
-                self.navigate()
-            if ev.key == pg.K_r:
-                self.reset()
+    # def set_node_walkable(self, pos):
+    #     for node in self.nodes:
+    #         if node.rect.collidepoint(pos):
+    #             node.walkable = not node.walkable
 
-    def update(self, dt):
-        for ag in self.agents:
-            ag.update(dt)
 
-    def set_node_walkable(self, pos):
-        for node in self.nodes:
-            if node.rect.collidepoint(pos):
-                node.walkable = not node.walkable
-
-    def set_agent_target(self, pos):
-        for node in self.nodes:
-            if node.rect.collidepoint(pos):
-                if node.walkable:
-                    self.target = node.rect.center
-
-    def add_agent(self, pos):
-        walkable = [n.position for n in self.nodes if n.walkable]
-        try:
-            node = [n for n in self.nodes if n.rect.collidepoint(pos)][-1]
-        except IndexError:
-            return
-
-        if node.position in walkable:
-            self.agents.append(Agent(node.rect.center))
-
-    def navigate(self):
+    def navigate(self, obj):
         # return if there is no target
-        if not self.target:
+        if not obj.target:
             return
 
         # calculate paths for all agents
-        for ag in self.agents:
-            start = ag.rect.center
-            goal = self.target
+        start = obj.rect.center
+        goal = obj.target
 
-            cf, cost = a_star_search(self, start, goal)
-            try:
-                path = reconstruct_path(cf, start, goal)
-            except KeyError:
-                return
+        cf, cost = a_star_search(self, start, goal)
+        try:
+            path = reconstruct_path(cf, start, goal)
+        except KeyError:
+            return
 
-            # Remove start position
-            ag.set_path(path[2:])
-
-    def reset(self):
-        self.agents.clear()
-        self.target = None
-
-        for n in self.nodes:
-            if not n.walkable:
-                n.walkable = True
+        # Remove start position
+        obj.set_path(path[2:])
 
     # These two last methods must be implemented for a_star to work
     def neighbors(self, pos):
@@ -142,11 +108,11 @@ class Graph:
 
         # Filter un-walkable positions
         res = []
-        for p in positions:
-            for n in self.nodes:
-                if n.rect.collidepoint(p):
-                    if n.walkable:
-                        res.append(p)
+        for pos in positions:
+            for node in self.nodes:
+                if node.rect.collidepoint(pos):
+                    if node.walkable:
+                        res.append(pos)
         return res
 
     def cost(self, p1, p2):

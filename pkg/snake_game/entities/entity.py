@@ -59,15 +59,19 @@ class Entity():
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight = 5
-        # Pathfinding variables
-        self.path = None
-        self.true_pos = list(self.rect.center)
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
         # RGB color = pink default
         self.obj_color = (255,105,180)
         # Entity is a rectangle object
         self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+        # Entity default death sound
+        # self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+        # self.sound_death_volume = base_game.effect_volume/4.5
+        # Pathfinding variables
+        self.path = None
+        self.true_pos = list(self.rect.center)
+        self.target = None
         # children list
         self.children = []
 
