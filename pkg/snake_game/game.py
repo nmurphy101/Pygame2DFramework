@@ -31,7 +31,6 @@ from .entities.entities import (
 )
 # All the game menus
 from .menus.menus import Menu
-from .ai.a_star.graph import Graph
 from .ai.ai import DecisionBox
 # pylint: enable=relative-beyond-top-level
 
@@ -70,8 +69,7 @@ class SnakeGame():
         # self.timer = time.time()
         # Game object list
         self.obj_dict = {}
-        # Navigation Graph for pathfinding
-        # self.graph = Graph(self, self.screen, (self.screen_size[0], self.screen_size[1]+32), (0, 0))
+        # AI blackbox
         self.chosen_ai = DecisionBox()
         # Menu Obj
         self.menu = Menu(self)
@@ -153,15 +151,14 @@ class SnakeGame():
 
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
-        # player_snake = Snake(self.screen, self.screen_size, self.base_game, player=True)
-        # player_snake.speed = .75
+        player_snake = Snake(self.screen, self.screen_size, self.base_game, player=True)
+        player_snake.speed = .75
         enemy_snake = Snake(self.screen, self.screen_size, self.base_game)
-        enemy_snake.speed = 2
+        enemy_snake.speed = .25
         tele_portal = TelePortal(self.screen, self.screen_size, self.base_game)
         self.obj_dict = {
-            # "graph": self.graph,
             food.ID: food,
-            # player_snake.ID: player_snake,
+            player_snake.ID: player_snake,
             enemy_snake.ID: enemy_snake,
             tele_portal.ID: tele_portal,
         }
@@ -181,25 +178,12 @@ class SnakeGame():
                 if obj1.alive and obj2.alive:
                     # Make sure not checking collision with self
                     if obj1 != obj2:
-                        # Collision check between obj and node
-                        # self.check_node_collision(obj1)
                         # Collision check between obj and other obj
                         self.check_obj_to_obj_collision(obj1, obj2)
                         # Screen edge collision check
                         self.check_edge_collision(obj1)
                     # Collision check between obj1 and obj2's children even if obj1=obj2
                     obj2.interact_children(obj1)
-
-    def check_node_collision(self, obj1):
-        '''
-        check_node_collision
-        ~~~~~~~~~~
-
-        check_node_collision does stuff
-        '''
-        node_index = obj1.rect.collidelist(self.graph.nodes)
-        if node_index != -1:
-            self.graph.nodes[node_index].walkable = False
 
     def check_edge_collision(self, obj1):
         '''

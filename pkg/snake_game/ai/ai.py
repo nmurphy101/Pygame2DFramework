@@ -62,7 +62,8 @@ class DecisionBox:
         while True:
             self.reset_sight_lines(entity)
             for name, obj in self.obj_dict.items():
-                if "food" not in name:
+                # Ignore the target object
+                if entity.target != (obj.pos_x, obj.pos_y):
                     # Check if object obstructs entity
                     if obj != entity:
                         ori_intent = intent
