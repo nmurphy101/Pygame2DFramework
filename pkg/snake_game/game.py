@@ -32,7 +32,7 @@ from .entities.entities import (
 # All the game menus
 from .menus.menus import Menu
 from .ai.a_star.graph import Graph
-from .ai.simple.simple import SimpleSearch
+from .ai.ai import DecisionBox
 # pylint: enable=relative-beyond-top-level
 
 
@@ -71,8 +71,8 @@ class SnakeGame():
         # Game object list
         self.obj_dict = {}
         # Navigation Graph for pathfinding
-        self.graph = Graph(self, self.screen, (self.screen_size[0], self.screen_size[1]+32), (0, 0))
-        self.chosen_ai = SimpleSearch()
+        # self.graph = Graph(self, self.screen, (self.screen_size[0], self.screen_size[1]+32), (0, 0))
+        self.chosen_ai = DecisionBox()
         # Menu Obj
         self.menu = Menu(self)
 
@@ -153,12 +153,13 @@ class SnakeGame():
 
         # Initilize game objects
         food = Food(self.screen, self.screen_size, self.base_game)
-        player_snake = Snake(self.screen, self.screen_size, self.base_game, player=True)
+        # player_snake = Snake(self.screen, self.screen_size, self.base_game, player=True)
+        # player_snake.speed = .75
         enemy_snake = Snake(self.screen, self.screen_size, self.base_game)
         enemy_snake.speed = 2
         tele_portal = TelePortal(self.screen, self.screen_size, self.base_game)
         self.obj_dict = {
-            "graph": self.graph,
+            # "graph": self.graph,
             food.ID: food,
             # player_snake.ID: player_snake,
             enemy_snake.ID: enemy_snake,

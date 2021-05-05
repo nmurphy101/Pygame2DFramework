@@ -21,7 +21,7 @@ from pygame.constants import (
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
 from ...ai.a_star.astar import a_star_search, reconstruct_path
-from ...ai.simple.simple import SimpleSearch
+from ...ai.ai import DecisionBox
 # pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
@@ -117,6 +117,7 @@ class Snake(Entity):
         choose_direction does stuff
         '''
         if self.alive:
+            # Check if Ai or player controls this entity
             if self.player:
                 key = pygame.key.get_pressed()
                 # pylint: disable=access-member-before-definition
@@ -130,10 +131,8 @@ class Snake(Entity):
                 elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
                     self.direction = 1
             else:
-                for name, obj in self.base_game.game.obj_dict.items():
-                    if "food" in name:
-                        self.target = (obj.pos_x, obj.pos_y)
-                self.direction = self.base_game.game.chosen_ai.decide_direction(self, self.target)
+                # Ai makes it's decisions on the move step
+                pass
 
     def move(self):
         '''
@@ -144,6 +143,14 @@ class Snake(Entity):
         '''
         # pylint: disable=access-member-before-definition
         if self.moved_last_cnt >= 1 and self.alive:
+            # Check if Ai or player controls this entity
+            if not self.player:
+                for name, obj in self.base_game.game.obj_dict.items():
+                    if "food" in name:
+                        self.target = (obj.pos_x, obj.pos_y)
+                self.direction = self.base_game.game.chosen_ai.decide_direction(
+                    self, self.target, self.base_game.game.obj_dict, difficulty=0
+                )
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_pos_x = self.pos_x
@@ -167,17 +174,6 @@ class Snake(Entity):
             self.moved_last_cnt = 0
         else:
             self.moved_last_cnt += 1 * self.speed
-
-    def move_to(self, pos, dt):
-        # Calculate distance between current pos and target, and direction
-        vec = pygame.math.Vector2(pos[0] - self.true_pos[0], pos[1] - self.true_pos[1])
-        direction = vec.normalize()
-
-        # Progress towards the target
-        self.true_pos[0] += direction[0] * self.speed * dt
-        self.true_pos[1] += direction[1] * self.speed * dt
-
-        self.rect.center = self.true_pos
 
     def interact_children(self, obj1):
         i = 0

@@ -58,13 +58,20 @@ class Entity():
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
-        self.sight = 5
+        self.sight = 2 * self.size
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
         # RGB color = pink default
         self.obj_color = (255,105,180)
         # Entity is a rectangle object
         self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+        # Sight line
+        self.sight_lines = [
+            Line(0, self),
+            Line(2, self),
+            Line(3, self),
+            Line(1, self),
+        ]
         # Entity default death sound
         # self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         # self.sound_death_volume = base_game.effect_volume/4.5
@@ -91,6 +98,9 @@ class Entity():
             self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the entity's obj based on it's parameters
             self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+            # Render the entity's sight lines
+            for line in self.sight_lines:
+                line.draw(self)
 
     def interact(self, obj1):
         pass
@@ -124,3 +134,57 @@ class Entity():
                 self.base_game.game.menu.menu_option = 3
             # Kill self
             self.alive = False
+
+
+class Line():
+    '''
+    Line
+    ~~~~~~~~~~
+
+    Sight line for a cardinal direction for an entity
+    '''
+    def __init__(self, direction, entity):
+        self.open = True
+        self.opasity = 1
+        self.color = (255,105,180, self.opasity)
+        self.direction = direction
+        if direction == 0:
+            self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
+        elif direction == 2:
+            self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
+        elif direction == 3:
+            self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
+        elif direction == 1:
+            self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+        self.rect = pygame.draw.line(
+            entity.screen,
+            self.color,
+            entity.rect.center,
+            self.end,
+            1,
+        )
+
+    def draw(self, entity):
+        '''
+        draw
+        ~~~~~~~~~~
+
+        draw does stuff
+        '''
+        # determine entity's sightline end point
+        if self.direction == 0:
+            self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
+        elif self.direction == 2:
+            self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
+        elif self.direction == 3:
+            self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
+        elif self.direction == 1:
+            self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+        # Render the entity's sight line
+        self.rect = pygame.draw.line(
+            entity.screen,
+            self.color,
+            entity.rect.center,
+            self.end,
+            1,
+        )

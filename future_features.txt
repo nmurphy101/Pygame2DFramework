@@ -9,7 +9,7 @@ Major:
     a. "Windows" -> "Chunks" -> "tiles"
 5. Optimize collision checks to be more generic instead of specific so
    other objects can get their collisions checked.
-6. Player AI
+6. Player AI -> Minor #9, #10, #11, #15 - WIP
 7. additional settings
     - Volume control
     - Window size control
@@ -21,7 +21,7 @@ Minor:
 9. immobile enemies
     a. "walls" for future level design
     b. explosive mine
-10. moving enemies
+10. moving enemies - DONE
 11. shooting enemies
     a. Only does damage to hit section (tail segment or head)
 12. consumable-items/pick-ups in level
@@ -31,13 +31,26 @@ Minor:
        goes.
     c. level generated with different "scenes"/"windows" as tiles connected.
         i. Procedual generation of levels
-14. Environmental effects
+14. Environmental effects - WIP
     a. wormhole/teleportation to different areas/challenges
         i. Teleport to other portal - DONE
-
+15. AI needs upgrade
+    a. AI can be improved by a few things:
+        i. Utilize diagonal movement
+        ii. Utilize teleporters
+        iii. increase sight
+        iv. Better logic for not locking self in a tail cage
+        v. increase speed
+        vi. increase growth amount
+    b. AI can be handicaped by a few things:
+        i. decrease speed
+        ii. decrease growth amount
+        iii. Disalow teleporters
+        iv. decrease sight
 
 Bugs:
-1.
+1. Food was able to spawn onto a portal/tail... That's not right...
+2. The game slows down after awhile with more tail segments
 
 
 
