@@ -27,7 +27,7 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     '''
     def __init__(self, alpha_screen, screen, screen_size, base_game, parent=None):
-        self.name = "portal_"
+        self.name = "TelePortal_"
         # Initilize parent init
         super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
         # Determines if entity can be killed

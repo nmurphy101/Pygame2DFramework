@@ -100,7 +100,8 @@ class BaseGame():
         # Game window settings
         background_colour = (0, 0, 0)
         screen = pygame.display.set_mode((self.screen_width, self.screen_height))#, RESIZABLE)
-        alpha_screen = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)#, RESIZABLE)
+        alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
+        alpha_screen.fill([0,0,0,0])
         pygame.display.set_caption(self.title)
         screen.fill(background_colour)
         game_font = freetype.Font(

@@ -11,6 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+import math
 import pygame
 
 class DecisionBox:
@@ -21,15 +22,16 @@ class DecisionBox:
     DecisionBox for the entity
     '''
     def __init__(self):
-        pass
+        self.difficulty = 0
 
     def decide_direction(self, entity, target, obj_dict, difficulty=0):
+        if not target:
+            return entity.direction
+
+        self.difficulty = difficulty
         self.obj_dict = obj_dict
         # Use intent algorithm depending on difficulty
-        if difficulty != 0:
-            direction = self.simple_intent(entity, target)
-        else:
-            direction = self.simple_intent(entity, target)
+        direction = self.situational_intent(entity, target)
 
         # print("Got Direction")
 
@@ -56,6 +58,39 @@ class DecisionBox:
 
         return intent
 
+    def situational_intent(self, entity, target):
+        # print("situational Intent Chosen")
+        intent = None
+        if not entity.secondary_target:
+            # Equal, Right, or left  Intent
+            if entity.pos_x < target[0]:
+                intent = 1
+            elif entity.pos_x > target[0]:
+                intent = 3
+            # Equal, down, or up  Intent
+            elif entity.pos_y < target[1]:
+                intent = 2
+            elif entity.pos_y > target[1]:
+                intent = 0
+        else:
+            print("Going for second target")
+            # Equal, Right, or left  Intent
+            if entity.pos_x < entity.secondary_target[0]:
+                intent = 1
+            elif entity.pos_x > entity.secondary_target[0]:
+                intent = 3
+            # Equal, down, or up  Intent
+            elif entity.pos_y < entity.secondary_target[1]:
+                intent = 2
+            elif entity.pos_y > entity.secondary_target[1]:
+                intent = 0
+
+        intent = self.check_intent(entity, intent)
+
+        # print("Got simple intent")
+
+        return intent
+
     def check_intent(self, entity, intent):
         # print("Checking intent: ", intent)
         ori_intent = intent
@@ -64,6 +99,7 @@ class DecisionBox:
             for name, obj in self.obj_dict.items():
                 # Ignore the target object
                 if entity.target != (obj.pos_x, obj.pos_y):
+                # if "food" not in obj.name:
                     # Check if object obstructs entity
                     if obj != entity:
                         ori_intent = intent
@@ -97,7 +133,12 @@ class DecisionBox:
                 line.open = False
             # Check the sight lines for a open direction
             if obj.rect.colliderect(line):
-                line.open = False
+                # if "TelePortal" in obj.name:
+                #     print("Seeing Portal: ", obj)
+                if self.difficulty >= 0:
+                    line.open = self.decide_portal(obj, entity)
+                else:
+                    line.open = False
 
     def reset_sight_lines(self, entity):
          for line in entity.sight_lines:
@@ -152,3 +193,31 @@ class DecisionBox:
                         # else:
                             # print("Couldn't get a different open line")
         return intent
+
+    def decide_portal(self, obj, entity):
+        if "TelePortal" in obj.name:
+            if obj.parent:
+                dist_oth_portal = math.hypot(entity.target[0] - obj.parent.pos_x, entity.target[1] - obj.parent.pos_y)
+                dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
+                if dist_oth_portal < dist_self:
+                    print("Teleport More efficient 1: ", dist_oth_portal, dist_self)
+                    if entity.secondary_target:
+                        return True
+                    else:
+                        entity.secondary_target = (obj.pos_x, obj.pos_y)
+                        self.situational_intent(entity, entity.target)
+                else:
+                    return False
+            else:
+                dist_oth_portal = math.hypot(entity.target[0] - obj.children[0].pos_x, entity.target[1] - obj.children[0].pos_y)
+                dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
+                if dist_oth_portal < dist_self:
+                    print("Teleport More efficient 2: ", dist_oth_portal, dist_self)
+                    if entity.secondary_target:
+                        return True
+                    else:
+                        entity.secondary_target = (obj.pos_x, obj.pos_y)
+                        self.situational_intent(entity, entity.target)
+                else:
+                    return False
+        return False

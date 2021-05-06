@@ -59,13 +59,16 @@ class Entity():
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
-        self.sight = 2 * self.size
+        self.sight = 3 * self.size
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
         # RGB color = pink default
         self.obj_color = (255,105,180)
         # Entity is a rectangle object
         self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+        # Default death sound
+        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/4.5
         # Sight lines
         self.sight_lines = [
             Line(0, self),
@@ -75,6 +78,7 @@ class Entity():
         ]
         # Pathfinding variables
         self.target = None
+        self.secondary_target = None
         # children list
         self.children = []
 
@@ -120,7 +124,7 @@ class Entity():
 
     def die(self, death_reason):
         if self.killable:
-            print(f"{self.ID} {death_reason}")
+            # print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
             sound.set_volume(self.sound_death_volume)
@@ -142,7 +146,7 @@ class Line():
     def __init__(self, direction, entity):
         self.open = True
         self.opasity = 0
-        self.color = (255, 105, 180, self.opasity)
+        self.color = (255, 105, 180, (self.opasity))
         self.direction = direction
         if direction == 0:
             self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
@@ -178,7 +182,7 @@ class Line():
             self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
         # Render the entity's sight line
         self.rect = pygame.draw.line(
-            entity.alpha_screen,
+            entity.screen,
             self.color,
             entity.rect.center,
             self.end,

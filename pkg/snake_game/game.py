@@ -159,9 +159,9 @@ class SnakeGame():
         tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.base_game)
         self.obj_dict = {
             food.ID: food,
+            tele_portal.ID: tele_portal,
             # player_snake.ID: player_snake,
             enemy_snake.ID: enemy_snake,
-            tele_portal.ID: tele_portal,
         }
 
     def collision_checks(self):
@@ -210,7 +210,10 @@ class SnakeGame():
         '''
         # Collision check between obj1 and other obj2
         if obj1.rect.colliderect(obj2):
-            print(obj1, " Interacting with ", obj2)
+            if (obj1.pos_x, obj1.pos_y) == obj1.secondary_target:
+                print("Resetting secondary target")
+                obj1.secondary_target = None
+            # print(obj1, " Interacting with ", obj2)
             # Do obj2's interaction method
             obj2.interact(obj1)
 
