@@ -34,11 +34,11 @@ class Snake(Entity):
 
     obj for the snake
     '''
-    def __init__(self, screen, screen_size, base_game, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, base_game, player=False):
         # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
-        super().__init__(screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
         # Default set snake to alive
         self.alive = True
         # Is this the player entity
@@ -62,7 +62,7 @@ class Snake(Entity):
         self.obj_color = (255, 0, 0)
         # Snake death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
-        self.sound_death_volume = base_game.effect_volume/4.5
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/4.5
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
@@ -70,9 +70,9 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(screen, screen_size, base_game, self, pos, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, base_game, self, pos, player=self.player))
             else:
-                self.children.append(TailSegment(screen, screen_size, base_game, self.children[pos-1], pos, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, base_game, self.children[pos-1], pos, player=self.player))
 
     def grow(self, eaten_obj):
         '''
@@ -85,6 +85,7 @@ class Snake(Entity):
         if self.alive:
             for _ in range(eaten_obj.growth):
                 tail = TailSegment(
+                    self.alpha_screen,
                     self.screen,
                     self.screen_size,
                     self.base_game,
@@ -194,11 +195,11 @@ class TailSegment(Entity):
 
     Tail Segment for the snake
     '''
-    def __init__(self, screen, screen_size, base_game, ahead_obj, position, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, base_game, ahead_obj, position, player=False):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
-        super().__init__(screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
         # Entity is dead or alive
         self.alive = True
         # Is this a entity part of the player obj?

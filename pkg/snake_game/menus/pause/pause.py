@@ -30,17 +30,7 @@ def pause_menu(self):
     self.game.pause_game_music = True
 
     # Render the Game Over text
-    text_str = '-Paused-'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*10
-    )
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("-Paused-", 10, (255, 0, 0))
 
     # Get the player score
     score = "NA"
@@ -48,56 +38,16 @@ def pause_menu(self):
         if obj.player:
             score = obj.score
     # Render the score
-    text_str = 'Score: ' + str(score)
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*8
-    )
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("Score: " + str(score), 8, (255, 0, 0))
 
     # Render the quit button
-    text_str = 'Resume'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size
-    )
-    resume_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    resume_obj = self.render_button("Resume", 1)
 
     # Render the settings button
-    text_str = 'Settings'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size
-    )
-    settings_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    settings_obj = self.render_button("Settings", -1)
 
     # Render the quit button
-    text_str = 'Main Menu'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size*3
-    )
-    return_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    return_obj = self.render_button("Main Menu", -3)
 
     # Update the screen display
     pygame.display.update()

@@ -25,11 +25,11 @@ class Food(Entity):
 
     Food for the snake
     '''
-    def __init__(self, screen, screen_size, base_game):
+    def __init__(self, alpha_screen, screen, screen_size, base_game):
         # Name for this type of object
         self.name = "food_"
         # Initilize parent init
-        super().__init__(screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
         # Where the food is located
         self.pos_x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
@@ -45,7 +45,7 @@ class Food(Entity):
         self.point_value = 10
         # Death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
-        self.sound_death_volume = base_game.effect_volume/1.5
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/1.5
         self.children = None
 
     def spawn(self, obj_dict):
@@ -62,10 +62,10 @@ class Food(Entity):
             while not found_spawn:
                 # Where the food is located
                 self.pos_x = self.screen_size[0] - random.randrange(
-                    16, self.screen_size[0], 16
+                    self.size*5, self.screen_size[0] - self.size * 5, self.size
                 )
                 self.pos_y = self.screen_size[1] - random.randrange(
-                    16, self.screen_size[1], 16
+                    self.size*5, self.screen_size[1] - self.size * 5, self.size
                 )
 
                 # Check if the chosen random spawn location is taken

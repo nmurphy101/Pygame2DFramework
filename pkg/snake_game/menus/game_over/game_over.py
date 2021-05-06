@@ -28,17 +28,7 @@ def game_over(self):
     pygame.mixer.music.stop()
 
     # Render the Game Over text
-    text_str = 'Game Over'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*10
-    )
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("Game Over", 10, (255, 0, 0))
 
     # Get the player score
     score = "NA"
@@ -46,43 +36,13 @@ def game_over(self):
         if obj.player:
             score = obj.score
     # Render the score
-    text_str = 'Score: ' + str(score)
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*8
-    )
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button('Score: ' + str(score), 8, (255, 0, 0))
 
     # Render the restart button
-    text_str = 'Restart'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size
-    )
-    restart_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    restart_obj = self.render_button("Restart", 1)
 
     # Render the quit button
-    text_str = 'Quit'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size*2
-    )
-    return_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    return_obj = self.render_button("Quit", -2)
 
     # Update the screen display
     pygame.display.update()

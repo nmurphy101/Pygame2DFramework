@@ -1,5 +1,8 @@
 {
     "settings": {
-        "music": false
+        "music": true,
+        "music_volume": "0.05000000000000007",
+        "effect_volume": ".4",
+        "menu_volume": ".4"
     }
 }

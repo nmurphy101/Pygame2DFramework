@@ -47,9 +47,6 @@ class BaseGame():
         self.screen_width = 1280
         self.screen_height = 720
         self.title = "Game Platform - "
-        self.music_volume = .2
-        self.effect_volume = .4
-        self.menu_volume = .4
         mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
         init()
         mixer.quit()
@@ -103,6 +100,7 @@ class BaseGame():
         # Game window settings
         background_colour = (0, 0, 0)
         screen = pygame.display.set_mode((self.screen_width, self.screen_height))#, RESIZABLE)
+        alpha_screen = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)#, RESIZABLE)
         pygame.display.set_caption(self.title)
         screen.fill(background_colour)
         game_font = freetype.Font(
@@ -114,7 +112,7 @@ class BaseGame():
         pygame.display.flip()
 
         # Instantiate the Game Obj
-        self.game = self.game_pkg(screen, game_font, self)
+        self.game = self.game_pkg(alpha_screen, screen, game_font, self)
 
     def event_checks(self, menu):
         '''
@@ -174,5 +172,5 @@ class BaseGame():
 
     def play_UI(self, num):
         menu_sound = self.menu_sounds[num]
-        menu_sound.set_volume(self.menu_volume/1.5)
+        menu_sound.set_volume(float(self.game.game_config["settings"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)

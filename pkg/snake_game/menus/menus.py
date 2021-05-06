@@ -56,3 +56,19 @@ class Menu():
 
     def SoundMenu(self):
         return sound_menu(self)
+
+    def render_button(self, title, position, color=(255, 255, 255), h_offset=0):
+        # Render the Display text
+        text_str = str(title)
+        position = (
+            self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2 + h_offset,
+            self.game.screen_size[1]/2 - self.game.game_font.size * position
+        )
+        obj = self.game.game_font.render_to(
+            self.game.screen,
+            position,
+            text_str,
+            color
+        )
+
+        return obj

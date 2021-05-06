@@ -26,10 +26,10 @@ class TelePortal(Entity):
 
     Teleport portal that entities can use to go to a connected portal elsewhere
     '''
-    def __init__(self, screen, screen_size, base_game, parent=None):
+    def __init__(self, alpha_screen, screen, screen_size, base_game, parent=None):
         self.name = "portal_"
         # Initilize parent init
-        super().__init__(screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
         # Determines if entity can be killed
         self.killable = False
         # Ability cooldown timer
@@ -49,12 +49,12 @@ class TelePortal(Entity):
         self.obj_color = (0, 0, 255)
         # Interact sound
         self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav")
-        self.sound_interact_volume = base_game.effect_volume/1.5
+        self.sound_interact_volume = float(base_game.game.game_config["settings"]["effect_volume"])/1.5
         # Active trigger
         self.activated = datetime.now()
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
-            self.children.append(TelePortal(screen, screen_size, base_game, parent=self))
+            self.children.append(TelePortal(alpha_screen, screen, screen_size, base_game, parent=self))
 
     def spawn(self, obj_dict):
         '''
@@ -70,10 +70,10 @@ class TelePortal(Entity):
             while not found_spawn:
                 # Where the portal is located
                 self.pos_x = self.screen_size[0] - random.randrange(
-                    16, self.screen_size[0], 16
+                    self.size*5, self.screen_size[0] - self.size * 5, self.size
                 )
                 self.pos_y = self.screen_size[1] - random.randrange(
-                    16, self.screen_size[1], 16
+                    self.size*5, self.screen_size[1] - self.size * 5, self.size
                 )
 
                 # Check if the chosen random spawn location is taken

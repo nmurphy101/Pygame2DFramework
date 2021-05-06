@@ -42,7 +42,7 @@ class SnakeGame():
 
     SnakeGame for the snake
     '''
-    def __init__(self, screen, game_font, base_game):
+    def __init__(self, alpha_screen, screen, game_font, base_game):
         # Calling game platform
         self.base_game = base_game
         # Game config file
@@ -53,6 +53,7 @@ class SnakeGame():
         self.title = base_game.title + "Snake"
         pygame.display.set_caption(self.title)
         self.screen = screen
+        self.alpha_screen = alpha_screen
         self.game_font = game_font
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
@@ -64,7 +65,7 @@ class SnakeGame():
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
-        pygame.mixer.music.set_volume(base_game.music_volume)
+        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
         # Game timer
         # self.timer = time.time()
         # Game object list
@@ -150,15 +151,15 @@ class SnakeGame():
         self.pause_game_music = False
 
         # Initilize game objects
-        food = Food(self.screen, self.screen_size, self.base_game)
-        player_snake = Snake(self.screen, self.screen_size, self.base_game, player=True)
-        player_snake.speed = .75
-        enemy_snake = Snake(self.screen, self.screen_size, self.base_game)
-        enemy_snake.speed = .25
-        tele_portal = TelePortal(self.screen, self.screen_size, self.base_game)
+        food = Food(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game, player=True)
+        # player_snake.speed = .75
+        enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        enemy_snake.speed = 1
+        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.base_game)
         self.obj_dict = {
             food.ID: food,
-            player_snake.ID: player_snake,
+            # player_snake.ID: player_snake,
             enemy_snake.ID: enemy_snake,
             tele_portal.ID: tele_portal,
         }
@@ -224,6 +225,7 @@ class SnakeGame():
         if self.game_config["settings"]["music"]:
             self.current_track = 0
             pygame.mixer.music.load(self.playlist[self.current_track])
+            pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
             pygame.mixer.music.play(0, 0, 1)
         elif not self.game_config["settings"]["music"]:
             pygame.mixer.music.pause()
@@ -262,6 +264,30 @@ class SnakeGame():
         self.game_config["settings"]["music"] = not self.game_config["settings"]["music"]
         with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
             json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
+
+    def increase_volume(self):
+        '''
+        increase_volume
+        ~~~~~~~~~~
+
+        increase_volume does stuff
+        '''
+        self.game_config["settings"]["music_volume"] = str(float(self.game_config["settings"]["music_volume"]) + .05)
+        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
+        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
+
+    def decrease_volume(self):
+        '''
+        decrease_volume
+        ~~~~~~~~~~
+
+        decrease_volume does stuff
+        '''
+        self.game_config["settings"]["music_volume"] = str(float(self.game_config["settings"]["music_volume"]) - .05)
+        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
+        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
 
 
 def psudo_func(name1, name2):

@@ -31,53 +31,16 @@ def settings_menu(self):
         self.game.settings_checks()
 
     # Render the Settings Menu text
-    text_str = 'Settings'
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-         self.game.screen_size[1]/2 - self.game.game_font.size*10),
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("Settings", 10, (255, 0, 0))
 
     # Render the display button
-    text_str = 'Display'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size
-    )
-    display_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    display_obj = self.render_button("Display", 1)
 
     # Render the Sound button
-    text_str = 'Sound'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size
-    )
-    sound_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    sound_obj = self.render_button("Sound", -1)
 
     # Render the Return button
-    text_str = 'Back'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size*8
-    )
-    back_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    back_obj = self.render_button("Back", -8)
 
     # Update the screen display
     pygame.display.update()

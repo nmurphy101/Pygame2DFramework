@@ -35,53 +35,16 @@ def main_menu(self):
         self.prev_menu = 2
 
     # Render the Main Menu text
-    text_str = 'Main Menu'
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        (self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*8),
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("Main Menu", 8, (255, 0, 0))
 
     # Render the play button
-    text_str = 'Play'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size
-    )
-    play_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    play_obj = self.render_button("Play", 1)
 
     # Render the settings button
-    text_str = 'Settings'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size
-    )
-    settings_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    settings_obj = self.render_button("Settings", -1)
 
     # Render the quit button
-    text_str = 'Quit'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size*3
-    )
-    quit_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    quit_obj = self.render_button("Quit", -3)
 
     # Update the screen display
     pygame.display.update()

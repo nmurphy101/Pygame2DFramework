@@ -28,30 +28,10 @@ def display_menu(self):
     self.menu_option = 4
 
     # Render the Display text
-    text_str = 'Display'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 - self.game.game_font.size*10
-    )
-    _ = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 0, 0)
-    )
+    _ = self.render_button("Display", 10, (255, 0, 0))
 
     # Render the Return button
-    text_str = 'Back'
-    position = (
-        self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2,
-        self.game.screen_size[1]/2 + self.game.game_font.size*8
-    )
-    back_obj = self.game.game_font.render_to(
-        self.game.screen,
-        position,
-        text_str,
-        (255, 255, 255)
-    )
+    back_obj = self.render_button("Back", 8)
 
     # Update the screen display
     pygame.display.update()

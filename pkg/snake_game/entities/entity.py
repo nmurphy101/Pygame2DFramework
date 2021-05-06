@@ -22,7 +22,7 @@ class Entity():
 
     base obj for all entities
     '''
-    def __init__(self, screen, screen_size, name, base_game):
+    def __init__(self, alpha_screen, screen, screen_size, name, base_game):
         # Base game obj
         self.base_game = base_game
         # Unique identifier
@@ -36,6 +36,7 @@ class Entity():
         # Entity is player
         self.player = False
         # Screen obj
+        self.alpha_screen = alpha_screen
         self.screen = screen
         # Score this entity has accumulated
         self.score = 0
@@ -140,8 +141,8 @@ class Line():
     '''
     def __init__(self, direction, entity):
         self.open = True
-        self.opasity = 1
-        self.color = (255,105,180, self.opasity)
+        self.opasity = 0
+        self.color = (255, 105, 180, self.opasity)
         self.direction = direction
         if direction == 0:
             self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
@@ -177,7 +178,7 @@ class Line():
             self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
         # Render the entity's sight line
         self.rect = pygame.draw.line(
-            entity.screen,
+            entity.alpha_screen,
             self.color,
             entity.rect.center,
             self.end,
