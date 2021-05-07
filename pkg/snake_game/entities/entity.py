@@ -59,7 +59,7 @@ class Entity():
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
-        self.sight = 3 * self.size
+        self.sight = 2 * self.size
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
         # RGB color = pink default

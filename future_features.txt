@@ -53,13 +53,14 @@ Minor:
         iii. Disalow teleporters
         iv. decrease sight
     c. Add more complex target acquisition
-        i. to deal with multiple primary targets - WIP
+        i. to deal with multiple primary targets - DONE
         ii. to situationally deal with a secondary target - DONE
 
 
 Bugs:
 1. Food was able to spawn onto a portal/tail... That's not right...
 2. The game slows down after awhile with more tail segments fix performance issues
+3. Dead second snake while invisible is detected by the ai and attempts to avoid it...
 
 
 

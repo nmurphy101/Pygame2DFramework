@@ -11,6 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+import math
 import random
 import pygame
 # pylint: disable=no-name-in-module
@@ -146,12 +147,7 @@ class Snake(Entity):
         if self.moved_last_cnt >= 1 and self.alive:
             # Check if Ai or player controls this entity
             if not self.player:
-                for name, obj in self.base_game.game.obj_dict.items():
-                    if "food" in name:
-                        self.target = (obj.pos_x, obj.pos_y)
-                self.direction = self.base_game.game.chosen_ai.decide_direction(
-                    self, self.target, self.base_game.game.obj_dict, difficulty=0
-                )
+                self.aquire_primary_target("food")
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_pos_x = self.pos_x
@@ -186,6 +182,18 @@ class Snake(Entity):
                     continue
                 if obj1.rect.colliderect(child):
                     obj1.die(f"Collided with {child.ID}")
+
+    def aquire_primary_target(self, target_name):
+        primary_target = (None, 10000*100000)
+        for name, obj in self.base_game.game.obj_dict.items():
+            if target_name in name:
+                dist_self = math.hypot(obj.pos_x - self.pos_x, obj.pos_y - self.pos_y)
+                if dist_self < primary_target[1]:
+                    primary_target = (obj, dist_self)
+        self.target = (primary_target[0].pos_x, primary_target[0].pos_y)
+        self.direction = self.base_game.game.chosen_ai.decide_direction(
+            self, self.target, self.base_game.game.obj_dict, difficulty=0
+        )
 
 
 class TailSegment(Entity):

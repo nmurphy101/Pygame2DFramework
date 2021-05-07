@@ -132,8 +132,6 @@ class DecisionBox:
                 line.open = False
             # Check the sight lines for a open direction
             if obj.rect.colliderect(line):
-                # if "TelePortal" in obj.name:
-                #     print("Seeing Portal: ", obj)
                 if self.difficulty >= 0:
                     line.open = self.decide_portal(obj, entity)
                 else:
