@@ -135,6 +135,12 @@ class Entity():
             # Kill self
             self.alive = False
 
+    def grow(self, eaten_obj):
+        pass
+
+    def up_score(self, eaten_obj):
+        pass
+
 
 class Line():
     '''

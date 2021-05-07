@@ -24,6 +24,9 @@ def main_menu(self):
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
+    # Clear game objects up to free memory
+    self.game.clean_up()
+
     # Make sure the right menu option is selected
     self.menu_option = 0
     self.root_menu = 0

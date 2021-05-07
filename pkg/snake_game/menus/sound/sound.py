@@ -52,9 +52,9 @@ def sound_menu(self):
     pygame.display.update()
 
     menu = [
-        (music_obj, self.game.toggle_game_music, self.prev_menu),
-        (volume_up_obj, self.game.increase_volume, self.prev_menu),
-        (volume_down_obj, self.game.decrease_volume, self.prev_menu),
+        (music_obj, self.toggle_game_music, self.prev_menu),
+        (volume_up_obj, self.increase_music_volume, self.prev_menu),
+        (volume_down_obj, self.decrease_music_volume, self.prev_menu),
         (back_obj, self.SettingsMenu, 5),
     ]
 

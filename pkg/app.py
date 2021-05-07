@@ -19,6 +19,7 @@
 # import re
 # import queue as q
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
+import gc
 import pygame
 # pylint: disable=no-name-in-module
 from pygame import (
@@ -52,11 +53,11 @@ class BaseGame():
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
 
-        UI1 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI01.wav")
-        UI2 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI02.wav")
-        UI3 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI03.wav")
+        UI_1 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI01.wav")
+        UI_2 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI02.wav")
+        UI_3 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI03.wav")
         self.menu_sounds = [
-            UI1, UI2, UI3
+            UI_1, UI_2, UI_3
         ]
 
     def run(self):
@@ -82,6 +83,8 @@ class BaseGame():
             menu = self.game.play()
             # System/window events to be checked
             self.event_checks(menu)
+            # Free unreferenced memory
+            gc.collect()
             # The game loop FPS
             clock.tick(self.fps)
 

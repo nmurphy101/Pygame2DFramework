@@ -10,7 +10,8 @@
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 '''
-
+import json
+import pygame
 # pylint: disable=relative-beyond-top-level
 from .main.main import main_menu
 from .pause.pause import pause_menu
@@ -72,3 +73,38 @@ class Menu():
         )
 
         return obj
+
+    def toggle_game_music(self):
+        '''
+        toggle_game_music
+        ~~~~~~~~~~
+
+        toggle_game_music does stuff
+        '''
+        self.game.game_config["settings"]["music"] = not self.game.game_config["settings"]["music"]
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+
+    def increase_music_volume(self):
+        '''
+        increase_music_volume
+        ~~~~~~~~~~
+
+        increase_music_volume does stuff
+        '''
+        self.game.game_config["settings"]["music_volume"] = str(float(self.game.game_config["settings"]["music_volume"]) + .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["music_volume"]))
+
+    def decrease_music_volume(self):
+        '''
+        decrease_music_volume
+        ~~~~~~~~~~
+
+        decrease_music_volume does stuff
+        '''
+        self.game.game_config["settings"]["music_volume"] = str(float(self.game.game_config["settings"]["music_volume"]) - .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["music_volume"]))

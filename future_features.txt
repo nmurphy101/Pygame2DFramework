@@ -8,10 +8,10 @@ Major:
 4. Data structure for objects to optimize collision checking and spawning
     a. "Windows" -> "Chunks" -> "tiles"
 5. Optimize collision checks to be more generic instead of specific so
-   other objects can get their collisions checked.
+   other objects can get their collisions checked. - DONE
 6. Player AI -> Minor #9, #10, #11, #15 - WIP
 7. additional settings
-    - Volume control
+    - Volume control - WIP
     - Window size control
 8. More advanced collision logic for entity interactions
   - like not just killing the other obj when colliding
@@ -21,9 +21,14 @@ Minor:
 9. immobile enemies
     a. "walls" for future level design
     b. explosive mine
-10. moving enemies - DONE
+10. moving enemies - WIP
+    a. Situational enemy
+    b. Hostile enemy
+    c. Passive enemy - Done
 11. shooting enemies
     a. Only does damage to hit section (tail segment or head)
+    b. loose part of tail for taking damage
+    c. die if hit in the head
 12. consumable-items/pick-ups in level
 13. Level design
     a. Win condition to get to next level (probably reach a certain score)
@@ -47,10 +52,14 @@ Minor:
         ii. decrease growth amount
         iii. Disalow teleporters
         iv. decrease sight
+    c. Add more complex target acquisition
+        i. to deal with multiple primary targets - WIP
+        ii. to situationally deal with a secondary target - DONE
+
 
 Bugs:
 1. Food was able to spawn onto a portal/tail... That's not right...
-2. The game slows down after awhile with more tail segments
+2. The game slows down after awhile with more tail segments fix performance issues
 
 
 

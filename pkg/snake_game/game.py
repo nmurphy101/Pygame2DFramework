@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 '''
-    Snake Ai
+    Snake Game
     ~~~~~~~~~~
 
-    Its the ai for the snake
+    Defines the game of snake
 
 
     :copyright: (c) 2021 by Nicholas Murphy.
@@ -14,7 +14,6 @@
 
 import os
 import sys
-import time
 # import threading
 # import logging
 # import sys
@@ -152,17 +151,36 @@ class SnakeGame():
 
         # Initilize game objects
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.base_game)
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game, player=True)
         # player_snake.speed = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game)
         enemy_snake.speed = 1
+        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        enemy_snake2.speed = 1
         tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.base_game)
-        self.obj_dict = {
+        self.obj_dict = { # Order of these objects actually matter
             food.ID: food,
+            food2.ID: food2,
             tele_portal.ID: tele_portal,
             # player_snake.ID: player_snake,
             enemy_snake.ID: enemy_snake,
+            enemy_snake2.ID: enemy_snake2,
         }
+
+    def clean_up(self):
+        '''
+        clean_up
+        ~~~~~~~~~~
+
+        clean_up does stuff
+        '''
+        # Game object list
+        self.obj_dict = {}
+        # AI blackbox
+        self.chosen_ai = DecisionBox()
+        # Menu Obj
+        self.menu = Menu(self)
 
     def collision_checks(self):
         '''
@@ -210,9 +228,9 @@ class SnakeGame():
         '''
         # Collision check between obj1 and other obj2
         if obj1.rect.colliderect(obj2):
-            if (obj1.pos_x, obj1.pos_y) == obj1.secondary_target:
-                print("Resetting secondary target")
+            if obj1.secondary_target:
                 obj1.secondary_target = None
+
             # print(obj1, " Interacting with ", obj2)
             # Do obj2's interaction method
             obj2.interact(obj1)
@@ -257,41 +275,11 @@ class SnakeGame():
         self.menu.menu_option = None
         self.pause_game_music = True
 
-    def toggle_game_music(self):
-        '''
-        toggle_game_music
-        ~~~~~~~~~~
 
-        toggle_game_music does stuff
-        '''
-        self.game_config["settings"]["music"] = not self.game_config["settings"]["music"]
-        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
+def psudo_func():
+    '''
+    psudo_func
+    ~~~~~~~~~~
 
-    def increase_volume(self):
-        '''
-        increase_volume
-        ~~~~~~~~~~
-
-        increase_volume does stuff
-        '''
-        self.game_config["settings"]["music_volume"] = str(float(self.game_config["settings"]["music_volume"]) + .05)
-        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
-        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
-
-    def decrease_volume(self):
-        '''
-        decrease_volume
-        ~~~~~~~~~~
-
-        decrease_volume does stuff
-        '''
-        self.game_config["settings"]["music_volume"] = str(float(self.game_config["settings"]["music_volume"]) - .05)
-        with open(self.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game_config, _file, ensure_ascii=False, indent=4)
-        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
-
-
-def psudo_func(name1, name2):
-    pass
+    psudo_func does stuff
+    '''

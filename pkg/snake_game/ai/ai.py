@@ -73,7 +73,6 @@ class DecisionBox:
             elif entity.pos_y > target[1]:
                 intent = 0
         else:
-            print("Going for second target")
             # Equal, Right, or left  Intent
             if entity.pos_x < entity.secondary_target[0]:
                 intent = 1
@@ -200,7 +199,6 @@ class DecisionBox:
                 dist_oth_portal = math.hypot(entity.target[0] - obj.parent.pos_x, entity.target[1] - obj.parent.pos_y)
                 dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
                 if dist_oth_portal < dist_self:
-                    print("Teleport More efficient 1: ", dist_oth_portal, dist_self)
                     if entity.secondary_target:
                         return True
                     else:
@@ -212,7 +210,6 @@ class DecisionBox:
                 dist_oth_portal = math.hypot(entity.target[0] - obj.children[0].pos_x, entity.target[1] - obj.children[0].pos_y)
                 dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
                 if dist_oth_portal < dist_self:
-                    print("Teleport More efficient 2: ", dist_oth_portal, dist_self)
                     if entity.secondary_target:
                         return True
                     else:
