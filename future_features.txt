@@ -11,7 +11,7 @@ Major:
    other objects can get their collisions checked. - DONE
 6. Player AI -> Minor #9, #10, #11, #15 - WIP
 7. additional settings
-    - Volume control - WIP
+    - Volume control - DONE
     - Window size control
 8. More advanced collision logic for entity interactions
   - like not just killing the other obj when colliding
@@ -55,12 +55,13 @@ Minor:
     c. Add more complex target acquisition
         i. to deal with multiple primary targets - DONE
         ii. to situationally deal with a secondary target - DONE
+        iii. Make current sightlines into actionlines and remake sightlines
+             to be used for calculated decisions
 
 
 Bugs:
 1. Food was able to spawn onto a portal/tail... That's not right...
 2. The game slows down after awhile with more tail segments fix performance issues
-3. Dead second snake while invisible is detected by the ai and attempts to avoid it...
 
 
 

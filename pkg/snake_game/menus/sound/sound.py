@@ -40,10 +40,32 @@ def sound_menu(self):
     _ = self.render_button(text_str, 6)
 
     # Render the Volume Up button
-    volume_up_obj = self.render_button("Up", 5, h_offset=100)
+    music_volume_up_obj = self.render_button("Up", 5, h_offset=100)
 
     # Render the Volume Down button
-    volume_down_obj = self.render_button("Down", 5, h_offset=-100)
+    music_volume_down_obj = self.render_button("Down", 5, h_offset=-100)
+
+    # Render the Volume view button
+    volume_num = round(100 * float(self.game.game_config["settings"]["effect_volume"]), 2)
+    text_str = "Effect Volume: " + str(volume_num)
+    _ = self.render_button(text_str, 4)
+
+    # Render the Volume Up button
+    effect_volume_up_obj = self.render_button("Up", 3, h_offset=100)
+
+    # Render the Volume Down button
+    effect_volume_down_obj = self.render_button("Down", 3, h_offset=-100)
+
+    # Render the Volume view button
+    volume_num = round(100 * float(self.game.game_config["settings"]["menu_volume"]), 2)
+    text_str = "Menu Volume: " + str(volume_num)
+    _ = self.render_button(text_str, 2)
+
+    # Render the Volume Up button
+    menu_volume_up_obj = self.render_button("Up", 1, h_offset=100)
+
+    # Render the Volume Down button
+    menu_volume_down_obj = self.render_button("Down", 1, h_offset=-100)
 
     # Render the Return button
     back_obj = self.render_button("Back", -8)
@@ -53,8 +75,12 @@ def sound_menu(self):
 
     menu = [
         (music_obj, self.toggle_game_music, self.prev_menu),
-        (volume_up_obj, self.increase_music_volume, self.prev_menu),
-        (volume_down_obj, self.decrease_music_volume, self.prev_menu),
+        (music_volume_up_obj, self.increase_music_volume, self.prev_menu),
+        (music_volume_down_obj, self.decrease_music_volume, self.prev_menu),
+        (effect_volume_up_obj, self.increase_effect_volume, self.prev_menu),
+        (effect_volume_down_obj, self.decrease_effect_volume, self.prev_menu),
+        (menu_volume_up_obj, self.increase_menu_volume, self.prev_menu),
+        (menu_volume_down_obj, self.decrease_menu_volume, self.prev_menu),
         (back_obj, self.SettingsMenu, 5),
     ]
 

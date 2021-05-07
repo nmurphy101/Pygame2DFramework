@@ -45,7 +45,8 @@ class Food(Entity):
         self.point_value = 10
         # Death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/1.5
+        self.sound_mod = 1.5
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
         self.children = None
 
     def spawn(self, obj_dict):
@@ -58,6 +59,7 @@ class Food(Entity):
         found_spawn = False
         # pylint: disable=access-member-before-definition
         if not self.alive:
+            self.rect = pygame.draw.rect(self.screen, self.obj_color, self.obj)
             # pylint: enable=access-member-before-definition
             while not found_spawn:
                 # Where the food is located

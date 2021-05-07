@@ -62,13 +62,15 @@ class Entity():
         self.sight = 2 * self.size
         # Obj pos/size  = (left, top, width, height)
         self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
+        self.death_obj = (-10000*10000, -10000*10000, 0, 0)
         # RGB color = pink default
         self.obj_color = (255,105,180)
         # Entity is a rectangle object
         self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/4.5
+        self.sound_mod = 4.5
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Sight lines
         self.sight_lines = [
             Line(0, self),
@@ -109,24 +111,27 @@ class Entity():
         i = 0
         if self.children:
             for child in self.children:
-                if obj1.rect.colliderect(child):
-                    if obj1.killable:
-                        print("Child collision")
-                        # Play obj1 death sound
-                        sound = obj1.sound_death
-                        sound.set_volume(obj1.sound_death_volume)
-                        pygame.mixer.Sound.play(sound)
-                        # Loose the game if obj1 is the player
-                        if obj1.player:
-                            self.base_game.game.menu.menu_option = 3
-                        # Kill obj1
-                        obj1.alive = False
+                if child.alive:
+                    if obj1.rect.colliderect(child):
+                        if obj1.killable:
+                            print("Child collision")
+                            # Play obj1 death sound
+                            sound = obj1.sound_death
+                            self.sound_death_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+                            sound.set_volume(obj1.sound_death_volume)
+                            pygame.mixer.Sound.play(sound)
+                            # Loose the game if obj1 is the player
+                            if obj1.player:
+                                self.base_game.game.menu.menu_option = 3
+                            # Kill obj1
+                            obj1.alive = False
 
     def die(self, death_reason):
         if self.killable:
             # print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
+            self.sound_death_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
             sound.set_volume(self.sound_death_volume)
             pygame.mixer.Sound.play(sound)
             # Loose the game if self is the player
@@ -134,11 +139,28 @@ class Entity():
                 self.base_game.game.menu.menu_option = 3
             # Kill self
             self.alive = False
+            self.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
+            if self.children:
+                for child in self.children:
+                    child.alive = False
+                    child.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
 
     def grow(self, eaten_obj):
         pass
 
     def up_score(self, eaten_obj):
+        pass
+
+    def move(self):
+        pass
+
+    def aquire_primary_target(self, target_name):
+        pass
+
+    def spawn(self, obj_dict):
+        pass
+
+    def teleport(self, oth_obj):
         pass
 
 
@@ -151,7 +173,7 @@ class Line():
     '''
     def __init__(self, direction, entity):
         self.open = True
-        self.opasity = 0
+        self.opasity = 0 # Change this to 1 if you want to see sightlines
         self.color = (255, 105, 180, (self.opasity))
         self.direction = direction
         if direction == 0:

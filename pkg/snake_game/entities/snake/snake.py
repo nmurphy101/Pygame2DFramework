@@ -63,7 +63,8 @@ class Snake(Entity):
         self.obj_color = (255, 0, 0)
         # Snake death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/4.5
+        self.sound_mod = 4.5
+        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
@@ -176,12 +177,13 @@ class Snake(Entity):
         i = 0
         if self.children:
             for child in self.children:
-                # Skip the first tail segment
-                if i == 0:
-                    i += 1
-                    continue
-                if obj1.rect.colliderect(child):
-                    obj1.die(f"Collided with {child.ID}")
+                if child.alive:
+                    # Skip the first tail segment
+                    if i == 0:
+                        i += 1
+                        continue
+                    if obj1.rect.colliderect(child):
+                        obj1.die(f"Collided with {child.ID}")
 
     def aquire_primary_target(self, target_name):
         primary_target = (None, 10000*100000)

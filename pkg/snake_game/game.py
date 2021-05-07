@@ -142,6 +142,9 @@ class SnakeGame():
 
         start does stuff
         '''
+        # Clear game objects up to free memory
+        self.clean_up()
+
         # Check settings
         self.settings_checks()
 

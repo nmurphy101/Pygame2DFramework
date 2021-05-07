@@ -24,15 +24,13 @@ def main_menu(self):
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
-    # Clear game objects up to free memory
-    self.game.clean_up()
-
     # Make sure the right menu option is selected
     self.menu_option = 0
     self.root_menu = 0
 
     # Check settings if just left settings page
     if self.prev_menu not in [1, 2]:
+        # Check the settings
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
         self.prev_menu = 2

@@ -108,3 +108,47 @@ class Menu():
         with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
             json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
         pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["music_volume"]))
+
+    def increase_effect_volume(self):
+        '''
+        increase_effect_volume
+        ~~~~~~~~~~
+
+        increase_effect_volume does stuff
+        '''
+        self.game.game_config["settings"]["effect_volume"] = str(float(self.game.game_config["settings"]["effect_volume"]) + .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+
+    def decrease_effect_volume(self):
+        '''
+        decrease_effect_volume
+        ~~~~~~~~~~
+
+        decrease_effect_volume does stuff
+        '''
+        self.game.game_config["settings"]["effect_volume"] = str(float(self.game.game_config["settings"]["effect_volume"]) - .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+
+    def increase_menu_volume(self):
+        '''
+        increase_menu_volume
+        ~~~~~~~~~~
+
+        increase_menu_volume does stuff
+        '''
+        self.game.game_config["settings"]["menu_volume"] = str(float(self.game.game_config["settings"]["menu_volume"]) + .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+
+    def decrease_menu_volume(self):
+        '''
+        decrease_menu_volume
+        ~~~~~~~~~~
+
+        decrease_menu_volume does stuff
+        '''
+        self.game.game_config["settings"]["menu_volume"] = str(float(self.game.game_config["settings"]["menu_volume"]) - .05)
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)

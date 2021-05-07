@@ -49,7 +49,8 @@ class TelePortal(Entity):
         self.obj_color = (0, 0, 255)
         # Interact sound
         self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav")
-        self.sound_interact_volume = float(base_game.game.game_config["settings"]["effect_volume"])/1.5
+        self.sound_mod = 2.5
+        self.sound_interact_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Active trigger
         self.activated = datetime.now()
         # Initilize starting children if it has no parent (and thus is the parent)
@@ -140,6 +141,7 @@ class TelePortal(Entity):
 
         # Play second obj's interact sound
         sound = self.sound_interact
+        self.sound_interact_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
         sound.set_volume(self.sound_interact_volume)
         pygame.mixer.Sound.play(sound)
 
