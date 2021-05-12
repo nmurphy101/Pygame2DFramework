@@ -14,7 +14,14 @@ Major:
     - Volume control - DONE
     - Window size control
 8. More advanced collision logic for entity interactions
-  - like not just killing the other obj when colliding
+    - like not just killing the other obj when colliding
+9. Code optimizations
+    - Make sure slow things like loading is done only once.
+    - Replace "if elif" logic with "dict.get()" where possible as seen here:
+        - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
+    - Impliment "dirty rect animation" for faster rendering seen here:
+        - https://www.pygame.org/docs/tut/newbieguide.html
+    - Look into integrating OpenGL rendering for hardware acceleration
 
 
 Minor:
@@ -62,6 +69,8 @@ Minor:
 Bugs:
 1. Food was able to spawn onto a portal/tail... That's not right...
 2. The game slows down after awhile with more tail segments fix performance issues
+3. As a player holding two directions at once can have you move diagonally
+   through a enemy thus appearing to "phase" through them without dying...
 
 
 

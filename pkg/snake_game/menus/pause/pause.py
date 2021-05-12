@@ -49,9 +49,6 @@ def pause_menu(self):
     # Render the quit button
     return_obj = self.render_button("Main Menu", -3)
 
-    # Update the screen display
-    pygame.display.update()
-
     menu = [
         (resume_obj, self.game.unpause, 1),
         (settings_obj, self.SettingsMenu, 1),

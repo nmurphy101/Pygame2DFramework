@@ -33,7 +33,7 @@ from pygame.constants import (
 
 NEXT = USEREVENT + 1
 
-class BaseGame():
+class App():
     '''
     Game
     ~~~~~~~~~~
@@ -44,7 +44,9 @@ class BaseGame():
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 60
+        self.fps = 62
+        self.logic_fps = 60
+        self.clock = None
         self.screen_width = 1280
         self.screen_height = 720
         self.title = "Game Platform - "
@@ -69,24 +71,23 @@ class BaseGame():
         '''
         # Game window settings
         self.set_window_settings()
-
-        clock = pygame.time.Clock()
-
-        # Initilize game objects
-        # self.game.start()
+        # Game loop clock
+        self.clock = pygame.time.Clock()
 
          # Game loop
         while self.running:
             # Send event NEXT every time music tracks ends
             mixer.music.set_endevent(NEXT)
-            # Gameplay logic
+            # Gameplay logic this turn/tick
             menu = self.game.play()
+            # Update the screen display
+            pygame.display.flip()
             # System/window events to be checked
             self.event_checks(menu)
             # Free unreferenced memory
             gc.collect()
-            # The game loop FPS
-            clock.tick(self.fps)
+            # The game loop clocktarget FPS
+            self.clock.tick(self.fps)
 
         #pylint: disable=no-member
         # Quit the game
@@ -102,21 +103,33 @@ class BaseGame():
         '''
         # Game window settings
         background_colour = (0, 0, 0)
-        screen = pygame.display.set_mode((self.screen_width, self.screen_height))#, RESIZABLE)
+        # flags = pygame.HWSURFACE | pygame.DOUBLEBUF
+        flags = 0
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags)#, RESIZABLE)
+        # screen.set_mode()
         alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
         alpha_screen.fill([0,0,0,0])
         pygame.display.set_caption(self.title)
         screen.fill(background_colour)
-        game_font = freetype.Font(
-            file='assets/fonts/PressStart2P-Regular.ttf',
-            size=32,
-        )
-
         # Show game window
         pygame.display.flip()
-
         # Instantiate the Game Obj
-        self.game = self.game_pkg(alpha_screen, screen, game_font, self)
+        self.game = self.game_pkg(alpha_screen, screen, self)
+
+    def update_fps(self):
+        fps = str(int(self.clock.get_fps()))
+        color=(255, 255, 255)
+        h_offset = 600
+        position = (
+            self.game.screen_size[0]/2-(len(fps)*self.game.game_font.size)/2 + h_offset,
+            self.game.screen_size[1]/2 - self.game.game_font.size * 11
+        )
+        _ = self.game.game_font.render_to(
+            self.game.screen,
+            position,
+            fps,
+            color
+        )
 
     def event_checks(self, menu):
         '''
@@ -134,7 +147,7 @@ class BaseGame():
                 if event.key == K_ESCAPE:
                     # If not game over
                     if self.game.menu.menu_option != 3:
-                        self.play_UI(1)
+                        self.play_ui_sound(1)
                         # If already paused
                         if self.game.menu.menu_option == 1:
                             self.game.menu.menu_option = None
@@ -166,15 +179,15 @@ class BaseGame():
 
     def play_menu_sound(self, button):
         if button[1] == self.game.start:
-            self.play_UI(2)
+            self.play_ui_sound(2)
         elif button[1] == self.game.quit_game:
-            self.play_UI(1)
+            self.play_ui_sound(1)
         elif button[1] == self.game.unpause:
-            self.play_UI(1)
+            self.play_ui_sound(1)
         else:
-            self.play_UI(0)
+            self.play_ui_sound(0)
 
-    def play_UI(self, num):
+    def play_ui_sound(self, num):
         menu_sound = self.menu_sounds[num]
         menu_sound.set_volume(float(self.game.game_config["settings"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)

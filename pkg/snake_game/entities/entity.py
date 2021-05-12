@@ -22,9 +22,9 @@ class Entity():
 
     base obj for all entities
     '''
-    def __init__(self, alpha_screen, screen, screen_size, name, base_game):
+    def __init__(self, alpha_screen, screen, screen_size, name, app):
         # Base game obj
-        self.base_game = base_game
+        self.app = app
         # Unique identifier
         self.ID = name + str(uuid.uuid4())
         # Entity is dead or alive
@@ -70,7 +70,7 @@ class Entity():
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Sight lines
         self.sight_lines = [
             Line(0, self),
@@ -117,12 +117,12 @@ class Entity():
                             print("Child collision")
                             # Play obj1 death sound
                             sound = obj1.sound_death
-                            self.sound_death_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+                            self.sound_death_volume = float(self.app.game.game_config["settings"]["effect_volume"])/self.sound_mod
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
                             # Loose the game if obj1 is the player
                             if obj1.player:
-                                self.base_game.game.menu.menu_option = 3
+                                self.app.game.menu.menu_option = 3
                             # Kill obj1
                             obj1.alive = False
 
@@ -131,12 +131,12 @@ class Entity():
             # print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
-            self.sound_death_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.app.game.game_config["settings"]["effect_volume"])/self.sound_mod
             sound.set_volume(self.sound_death_volume)
             pygame.mixer.Sound.play(sound)
             # Loose the game if self is the player
             if self.player:
-                self.base_game.game.menu.menu_option = 3
+                self.app.game.menu.menu_option = 3
             # Kill self
             self.alive = False
             self.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
@@ -144,6 +144,10 @@ class Entity():
                 for child in self.children:
                     child.alive = False
                     child.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
+
+    def get_speed(self, entity_speed):
+        real_speed = entity_speed * (self.app.logic_fps/int(self.app.clock.get_fps()))
+        return real_speed
 
     def grow(self, eaten_obj):
         pass

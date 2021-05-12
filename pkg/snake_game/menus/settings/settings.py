@@ -42,9 +42,6 @@ def settings_menu(self):
     # Render the Return button
     back_obj = self.render_button("Back", -8)
 
-    # Update the screen display
-    pygame.display.update()
-
     menu = [
         (display_obj, self.DisplayMenu, 2),
         (sound_obj, self.SoundMenu, 2),

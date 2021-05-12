@@ -26,10 +26,10 @@ class TelePortal(Entity):
 
     Teleport portal that entities can use to go to a connected portal elsewhere
     '''
-    def __init__(self, alpha_screen, screen, screen_size, base_game, parent=None):
+    def __init__(self, alpha_screen, screen, screen_size, app, parent=None):
         self.name = "TelePortal_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, app)
         # Determines if entity can be killed
         self.killable = False
         # Ability cooldown timer
@@ -50,12 +50,12 @@ class TelePortal(Entity):
         # Interact sound
         self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav")
         self.sound_mod = 2.5
-        self.sound_interact_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_interact_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Active trigger
         self.activated = datetime.now()
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
-            self.children.append(TelePortal(alpha_screen, screen, screen_size, base_game, parent=self))
+            self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
 
     def spawn(self, obj_dict):
         '''
@@ -141,7 +141,7 @@ class TelePortal(Entity):
 
         # Play second obj's interact sound
         sound = self.sound_interact
-        self.sound_interact_volume = float(self.base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_interact_volume = float(self.app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         sound.set_volume(self.sound_interact_volume)
         pygame.mixer.Sound.play(sound)
 

@@ -70,9 +70,6 @@ def sound_menu(self):
     # Render the Return button
     back_obj = self.render_button("Back", -8)
 
-    # Update the screen display
-    pygame.display.update()
-
     menu = [
         (music_obj, self.toggle_game_music, self.prev_menu),
         (music_volume_up_obj, self.increase_music_volume, self.prev_menu),

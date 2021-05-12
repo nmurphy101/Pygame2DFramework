@@ -24,6 +24,9 @@ import sys
 import json
 import pygame
 # pylint: disable=relative-beyond-top-level
+from pygame import (
+    freetype
+)
 # All the game entities
 from .entities.entities import (
     Snake, Food, TelePortal,
@@ -41,19 +44,22 @@ class SnakeGame():
 
     SnakeGame for the snake
     '''
-    def __init__(self, alpha_screen, screen, game_font, base_game):
+    def __init__(self, alpha_screen, screen, app):
         # Calling game platform
-        self.base_game = base_game
+        self.app = app
         # Game config file
         self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
         with open(self.game_config_file_path) as json_data_file:
             self.game_config = json.load(json_data_file)
         # Window settings
-        self.title = base_game.title + "Snake"
+        self.title = app.title + "Snake"
         pygame.display.set_caption(self.title)
         self.screen = screen
         self.alpha_screen = alpha_screen
-        self.game_font = game_font
+        self.game_font = game_font = freetype.Font(
+            file='assets/fonts/PressStart2P-Regular.ttf',
+            size=32,
+        )
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
         # Game settings
@@ -109,8 +115,8 @@ class SnakeGame():
                 except AttributeError:
                     pass
 
-            # update the display
-            pygame.display.update()
+            # The game loop FPS counter
+            self.app.update_fps()
 
             # collision of objects
             self.collision_checks()
@@ -153,15 +159,15 @@ class SnakeGame():
         self.pause_game_music = False
 
         # Initilize game objects
-        food = Food(self.alpha_screen, self.screen, self.screen_size, self.base_game)
-        food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.base_game)
-        # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game, player=True)
+        food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
+        food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
         # player_snake.speed = .75
-        enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         enemy_snake.speed = 1
-        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         enemy_snake2.speed = 1
-        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.base_game)
+        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         self.obj_dict = { # Order of these objects actually matter
             food.ID: food,
             food2.ID: food2,
@@ -261,7 +267,7 @@ class SnakeGame():
 
         quit_game does stuff
         '''
-        self.base_game.running = False
+        self.app.running = False
         #pylint: disable=no-member
         pygame.display.quit()
         pygame.quit()

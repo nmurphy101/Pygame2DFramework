@@ -47,9 +47,6 @@ def main_menu(self):
     # Render the quit button
     quit_obj = self.render_button("Quit", -3)
 
-    # Update the screen display
-    pygame.display.update()
-
     menu = [
         (play_obj, self.game.start, 0),
         (settings_obj, self.SettingsMenu, 0),

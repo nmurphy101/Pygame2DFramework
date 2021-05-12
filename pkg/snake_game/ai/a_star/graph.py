@@ -43,10 +43,10 @@ class Node:
 
 
 class Graph(Entity):
-    def __init__(self, base_game, screen, size, pos):
+    def __init__(self, app, screen, size, pos):
         self.name = "graph_"
         # Initilize parent init
-        super().__init__(screen, size, self.name, base_game)
+        super().__init__(screen, size, self.name, app)
         self.alive = True
         self.killable = False
         self.graph_size = size

@@ -35,11 +35,11 @@ class Snake(Entity):
 
     obj for the snake
     '''
-    def __init__(self, alpha_screen, screen, screen_size, base_game, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, app, player=False):
         # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, app)
         # Default set snake to alive
         self.alive = True
         # Is this the player entity
@@ -64,7 +64,7 @@ class Snake(Entity):
         # Snake death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
@@ -72,9 +72,9 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, base_game, self, pos, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, player=self.player))
             else:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, base_game, self.children[pos-1], pos, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, player=self.player))
 
     def grow(self, eaten_obj):
         '''
@@ -90,7 +90,7 @@ class Snake(Entity):
                     self.alpha_screen,
                     self.screen,
                     self.screen_size,
-                    self.base_game,
+                    self.app,
                     self.children[self.num_tails - 1],
                     self.num_tails + 1,
                     player=self.player
@@ -171,7 +171,7 @@ class Snake(Entity):
                 self.pos_x += self.size
             self.moved_last_cnt = 0
         else:
-            self.moved_last_cnt += 1 * self.speed
+            self.moved_last_cnt += 1 * self.get_speed(self.speed)
 
     def interact_children(self, obj1):
         i = 0
@@ -187,14 +187,14 @@ class Snake(Entity):
 
     def aquire_primary_target(self, target_name):
         primary_target = (None, 10000*100000)
-        for name, obj in self.base_game.game.obj_dict.items():
+        for name, obj in self.app.game.obj_dict.items():
             if target_name in name:
                 dist_self = math.hypot(obj.pos_x - self.pos_x, obj.pos_y - self.pos_y)
                 if dist_self < primary_target[1]:
                     primary_target = (obj, dist_self)
         self.target = (primary_target[0].pos_x, primary_target[0].pos_y)
-        self.direction = self.base_game.game.chosen_ai.decide_direction(
-            self, self.target, self.base_game.game.obj_dict, difficulty=0
+        self.direction = self.app.game.chosen_ai.decide_direction(
+            self, self.target, self.app.game.obj_dict, difficulty=0
         )
 
 
@@ -205,11 +205,11 @@ class TailSegment(Entity):
 
     Tail Segment for the snake
     '''
-    def __init__(self, alpha_screen, screen, screen_size, base_game, ahead_obj, position, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, app, ahead_obj, position, player=False):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, app)
         # Entity is dead or alive
         self.alive = True
         # Is this a entity part of the player obj?

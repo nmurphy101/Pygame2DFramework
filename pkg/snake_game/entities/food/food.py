@@ -25,11 +25,11 @@ class Food(Entity):
 
     Food for the snake
     '''
-    def __init__(self, alpha_screen, screen, screen_size, base_game):
+    def __init__(self, alpha_screen, screen, screen_size, app):
         # Name for this type of object
         self.name = "food_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, base_game)
+        super().__init__(screen, alpha_screen, screen_size, self.name, app)
         # Where the food is located
         self.pos_x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
@@ -46,7 +46,7 @@ class Food(Entity):
         # Death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
         self.sound_mod = 1.5
-        self.sound_death_volume = float(base_game.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         self.children = None
 
     def spawn(self, obj_dict):

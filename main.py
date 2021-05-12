@@ -18,7 +18,7 @@ __version__ = '1.0.0-alpha'
 # from multiprocessing import Manager
 # from multiprocessing import freeze_support
 from pkg.snake_game.game import SnakeGame
-from pkg.app import BaseGame
+from pkg.app import App
 
 # freeze_support()
 
@@ -29,7 +29,7 @@ def main():
     # Take the game to be initalized
     snake_game = SnakeGame
     # Initilize the base game with the imported game
-    game = BaseGame(snake_game)
+    game = App(snake_game)
     # Run the loaded game
     game.run()
 
