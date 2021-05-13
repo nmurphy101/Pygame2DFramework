@@ -21,7 +21,12 @@ Major:
         - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
     - Impliment "dirty rect animation" for faster rendering seen here:
         - https://www.pygame.org/docs/tut/newbieguide.html
+    - Impliment list comprehensions like this:
+        - https://www.python.org/dev/peps/pep-0202/
     - Look into integrating OpenGL rendering for hardware acceleration
+10. Test the ai by making a maze for it to solve
+11. Impliment a stack obj for the menu "history"/navigation for consistant
+    functionality for the esc key or mouse click on a button
 
 
 Minor:
