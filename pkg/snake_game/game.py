@@ -56,12 +56,12 @@ class SnakeGame():
         pygame.display.set_caption(self.title)
         self.screen = screen
         self.alpha_screen = alpha_screen
-        self.game_font = game_font = freetype.Font(
+        screen_w, screen_h = screen.get_size()
+        self.screen_size = (screen_w, screen_h)
+        self.game_font = freetype.Font(
             file='assets/fonts/PressStart2P-Regular.ttf',
             size=32,
         )
-        screen_w, screen_h = screen.get_size()
-        self.screen_size = (screen_w, screen_h)
         # Game settings
         self.pause_game_music = False
         # Game music
@@ -71,6 +71,12 @@ class SnakeGame():
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
         pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
+        # Game Sounds
+        self.sounds = [
+            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
+            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
+            pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav"),
+        ]
         # Game timer
         # self.timer = time.time()
         # Game object list
@@ -115,11 +121,14 @@ class SnakeGame():
                 except AttributeError:
                     pass
 
+                try:
+                    # collision of obj to other objects/children-of-objs
+                    self.collision_checks(obj)
+                except AttributeError:
+                    pass
+
             # The game loop FPS counter
             self.app.update_fps()
-
-            # collision of objects
-            self.collision_checks()
 
         else:
             # show the game main menu
@@ -150,14 +159,11 @@ class SnakeGame():
         '''
         # Clear game objects up to free memory
         self.clean_up()
-
         # Check settings
         self.settings_checks()
-
         # Starting variables
         self.menu.menu_option = None
         self.pause_game_music = False
-
         # Initilize game objects
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
@@ -191,7 +197,7 @@ class SnakeGame():
         # Menu Obj
         self.menu = Menu(self)
 
-    def collision_checks(self):
+    def collision_checks(self, obj1):
         '''
         collision_checks
         ~~~~~~~~~~
@@ -200,18 +206,17 @@ class SnakeGame():
         '''
         items = self.obj_dict.items()
         # Collision check for all entities
-        for _, obj1 in items:
-            for _, obj2 in items:
-                # Make sure not checking collision with dead obj's
-                if obj1.alive and obj2.alive:
-                    # Make sure not checking collision with self
-                    if obj1 != obj2:
-                        # Collision check between obj and other obj
-                        self.check_obj_to_obj_collision(obj1, obj2)
-                        # Screen edge collision check
-                        self.check_edge_collision(obj1)
-                    # Collision check between obj1 and obj2's children even if obj1=obj2
-                    obj2.interact_children(obj1)
+        for _, obj2 in items:
+            # Make sure not checking collision with dead obj's
+            if obj1.alive and obj2.alive:
+                # Make sure not checking collision with self
+                if obj1 != obj2:
+                    # Collision check between obj and other obj
+                    self.check_obj_to_obj_collision(obj1, obj2)
+                    # Screen edge collision check
+                    self.check_edge_collision(obj1)
+                # Collision check between obj1 and obj2's children even if obj1=obj2
+                obj2.interact_children(obj1)
 
     def check_edge_collision(self, obj1):
         '''
@@ -285,10 +290,11 @@ class SnakeGame():
         self.pause_game_music = True
 
 
-def psudo_func():
+def psudo_func(test):
     '''
     psudo_func
     ~~~~~~~~~~
 
     psudo_func does stuff
     '''
+    print("Psudo_func: ", test)

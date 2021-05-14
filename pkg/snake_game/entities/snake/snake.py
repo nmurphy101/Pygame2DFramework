@@ -62,7 +62,7 @@ class Snake(Entity):
         # head color = red
         self.obj_color = (255, 0, 0)
         # Snake death sound
-        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+        self.sound_death = self.app.game.sounds[0]
         self.sound_mod = 4.5
         self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Interact sound

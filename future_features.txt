@@ -15,10 +15,11 @@ Major:
     - Window size control
 8. More advanced collision logic for entity interactions
     - like not just killing the other obj when colliding
-9. Code optimizations
-    - Make sure slow things like loading is done only once.
-    - Replace "if elif" logic with "dict.get()" where possible as seen here:
+9. Code optimizations - WIP
+    - Make sure slow things like loading is done only once. - DONE
+    - Replace "if elif" logic with "dict.get()" where possible as seen here: - WIP
         - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
+        - Make sure this is actually faster when the temp dict with lambdas have to constantly be remade...
     - Impliment "dirty rect animation" for faster rendering seen here:
         - https://www.pygame.org/docs/tut/newbieguide.html
     - Impliment list comprehensions like this:
@@ -27,6 +28,7 @@ Major:
 10. Test the ai by making a maze for it to solve
 11. Impliment a stack obj for the menu "history"/navigation for consistant
     functionality for the esc key or mouse click on a button
+12. Make the game speed/logic dependent on the game timer not game frames
 
 
 Minor:

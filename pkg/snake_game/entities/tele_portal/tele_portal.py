@@ -48,7 +48,7 @@ class TelePortal(Entity):
         # TelePortal color = blue
         self.obj_color = (0, 0, 255)
         # Interact sound
-        self.sound_interact = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav")
+        self.sound_interact = self.app.game.sounds[2]
         self.sound_mod = 2.5
         self.sound_interact_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         # Active trigger

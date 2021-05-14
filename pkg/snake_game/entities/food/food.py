@@ -44,7 +44,8 @@ class Food(Entity):
         # Point value of the food
         self.point_value = 10
         # Death sound
-        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav")
+
+        self.sound_death = self.app.game.sounds[1]
         self.sound_mod = 1.5
         self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
         self.children = None

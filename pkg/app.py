@@ -61,6 +61,7 @@ class App():
         self.menu_sounds = [
             UI_1, UI_2, UI_3
         ]
+        self.ui_sound_options = {}
 
     def run(self):
         '''
@@ -115,6 +116,12 @@ class App():
         pygame.display.flip()
         # Instantiate the Game Obj
         self.game = self.game_pkg(alpha_screen, screen, self)
+        # Instatiate the ui sound options
+        self.ui_sound_options = {
+            self.game.start: 2,
+            self.game.quit_game: 1,
+            self.game.unpause: 1,
+        }
 
     def update_fps(self):
         fps = str(int(self.clock.get_fps()))
@@ -139,53 +146,73 @@ class App():
         event_checks for the game
         '''
         for event in pygame.event.get():
-            # Game window closes
-            if event.type == QUIT:
-                self.running = False
-            # Press escape to pause/unpause/back
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    # If not game over
-                    if self.game.menu.menu_option != 3:
-                        self.play_ui_sound(1)
-                        # If already paused
-                        if self.game.menu.menu_option == 1:
-                            self.game.menu.menu_option = None
-                        elif self.game.menu.menu_option is None:
-                            self.game.menu.menu_option = 1
-                        elif self.game.menu.menu_option != 0:
-                            self.game.menu.menu_option = self.game.menu.prev_menu
-                    # If game over
-                    else:
-                        self.game.start()
-            elif event.type == WINDOWFOCUSGAINED:
-                self.game.focus_pause = False
-            elif event.type == WINDOWFOCUSLOST:
-                self.game.focus_pause = True
-            elif event.type == NEXT:
-                # If not game over
-                if self.game.menu.menu_option != 3:
-                    # Get next track (modulo number of tracks)
-                    self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
-                    pygame.mixer.music.load(self.game.playlist[self.game.current_track])
-                    pygame.mixer.music.play(0, 0, 1)
-            elif event.type == MOUSEBUTTONDOWN:
-                if menu:
-                    for button in menu:
-                        if button[0].collidepoint(event.pos):
-                            self.play_menu_sound(button)
-                            self.game.menu.prev_menu = button[2]
-                            button[1]()
+            decision_func = {
+                QUIT: lambda: self.quit,
+                KEYDOWN: lambda: self.key_down(event),
+                WINDOWFOCUSGAINED: lambda x=False: self.window_focus(x),
+                WINDOWFOCUSLOST: lambda x=True: self.window_focus(x),
+                NEXT: self.next_music,
+                MOUSEBUTTONDOWN: lambda: self.mouse_down(event, menu),
+            }.get(event.type)
+            if decision_func:
+                decision_func()
+
+            # # Game window closes
+            # if event.type == QUIT:
+            #     self.running = False
+            # # Press down on a key
+            # elif event.type == KEYDOWN:
+            #     self.key_down(event)
+            # elif event.type == WINDOWFOCUSGAINED:
+            #     self.game.focus_pause = False
+            # elif event.type == WINDOWFOCUSLOST:
+            #     self.game.focus_pause = True
+            # elif event.type == NEXT:
+            #     self.next_music()
+            # elif event.type == MOUSEBUTTONDOWN:
+            #     self.mouse_down(menu)
+
+    def quit(self):
+        self.running = False
+
+    def window_focus(self, choice):
+        self.game.focus_pause = choice
+
+    def key_down(self, event):
+        # Pressed escape to pause/unpause/back
+        if event.key == K_ESCAPE:
+            # If not game over
+            if self.game.menu.menu_option != 3:
+                self.play_ui_sound(1)
+                # If already paused
+                self.game.menu.menu_option = {
+                    0: self.game.menu.menu_option,
+                    1: None,
+                    None: 1,
+                }.get(self.game.menu.menu_option, self.game.menu.prev_menu)
+            # If game over
+            else:
+                self.game.start()
+
+    def mouse_down(self, event, menu):
+        if menu:
+            for button in menu:
+                if button[0].collidepoint(event.pos):
+                    self.play_menu_sound(button)
+                    self.game.menu.prev_menu = button[2]
+                    button[1]()
+
+    def next_music(self):
+        # If not game over
+        if self.game.menu.menu_option != 3:
+            # Get next track (modulo number of tracks)
+            self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
+            pygame.mixer.music.load(self.game.playlist[self.game.current_track])
+            pygame.mixer.music.play(0, 0, 1)
 
     def play_menu_sound(self, button):
-        if button[1] == self.game.start:
-            self.play_ui_sound(2)
-        elif button[1] == self.game.quit_game:
-            self.play_ui_sound(1)
-        elif button[1] == self.game.unpause:
-            self.play_ui_sound(1)
-        else:
-            self.play_ui_sound(0)
+        num = self.ui_sound_options.get(button[1], 0)
+        self.play_ui_sound(num)
 
     def play_ui_sound(self, num):
         menu_sound = self.menu_sounds[num]
