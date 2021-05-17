@@ -1,9 +1,14 @@
 {
     "settings": {
-        "music": true,
-        "music_volume": "0.15000000000000008",
-        "effect_volume": "0.10000000000000007",
-        "menu_volume": "0.35000000000000003",
-        "fps_display": true
+        "sound": {
+            "music": true,
+            "music_volume": "0.5",
+            "effect_volume": "0.10000000000000007",
+            "menu_volume": "0.35000000000000003"
+        },
+        "display": {
+            "fps": 700,
+            "fps_display": true
+        }
     }
 }

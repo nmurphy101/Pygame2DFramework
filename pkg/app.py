@@ -147,7 +147,7 @@ class App():
         '''
         for event in pygame.event.get():
             decision_func = {
-                QUIT: lambda: self.quit,
+                QUIT: lambda: self.quit(),
                 KEYDOWN: lambda: self.key_down(event),
                 WINDOWFOCUSGAINED: lambda x=False: self.window_focus(x),
                 WINDOWFOCUSLOST: lambda x=True: self.window_focus(x),
@@ -156,21 +156,6 @@ class App():
             }.get(event.type)
             if decision_func:
                 decision_func()
-
-            # # Game window closes
-            # if event.type == QUIT:
-            #     self.running = False
-            # # Press down on a key
-            # elif event.type == KEYDOWN:
-            #     self.key_down(event)
-            # elif event.type == WINDOWFOCUSGAINED:
-            #     self.game.focus_pause = False
-            # elif event.type == WINDOWFOCUSLOST:
-            #     self.game.focus_pause = True
-            # elif event.type == NEXT:
-            #     self.next_music()
-            # elif event.type == MOUSEBUTTONDOWN:
-            #     self.mouse_down(menu)
 
     def quit(self):
         self.running = False
@@ -216,5 +201,5 @@ class App():
 
     def play_ui_sound(self, num):
         menu_sound = self.menu_sounds[num]
-        menu_sound.set_volume(float(self.game.game_config["settings"]["menu_volume"])/1.5)
+        menu_sound.set_volume(float(self.game.game_config["settings"]["sound"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)

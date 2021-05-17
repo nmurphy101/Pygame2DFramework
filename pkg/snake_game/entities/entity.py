@@ -72,7 +72,7 @@ class Entity():
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
-        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Sight lines
         self.sight_lines = [
             Line(0, self),
@@ -119,7 +119,7 @@ class Entity():
                             print("Child collision")
                             # Play obj1 death sound
                             sound = obj1.sound_death
-                            self.sound_death_volume = float(self.app.game.game_config["settings"]["effect_volume"])/self.sound_mod
+                            self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
                             sound.set_volume(obj1.sound_death_volume)
                             pygame.mixer.Sound.play(sound)
                             # Loose the game if obj1 is the player
@@ -133,7 +133,7 @@ class Entity():
             # print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
-            self.sound_death_volume = float(self.app.game.game_config["settings"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
             sound.set_volume(self.sound_death_volume)
             pygame.mixer.Sound.play(sound)
             # Loose the game if self is the player

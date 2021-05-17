@@ -47,7 +47,7 @@ class Food(Entity):
 
         self.sound_death = self.app.game.sounds[1]
         self.sound_mod = 1.5
-        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         self.children = None
 
     def spawn(self, obj_dict):

@@ -39,6 +39,15 @@ class Menu():
         self.game_menus = [self.MainMenu, self.PauseMenu,
                            self.SettingsMenu, self.GameOverMenu,
                            self.DisplayMenu, self.SoundMenu,]
+        # Menu options
+        self.menu_options = {
+            0: lambda: self.MainMenu(),
+            1: lambda: self.PauseMenu(),
+            2: lambda: self.SettingsMenu(),
+            3: lambda: self.GameOverMenu(),
+            4: lambda: self.DisplayMenu(),
+            5: lambda: self.SoundMenu(),
+        }
 
     def MainMenu(self):
        return main_menu(self)

@@ -51,6 +51,8 @@ class SnakeGame():
         self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
         with open(self.game_config_file_path) as json_data_file:
             self.game_config = json.load(json_data_file)
+        # Set starting fps from the config file
+        self.app.fps = int(self.game_config["settings"]["display"]["fps"])
         # Window settings
         self.title = app.title + "Snake"
         pygame.display.set_caption(self.title)
@@ -70,7 +72,7 @@ class SnakeGame():
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
-        pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
+        pygame.mixer.music.set_volume(float(self.game_config["settings"]["sound"]["music_volume"]))
         # Game Sounds
         self.sounds = [
             pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
@@ -131,24 +133,8 @@ class SnakeGame():
             self.app.update_fps()
 
         else:
-            # show the game main menu
-            if self.menu.menu_option == 0:
-                return self.menu.MainMenu()
-            # show the pause menu
-            elif self.menu.menu_option == 1:
-                return self.menu.PauseMenu()
-            # show the pause menu
-            elif self.menu.menu_option == 2:
-                return self.menu.SettingsMenu()
-            # show the pause menu
-            elif self.menu.menu_option == 3:
-                return self.menu.GameOverMenu()
-            # show the display menu
-            elif self.menu.menu_option == 4:
-                return self.menu.DisplayMenu()
-            # show the display menu
-            elif self.menu.menu_option == 5:
-                return self.menu.SoundMenu()
+            # Show which ever menu option that has been chosen
+            return self.menu.menu_options.get(self.menu.menu_option)()
 
     def start(self):
         '''
@@ -259,12 +245,12 @@ class SnakeGame():
         settings_checks does stuff
         '''
         # Start the game music
-        if self.game_config["settings"]["music"]:
+        if self.game_config["settings"]["sound"]["music"]:
             self.current_track = 0
             pygame.mixer.music.load(self.playlist[self.current_track])
-            pygame.mixer.music.set_volume(float(self.game_config["settings"]["music_volume"]))
+            pygame.mixer.music.set_volume(float(self.game_config["settings"]["sound"]["music_volume"]))
             pygame.mixer.music.play(0, 0, 1)
-        elif not self.game_config["settings"]["music"]:
+        else:
             pygame.mixer.music.pause()
 
     def quit_game(self):

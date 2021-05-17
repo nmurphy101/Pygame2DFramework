@@ -64,7 +64,7 @@ class Snake(Entity):
         # Snake death sound
         self.sound_death = self.app.game.sounds[0]
         self.sound_mod = 4.5
-        self.sound_death_volume = float(app.game.game_config["settings"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Number of tail segments
