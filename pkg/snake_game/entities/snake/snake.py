@@ -58,7 +58,7 @@ class Snake(Entity):
         # How big snake parts are
         self.size = 16
         # How many moves the snake can make per second
-        self.movement = 1
+        self.movement = 2
         # head color = red
         self.obj_color = (255, 0, 0)
         # Snake death sound
@@ -145,7 +145,7 @@ class Snake(Entity):
         move does stuff
         '''
         # pylint: disable=access-member-before-definition
-        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=20/self.movement) and self.alive:
+        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.movement) and self.alive:
             # Check if Ai or player controls this entity
             if not self.player:
                 self.aquire_primary_target("food")

@@ -54,6 +54,7 @@ class Entity():
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
         # self.speed = 1
+        self.base_speed = 30
         self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.prev_direction = 2

@@ -129,7 +129,7 @@ class App():
         _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
         self.fps_list.append(int(fps))
         # Keep the fps list limited to 100 most recient samples
-        if len(self.fps_list) > 100:
+        if len(self.fps_list) > 200:
             self.fps_list.pop(0)
         # Average FPS
         avg_fps = str(round(statistics.mean(self.fps_list)))
