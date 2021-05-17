@@ -19,6 +19,7 @@
 # import re
 # import queue as q
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
+import statistics
 import gc
 import pygame
 # pylint: disable=no-name-in-module
@@ -44,8 +45,8 @@ class App():
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 62
-        self.logic_fps = 60
+        self.fps = 300
+        self.fps_list = []
         self.clock = None
         self.screen_width = 1280
         self.screen_height = 720
@@ -125,18 +126,17 @@ class App():
 
     def update_fps(self):
         fps = str(int(self.clock.get_fps()))
-        color=(255, 255, 255)
-        h_offset = 600
-        position = (
-            self.game.screen_size[0]/2-(len(fps)*self.game.game_font.size)/2 + h_offset,
-            self.game.screen_size[1]/2 - self.game.game_font.size * 11
-        )
-        _ = self.game.game_font.render_to(
-            self.game.screen,
-            position,
-            fps,
-            color
-        )
+        _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
+        self.fps_list.append(int(fps))
+        # Keep the fps list limited to 100 most recient samples
+        if len(self.fps_list) > 100:
+            self.fps_list.pop(0)
+        # Average FPS
+        avg_fps = str(round(statistics.mean(self.fps_list)))
+        _ = self.game.menu.render_button(f"avg:{avg_fps}", 10, h_offset=530)
+        # High and low FPS
+        _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 8.8, h_offset=565)
+        _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 7.8, h_offset=565)
 
     def event_checks(self, menu):
         '''

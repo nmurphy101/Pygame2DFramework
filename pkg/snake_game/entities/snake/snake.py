@@ -13,6 +13,7 @@
 
 import math
 import random
+from datetime import datetime, timedelta
 import pygame
 # pylint: disable=no-name-in-module
 from pygame.constants import (
@@ -56,9 +57,8 @@ class Snake(Entity):
         self.prev_pos_y = self.pos_y - 16
         # How big snake parts are
         self.size = 16
-        # How fast the snake can move per loop-tick
-        # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        self.speed = 1
+        # How many moves the snake can make per second
+        self.movement = 1
         # head color = red
         self.obj_color = (255, 0, 0)
         # Snake death sound
@@ -145,7 +145,7 @@ class Snake(Entity):
         move does stuff
         '''
         # pylint: disable=access-member-before-definition
-        if self.moved_last_cnt >= 1 and self.alive:
+        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=20/self.movement) and self.alive:
             # Check if Ai or player controls this entity
             if not self.player:
                 self.aquire_primary_target("food")
@@ -169,9 +169,8 @@ class Snake(Entity):
             elif self.direction == 1:
                 self.prev_direction = self.direction
                 self.pos_x += self.size
-            self.moved_last_cnt = 0
-        else:
-            self.moved_last_cnt += 1 * self.get_speed(self.speed)
+            # Set the new last moved time
+            self.time_last_moved = datetime.now()
 
     def interact_children(self, obj1):
         i = 0

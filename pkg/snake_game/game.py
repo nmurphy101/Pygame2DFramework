@@ -17,7 +17,7 @@ import sys
 # import threading
 # import logging
 # import sys
-# import time
+from datetime import datetime
 # import re
 # import queue as q
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
@@ -78,7 +78,7 @@ class SnakeGame():
             pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav"),
         ]
         # Game timer
-        # self.timer = time.time()
+        self.timer = None
         # Game object list
         self.obj_dict = {}
         # AI blackbox
@@ -159,6 +159,8 @@ class SnakeGame():
         '''
         # Clear game objects up to free memory
         self.clean_up()
+        # Start the game timer
+        self.timer = datetime.now()
         # Check settings
         self.settings_checks()
         # Starting variables

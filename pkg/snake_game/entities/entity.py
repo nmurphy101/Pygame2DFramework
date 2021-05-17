@@ -11,6 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+from datetime import datetime
 import uuid
 import pygame
 
@@ -52,8 +53,8 @@ class Entity():
         self.size = 16
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        self.speed = 1
-        self.moved_last_cnt = 0
+        # self.speed = 1
+        self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.prev_direction = 2
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
@@ -144,10 +145,6 @@ class Entity():
                 for child in self.children:
                     child.alive = False
                     child.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
-
-    def get_speed(self, entity_speed):
-        real_speed = entity_speed * (self.app.logic_fps/int(self.app.clock.get_fps()))
-        return real_speed
 
     def grow(self, eaten_obj):
         pass
