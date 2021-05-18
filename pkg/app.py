@@ -45,7 +45,7 @@ class App():
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 300
+        self.fps = 1000
         self.fps_list = []
         self.clock = None
         self.screen_width = 1280
@@ -148,11 +148,11 @@ class App():
         for event in pygame.event.get():
             decision_func = {
                 QUIT: lambda: self.quit(),
-                KEYDOWN: lambda: self.key_down(event),
+                KEYDOWN: lambda event=event: self.key_down(event),
                 WINDOWFOCUSGAINED: lambda x=False: self.window_focus(x),
                 WINDOWFOCUSLOST: lambda x=True: self.window_focus(x),
                 NEXT: self.next_music,
-                MOUSEBUTTONDOWN: lambda: self.mouse_down(event, menu),
+                MOUSEBUTTONDOWN: lambda event=event, menu=menu: self.mouse_down(event, menu),
             }.get(event.type)
             if decision_func:
                 decision_func()
