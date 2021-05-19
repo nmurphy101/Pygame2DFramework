@@ -17,7 +17,7 @@ Major:
     - like not just killing the other obj when colliding
 9. Code optimizations - WIP
     - Make sure slow things like loading is done only once. - DONE
-    - Replace "if elif" logic with "dict.get()" where possible as seen here: - WIP
+    - Replace "if elif" logic with "dict.get()" where possible as seen here: - DONE
         - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
         - Make sure this is actually faster when the temp dict with lambdas have to constantly be remade...
     - Impliment "dirty rect animation" for faster rendering seen here:
@@ -87,3 +87,7 @@ Notes:
 https://github.com/ranjian0/A-star-Pathfinding/blob/master/core/graph.py
 https://www.codementor.io/blog/basic-pathfinding-explained-with-python-5pil8767c1
 https://en.wikipedia.org/wiki/A*_search_algorithm
+
+
+https://stackoverflow.com/questions/41637139/choppy-animation-in-pygame
+https://stackoverflow.com/questions/37780639/bullet-object-has-no-attribute-sprite-g-when-adding-sprite-to-group/37785640

@@ -13,10 +13,9 @@
 
 
 import os
-import sys
+import gc
 # import threading
 # import logging
-# import sys
 from datetime import datetime
 # import re
 # import queue as q
@@ -81,10 +80,11 @@ class SnakeGame():
         ]
         # Game timer
         self.timer = None
-        # Game object list
-        self.obj_dict = {}
+        # Game object containers
+        self.obj_container = []
+        self.sprite_group = pygame.sprite.Group()
         # AI blackbox
-        self.chosen_ai = DecisionBox()
+        self.chosen_ai = None
         # Menu Obj
         self.menu = Menu(self)
 
@@ -101,38 +101,24 @@ class SnakeGame():
 
         # Check if not in a menu
         if self.menu.menu_option is None:
-            for _, obj in self.obj_dict.items():
-                try:
-                    # try to spawn if obj can
-                    obj.spawn(self.obj_dict)
-                except AttributeError:
-                    pass
-
+            # Execute game object actions
+            for obj in self.obj_container:
+                # try to spawn if obj can
+                obj.spawn(self.obj_container)
                 # Draw game objects
-                obj.draw(self.screen, self.obj_dict)
-
-                try:
-                    # try to choose a direction if obj can
-                    obj.choose_direction()
-                except AttributeError:
-                    pass
-
-                try:
-                    # Try to move if obj can
-                    obj.move()
-                except AttributeError:
-                    pass
-
-                try:
-                    # collision of obj to other objects/children-of-objs
-                    self.collision_checks(obj)
-                except AttributeError:
-                    pass
-
+                obj.draw(self.screen, self.obj_container)
+                # try to choose a direction if obj can
+                obj.choose_direction()
+                # Try to move if obj can
+                obj.move()
+                # collision of obj to other objects/children-of-other-objs
+                obj.collision_checks()
             # The game loop FPS counter
             self.app.update_fps()
 
         else:
+            # The game loop FPS counter
+            self.app.update_fps()
             # Show which ever menu option that has been chosen
             return self.menu.menu_options.get(self.menu.menu_option)()
 
@@ -143,33 +129,37 @@ class SnakeGame():
 
         start does stuff
         '''
-        # Clear game objects up to free memory
-        self.clean_up()
-        # Start the game timer
-        self.timer = datetime.now()
         # Check settings
         self.settings_checks()
         # Starting variables
         self.menu.menu_option = None
         self.pause_game_music = False
+        # AI blackbox
+        self.chosen_ai = DecisionBox()
         # Initilize game objects
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
-        # player_snake.speed = .75
+        # player_snake.movement = 1
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.speed = 1
+        enemy_snake.movement = 1
         enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake2.speed = 1
+        enemy_snake2.movement = 1
         tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
-        self.obj_dict = { # Order of these objects actually matter
-            food.ID: food,
-            food2.ID: food2,
-            tele_portal.ID: tele_portal,
-            # player_snake.ID: player_snake,
-            enemy_snake.ID: enemy_snake,
-            enemy_snake2.ID: enemy_snake2,
-        }
+        # Set of game objects
+        self.obj_container = [ # Order of these objects actually matter
+            food,
+            food2,
+            tele_portal,
+            # player_snake,
+            enemy_snake,
+            enemy_snake2,
+        ]
+        # Sprite Group obj
+        for obj in self.obj_container:
+            self.sprite_group.add(obj)
+        # Start the game timer
+        self.timer = datetime.now()
 
     def clean_up(self):
         '''
@@ -178,64 +168,18 @@ class SnakeGame():
 
         clean_up does stuff
         '''
+        # Game settings
+        self.pause_game_music = False
+        # Game timer
+        self.timer = None
         # Game object list
-        self.obj_dict = {}
+        self.obj_container = []
         # AI blackbox
-        self.chosen_ai = DecisionBox()
+        self.chosen_ai = None
         # Menu Obj
         self.menu = Menu(self)
-
-    def collision_checks(self, obj1):
-        '''
-        collision_checks
-        ~~~~~~~~~~
-
-        collision_checks does stuff
-        '''
-        items = self.obj_dict.items()
-        # Collision check for all entities
-        for _, obj2 in items:
-            # Make sure not checking collision with dead obj's
-            if obj1.alive and obj2.alive:
-                # Make sure not checking collision with self
-                if obj1 != obj2:
-                    # Collision check between obj and other obj
-                    self.check_obj_to_obj_collision(obj1, obj2)
-                    # Screen edge collision check
-                    self.check_edge_collision(obj1)
-                # Collision check between obj1 and obj2's children even if obj1=obj2
-                obj2.interact_children(obj1)
-
-    def check_edge_collision(self, obj1):
-        '''
-        check_edge_collision
-        ~~~~~~~~~~
-
-        Check for obj1 collision/interaction to the edge of the screen
-        '''
-        # Collision check for edge of screen (Right and Bottom)
-        if (obj1.pos_x > self.screen_size[0]-obj1.size) or (
-                obj1.pos_y > self.screen_size[1]-obj1.size):
-            obj1.die("Edge of screen")
-        # Collision check for edge of screen (Left and Top)
-        elif obj1.pos_x < 0 or obj1.pos_y < 0:
-            obj1.die("Edge of screen")
-
-    def check_obj_to_obj_collision(self, obj1, obj2):
-        '''
-        check_obj_to_obj_collision
-        ~~~~~~~~~~
-
-        Check for obj1 to obj2 collision/interaction
-        '''
-        # Collision check between obj1 and other obj2
-        if obj1.rect.colliderect(obj2):
-            if obj1.secondary_target:
-                obj1.secondary_target = None
-
-            # print(obj1, " Interacting with ", obj2)
-            # Do obj2's interaction method
-            obj2.interact(obj1)
+        # Free unreferenced memory
+        gc.collect()
 
     def settings_checks(self):
         '''
@@ -261,11 +205,6 @@ class SnakeGame():
         quit_game does stuff
         '''
         self.app.running = False
-        #pylint: disable=no-member
-        pygame.display.quit()
-        pygame.quit()
-        #pylint: enable=no-member
-        sys.exit()
 
     def unpause(self):
         '''

@@ -29,7 +29,7 @@ class TelePortal(Entity):
     def __init__(self, alpha_screen, screen, screen_size, app, parent=None):
         self.name = "TelePortal_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, app)
+        super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Determines if entity can be killed
         self.killable = False
         # Ability cooldown timer
@@ -53,11 +53,13 @@ class TelePortal(Entity):
         self.sound_interact_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Active trigger
         self.activated = datetime.now()
+        # No Sight lines for tail segments
+        self.sight_lines = []
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
             self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
 
-    def spawn(self, obj_dict):
+    def spawn(self, obj_container):
         '''
         spawn
         ~~~~~~~~~~
@@ -78,7 +80,7 @@ class TelePortal(Entity):
                 )
 
                 # Check if the chosen random spawn location is taken
-                for _, oth_obj in obj_dict.items():
+                for oth_obj in obj_container:
                     collision_bool = self.rect.collidepoint(self.pos_x, self.pos_y)
 
                     if collision_bool:
@@ -87,7 +89,7 @@ class TelePortal(Entity):
                 if collision_bool:
                     continue
 
-                for _, oth_obj in obj_dict.items():
+                for oth_obj in obj_container:
                     try:
                         if oth_obj.children:
                             self.rect.collidelist(oth_obj.children)
@@ -100,7 +102,7 @@ class TelePortal(Entity):
 
         if self.children:
             for child in self.children:
-                child.spawn(obj_dict)
+                child.spawn(obj_container)
 
 
     def teleport(self, oth_obj):

@@ -22,7 +22,6 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
-from ...ai.a_star.astar import a_star_search, reconstruct_path
 from ...ai.ai import DecisionBox
 # pylint: enable=relative-beyond-top-level
 
@@ -40,9 +39,11 @@ class Snake(Entity):
         # Name for this type of object
         self.name = "snake_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, app)
+        super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Default set snake to alive
         self.alive = True
+        # Make snake invinsible
+        # self.killable = False
         # Is this the player entity
         self.player = player
         # Where the snake is started located
@@ -186,14 +187,14 @@ class Snake(Entity):
 
     def aquire_primary_target(self, target_name):
         primary_target = (None, 10000*100000)
-        for name, obj in self.app.game.obj_dict.items():
-            if target_name in name:
+        for obj in self.app.game.obj_container:
+            if target_name in obj.ID:
                 dist_self = math.hypot(obj.pos_x - self.pos_x, obj.pos_y - self.pos_y)
                 if dist_self < primary_target[1]:
                     primary_target = (obj, dist_self)
         self.target = (primary_target[0].pos_x, primary_target[0].pos_y)
         self.direction = self.app.game.chosen_ai.decide_direction(
-            self, self.target, self.app.game.obj_dict, difficulty=0
+            self, self.target, self.app.game.obj_container, difficulty=0
         )
 
 
@@ -208,7 +209,7 @@ class TailSegment(Entity):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, app)
+        super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Entity is dead or alive
         self.alive = True
         # Is this a entity part of the player obj?
@@ -234,8 +235,10 @@ class TailSegment(Entity):
         else:
             # Tail color = Red   (if not a player snake)
             self.obj_color = (255, 0, 0)
+        # No Sight lines for tail segments
+        self.sight_lines = []
 
-    def draw(self, screen, obj_dict):
+    def draw(self, screen, _):
         '''
         draw
         ~~~~~~~~~~
@@ -249,7 +252,6 @@ class TailSegment(Entity):
             # Where the tail is located
             self.pos_x = self.ahead_obj.prev_pos_x
             self.pos_y = self.ahead_obj.prev_pos_y
-            # Set the current tail position and size
-            self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the tail segment based on it's parameters
-            self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+            self.rect.topleft = (self.pos_x, self.pos_y)
+            screen.blit(self.image, self.position)

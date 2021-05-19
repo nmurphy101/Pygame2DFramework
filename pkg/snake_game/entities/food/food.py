@@ -29,7 +29,7 @@ class Food(Entity):
         # Name for this type of object
         self.name = "food_"
         # Initilize parent init
-        super().__init__(screen, alpha_screen, screen_size, self.name, app)
+        super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Where the food is located
         self.pos_x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
@@ -43,14 +43,16 @@ class Food(Entity):
         self.growth = 5
         # Point value of the food
         self.point_value = 10
+        # No Sight lines for tail segments
+        self.sight_lines = []
         # Death sound
-
         self.sound_death = self.app.game.sounds[1]
         self.sound_mod = 1.5
         self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         self.children = None
 
-    def spawn(self, obj_dict):
+
+    def spawn(self, obj_container):
         '''
         spawn
         ~~~~~~~~~~
@@ -60,7 +62,6 @@ class Food(Entity):
         found_spawn = False
         # pylint: disable=access-member-before-definition
         if not self.alive:
-            self.rect = pygame.draw.rect(self.screen, self.obj_color, self.obj)
             # pylint: enable=access-member-before-definition
             while not found_spawn:
                 # Where the food is located
@@ -72,20 +73,12 @@ class Food(Entity):
                 )
 
                 # Check if the chosen random spawn location is taken
-                for _, oth_obj in obj_dict.items():
+                for obj in obj_container:
                     collision_bool = self.rect.collidepoint(self.pos_x, self.pos_y)
                     if collision_bool:
                         break
-
-                if collision_bool:
-                        continue
-
-                for _, oth_obj in obj_dict.items():
-                    try:
-                        if oth_obj.children:
-                            self.rect.collidelist(oth_obj.children)
-                    except AttributeError:
-                        pass
+                    elif obj.children:
+                            self.rect.collidelist(obj.children)
 
                 found_spawn = True
 

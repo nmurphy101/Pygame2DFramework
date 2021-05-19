@@ -78,6 +78,8 @@ class App():
 
          # Game loop
         while self.running:
+            # The game loop clocktarget FPS
+            self.clock.tick(self.fps)
             # Send event NEXT every time music tracks ends
             mixer.music.set_endevent(NEXT)
             # Gameplay logic this turn/tick
@@ -88,13 +90,6 @@ class App():
             self.event_checks(menu)
             # Free unreferenced memory
             gc.collect()
-            # The game loop clocktarget FPS
-            self.clock.tick(self.fps)
-
-        #pylint: disable=no-member
-        # Quit the game
-        pygame.quit()
-        #pylint: enable=no-member
 
     def set_window_settings(self):
         '''
@@ -147,11 +142,11 @@ class App():
         '''
         for event in pygame.event.get():
             decision_func = {
-                QUIT: lambda: self.quit(),
-                KEYDOWN: lambda event=event: self.key_down(event),
-                WINDOWFOCUSGAINED: lambda x=False: self.window_focus(x),
-                WINDOWFOCUSLOST: lambda x=True: self.window_focus(x),
+                QUIT: self.quit,
                 NEXT: self.next_music,
+                WINDOWFOCUSGAINED: lambda: self.window_focus(False),
+                WINDOWFOCUSLOST: lambda: self.window_focus(True),
+                KEYDOWN: lambda event=event: self.key_down(event),
                 MOUSEBUTTONDOWN: lambda event=event, menu=menu: self.mouse_down(event, menu),
             }.get(event.type)
             if decision_func:

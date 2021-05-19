@@ -14,9 +14,9 @@
 from datetime import datetime
 import uuid
 import pygame
+from pygame.sprite import Sprite
 
-
-class Entity():
+class Entity(Sprite):
     '''
     Entity
     ~~~~~~~~~~
@@ -53,7 +53,7 @@ class Entity():
         self.size = 16
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        # self.speed = 1
+        self.movement = 1
         self.base_speed = 30
         self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
@@ -67,8 +67,11 @@ class Entity():
         self.death_obj = (-10000*10000, -10000*10000, 0, 0)
         # RGB color = pink default
         self.obj_color = (255,105,180)
+        # Entity's visual representation
+        self.image = pygame.Surface((self.size, self.size))
+        self.image.fill(self.obj_color)
         # Entity is a rectangle object
-        self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+        self.rect = self.image.get_rect(topleft=(self.pos_x, self.pos_y))
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
@@ -86,7 +89,7 @@ class Entity():
         # children list
         self.children = []
 
-    def draw(self, screen, obj_dict):
+    def draw(self, screen, obj_container):
         '''
         draw
         ~~~~~~~~~~
@@ -97,11 +100,12 @@ class Entity():
             # Draw each child if there are any
             if self.children:
                 for child in self.children:
-                    child.draw(screen, obj_dict)
+                    child.draw(screen, obj_container)
             # obj pos/size  = (left, top, width, height)
             self.obj = (self.pos_x, self.pos_y, self.size, self.size)
             # Render the entity's obj based on it's parameters
-            self.rect = pygame.draw.rect(screen, self.obj_color, self.obj)
+            self.rect.topleft = (self.pos_x, self.pos_y)
+            screen.blit(self.image, self.position)
             # Render the entity's sight lines
             for line in self.sight_lines:
                 line.draw(self)
@@ -147,10 +151,64 @@ class Entity():
                     child.alive = False
                     child.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
 
+    def collision_checks(self):
+        '''
+        collision_checks
+        ~~~~~~~~~~
+
+        collision_checks does stuff
+        '''
+        # Collision check for all entities
+        for obj in self.app.game.obj_container:
+            # Make sure not checking collision with dead obj's
+            if self.alive and obj.alive:
+                # Make sure not checking collision with self
+                if self != obj:
+                    # Collision check between obj and other obj
+                    self.check_obj_to_obj_collision(obj)
+                    # Screen edge collision check
+                    self.check_edge_collision()
+                # Collision check between self and obj's children even if self=obj
+                obj.interact_children(self)
+
+    def check_edge_collision(self):
+        '''
+        check_edge_collision
+        ~~~~~~~~~~
+
+        Check for self collision/interaction to the edge of the screen
+        '''
+        # Collision check for edge of screen (Right and Bottom)
+        if (self.pos_x > self.screen_size[0]-self.size) or (
+                self.pos_y > self.screen_size[1]-self.size):
+            self.die("Edge of screen")
+        # Collision check for edge of screen (Left and Top)
+        elif self.pos_x < 0 or self.pos_y < 0:
+            self.die("Edge of screen")
+
+    def check_obj_to_obj_collision(self, obj2):
+        '''
+        check_obj_to_obj_collision
+        ~~~~~~~~~~
+
+        Check for obj1 to obj2 collision/interaction
+        '''
+        # Collision check between obj1 and other obj2
+        if self.rect.colliderect(obj2):
+            if self.secondary_target:
+                self.secondary_target = None
+
+            # print(self, " Interacting with ", obj2)
+            # Do obj2's interaction method
+            obj2.interact(self)
+
     def grow(self, eaten_obj):
         pass
 
     def up_score(self, eaten_obj):
+        pass
+
+    def choose_direction(self):
         pass
 
     def move(self):
@@ -159,7 +217,7 @@ class Entity():
     def aquire_primary_target(self, target_name):
         pass
 
-    def spawn(self, obj_dict):
+    def spawn(self, obj_container):
         pass
 
     def teleport(self, oth_obj):
@@ -178,16 +236,17 @@ class Line():
         self.opasity = 0 # Change this to 1 if you want to see sightlines
         self.color = (255, 105, 180, (self.opasity))
         self.direction = direction
-        if direction == 0:
-            self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
-        elif direction == 2:
-            self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
-        elif direction == 3:
-            self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
-        elif direction == 1:
-            self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+        # determine entity's sightline end point
+        draw_line = {
+            0: lambda: self.draw_up(entity),
+            2: lambda: self.draw_down(entity),
+            3: lambda: self.draw_left(entity),
+            1: lambda: self.draw_right(entity),
+        }.get(self.direction)
+        # Run the chosen line to draw
+        draw_line()
         self.rect = pygame.draw.line(
-            entity.screen,
+            entity.alpha_screen,
             self.color,
             entity.rect.center,
             self.end,
@@ -202,19 +261,31 @@ class Line():
         draw does stuff
         '''
         # determine entity's sightline end point
-        if self.direction == 0:
-            self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
-        elif self.direction == 2:
-            self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
-        elif self.direction == 3:
-            self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
-        elif self.direction == 1:
-            self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
-        # Render the entity's sight line
+        draw_line = {
+            0: lambda: self.draw_up(entity),
+            2: lambda: self.draw_down(entity),
+            3: lambda: self.draw_left(entity),
+            1: lambda: self.draw_right(entity),
+        }.get(self.direction)
+        # Run the chosen line to draw
+        draw_line()
+        # Draw the line representing the rect
         self.rect = pygame.draw.line(
-            entity.screen,
+            entity.alpha_screen,
             self.color,
             entity.rect.center,
             self.end,
             1,
         )
+
+    def draw_up(self, entity):
+        self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
+
+    def draw_down(self, entity):
+        self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
+
+    def draw_left(self, entity):
+        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
+
+    def draw_right(self, entity):
+        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]

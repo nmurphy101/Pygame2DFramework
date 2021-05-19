@@ -7,7 +7,7 @@
             "menu_volume": "0.05000000000000007"
         },
         "display": {
-            "fps": 60,
+            "fps": 500,
             "fps_display": true
         }
     }

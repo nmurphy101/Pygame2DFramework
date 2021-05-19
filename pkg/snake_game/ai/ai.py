@@ -22,14 +22,16 @@ class DecisionBox:
     DecisionBox for the entity
     '''
     def __init__(self):
-        self.difficulty = 0
+        self.difficulty = 10
+        self.obj_container = None
+        self.portal_use_difficulty = 1
 
-    def decide_direction(self, entity, target, obj_dict, difficulty=0):
+    def decide_direction(self, entity, target, obj_container, difficulty=0):
         if not target:
             return entity.direction
 
         self.difficulty = difficulty
-        self.obj_dict = obj_dict
+        self.obj_container = obj_container
         # Use intent algorithm depending on difficulty
         direction = self.situational_intent(entity, target)
 
@@ -92,26 +94,21 @@ class DecisionBox:
 
     def check_intent(self, entity, intent):
         # print("Checking intent: ", intent)
-        ori_intent = intent
         while True:
             self.reset_sight_lines(entity)
-            for name, obj in self.obj_dict.items():
+            for obj in self.obj_container:
                 # Ignore the target object
                 if entity.target != (obj.pos_x, obj.pos_y):
                 # if "food" not in obj.name:
                     # Check if object obstructs entity
                     if obj != entity:
-                        ori_intent = intent
                         self.verify_sight_lines(obj, entity)
                         intent = self.get_intent(intent, entity)
                     # Check if object's children if any (even if self) obstructs entity
                     if obj.children:
-                        ori_intent = intent
                         for child in obj.children:
                             self.verify_sight_lines(child, entity)
                             intent = self.get_intent(intent, entity)
-                            # if intent != ori_intent:
-                                # print(f"intent changed on child: {ori_intent} to {intent}")
             # Break from while loop
             break
 
@@ -132,7 +129,8 @@ class DecisionBox:
                 line.open = False
             # Check the sight lines for a open direction
             if obj.rect.colliderect(line):
-                if self.difficulty >= 0:
+                # Will Ai see and use portals?
+                if self.difficulty >= self.portal_use_difficulty:
                     line.open = self.decide_portal(obj, entity)
                 else:
                     line.open = False

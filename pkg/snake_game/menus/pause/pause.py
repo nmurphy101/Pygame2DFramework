@@ -34,7 +34,7 @@ def pause_menu(self):
 
     # Get the player score
     score = "NA"
-    for _, obj in self.game.obj_dict.items():
+    for obj in self.game.obj_container:
         if obj.player:
             score = obj.score
     # Render the score

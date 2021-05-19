@@ -11,8 +11,6 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
-
 
 def main_menu(self):
     '''
@@ -34,6 +32,9 @@ def main_menu(self):
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
         self.prev_menu = 2
+    elif self.prev_menu == 1:
+        # Clear game objects up to free memory
+        self.game.clean_up()
 
     # Render the Main Menu text
     _ = self.render_button("Main Menu", 8, (255, 0, 0))
