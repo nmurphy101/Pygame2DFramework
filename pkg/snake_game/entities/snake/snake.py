@@ -158,7 +158,6 @@ class Snake(Entity):
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_position = self.position
-            print(f"Direction: {self.direction}")
             # Moving up
             if self.direction == 0:
                 self.prev_direction = self.direction
@@ -242,6 +241,7 @@ class TailSegment(Entity):
             self.prev_position = self.position
             # located where the ahead obj was last
             self.position = self.ahead_obj.prev_position
+            self.rect.topleft = self.position
             # Render the tail segment based on it's parameters
             screen.blit(self.image, self.position)
 

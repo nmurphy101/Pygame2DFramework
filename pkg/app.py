@@ -63,6 +63,16 @@ class App():
             UI_1, UI_2, UI_3
         ]
         self.ui_sound_options = {}
+        # event = None
+        # menu = None
+        self.event_options = {
+            QUIT: lambda **kwargs: self.quit(**kwargs),
+            NEXT: lambda **kwargs: self.next_music(**kwargs),
+            WINDOWFOCUSGAINED: lambda **kwargs: self.window_focus(focus=False, **kwargs),
+            WINDOWFOCUSLOST: lambda **kwargs: self.window_focus(focus=True, **kwargs),
+            KEYDOWN: lambda **kwargs: self.key_down(**kwargs),
+            MOUSEBUTTONDOWN: lambda **kwargs: self.mouse_down(**kwargs),
+        }
 
     def run(self):
         '''
@@ -141,26 +151,21 @@ class App():
         event_checks for the game
         '''
         for event in pygame.event.get():
-            decision_func = {
-                QUIT: self.quit,
-                NEXT: self.next_music,
-                WINDOWFOCUSGAINED: lambda: self.window_focus(False),
-                WINDOWFOCUSLOST: lambda: self.window_focus(True),
-                KEYDOWN: lambda event=event: self.key_down(event),
-                MOUSEBUTTONDOWN: lambda event=event, menu=menu: self.mouse_down(event, menu),
-            }.get(event.type)
+            # Possible event options:
+            # QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,  KEYDOWN, MOUSEBUTTONDOWN,
+            decision_func = self.event_options.get(event.type)
             if decision_func:
-                decision_func()
+                decision_func(event=event, menu=menu)
 
-    def quit(self):
+    def quit(self, **_):
         self.running = False
 
-    def window_focus(self, choice):
-        self.game.focus_pause = choice
+    def window_focus(self, focus, **_):
+        self.game.focus_pause = focus
 
-    def key_down(self, event):
+    def key_down(self, **kwargs):
         # Pressed escape to pause/unpause/back
-        if event.key == K_ESCAPE:
+        if kwargs["event"].key == K_ESCAPE:
             # If not game over
             if self.game.menu.menu_option != 3:
                 self.play_ui_sound(1)
@@ -174,15 +179,15 @@ class App():
             else:
                 self.game.start()
 
-    def mouse_down(self, event, menu):
-        if menu:
-            for button in menu:
-                if button[0].collidepoint(event.pos):
+    def mouse_down(self, **kwargs):
+        if kwargs["menu"]:
+            for button in kwargs["menu"]:
+                if button[0].collidepoint(kwargs["event"].pos):
                     self.play_menu_sound(button)
                     self.game.menu.prev_menu = button[2]
                     button[1]()
 
-    def next_music(self):
+    def next_music(self, **_):
         # If not game over
         if self.game.menu.menu_option != 3:
             # Get next track (modulo number of tracks)
