@@ -21,7 +21,6 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
-from ...ai.ai import DecisionBox
 # pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0

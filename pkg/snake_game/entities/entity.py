@@ -137,10 +137,12 @@ class Entity(Sprite):
             # Kill self
             self.alive = False
             self.position = self.death_position
+            self.rect.topleft = self.position
             if self.children:
                 for child in self.children:
                     child.alive = False
-                    child.position = ()
+                    child.position = self.death_position
+                    child.rect.topleft = child.position
 
     def collision_checks(self):
         '''
@@ -215,16 +217,12 @@ class Entity(Sprite):
             # print(f"{obj.ID} has children {obj.children}")
             for child in obj.children:
                 if pygame.sprite.collide_rect(self, child):
-                    # if self.secondary_target == child.position:
-                    #     self.secondary_target = None
-                    print(f"----{self.ID} Interacting with child 1 {child.ID}-----")
-                    print(f"child pos: {child.tail_pos}/{len(obj.children)}")
+                    if self.secondary_target == child.position:
+                        self.secondary_target = None
+                    # print(f"----{self.ID} Interacting with child 1 {child.ID}-----")
+                    # print(f"child pos: {child.tail_pos}/{len(obj.children)}")
                     child.interact(self)
                     return True
-                elif self.rect.colliderect(child.rect):
-                    print(f"----{self.ID} Interacting with child 3 {child.ID}-----")
-
-            # print(self.ID, " Not interacting with child ", child.ID)
         return False
 
     def set_random_spawn(self, obj_container):

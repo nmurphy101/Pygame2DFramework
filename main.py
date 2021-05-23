@@ -17,12 +17,10 @@ __version__ = '1.0.0-alpha'
 # from tkinter import Tk
 # from multiprocessing import Manager
 # from multiprocessing import freeze_support
-import sys
 import io
 import pstats
 import cProfile
 from functools import wraps
-import pygame
 from pkg.snake_game.game import SnakeGame
 from pkg.app import App
 

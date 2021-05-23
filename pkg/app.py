@@ -24,7 +24,7 @@ import gc
 import pygame
 # pylint: disable=no-name-in-module
 from pygame import (
-    freetype, init, mixer
+    init, mixer
 )
 from pygame.constants import (
     QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
