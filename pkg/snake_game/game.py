@@ -138,22 +138,22 @@ class SnakeGame():
         self.chosen_ai = DecisionBox()
         # Initilize game objects
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
-        food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
-        # player_snake.movement = 1
+        # player_snake.movement = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.movement = 1
-        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake2.movement = 1
-        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        enemy_snake.movement = 2
+        # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # enemy_snake2.movement = 1
+        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         self.obj_container = [ # Order of these objects actually matter
             food,
-            food2,
-            tele_portal,
+            # food2,
+            # tele_portal,
             # player_snake,
             enemy_snake,
-            enemy_snake2,
+            # enemy_snake2,
         ]
         # Sprite Group obj
         for obj in self.obj_container:

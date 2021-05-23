@@ -11,6 +11,8 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+import random
+import math
 from datetime import datetime
 import uuid
 import pygame
@@ -24,6 +26,7 @@ class Entity(Sprite):
     base obj for all entities
     '''
     def __init__(self, alpha_screen, screen, screen_size, name, app):
+        pygame.sprite.Sprite.__init__(self)
         # Base game obj
         self.app = app
         # Unique identifier
@@ -42,13 +45,11 @@ class Entity(Sprite):
         # Score this entity has accumulated
         self.score = 0
         # Where the entity was located
-        self.prev_pos_x = -20
-        self.prev_pos_y = -20
+        self.prev_position = (-20, -20)
         # Size of the game screen
         self.screen_size = screen_size
         # Where the entity is located
-        self.pos_x = -20
-        self.pos_y = -20
+        self.position = (-20, -20)
         # How big entity is
         self.size = 16
         # How fast the entity can move per loop-tick
@@ -63,15 +64,15 @@ class Entity(Sprite):
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight = 2 * self.size
         # Obj pos/size  = (left, top, width, height)
-        self.obj = (self.pos_x, self.pos_y, self.size+8, self.size)
-        self.death_obj = (-10000*10000, -10000*10000, 0, 0)
+        self.obj = (self.position[0], self.position[1], self.size+8, self.size)
+        self.death_position = (-10000*10000, -10000*10000)
         # RGB color = pink default
         self.obj_color = (255,105,180)
         # Entity's visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
         # Entity is a rectangle object
-        self.rect = self.image.get_rect(topleft=(self.pos_x, self.pos_y))
+        self.rect = self.image.get_rect(topleft=self.position)
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
@@ -97,40 +98,30 @@ class Entity(Sprite):
         draw does stuff
         '''
         if self.alive:
-            # Draw each child if there are any
-            if self.children:
-                for child in self.children:
-                    child.draw(screen, obj_container)
             # obj pos/size  = (left, top, width, height)
-            self.obj = (self.pos_x, self.pos_y, self.size, self.size)
+            self.obj = (self.position[0], self.position[1], self.size, self.size)
             # Render the entity's obj based on it's parameters
-            self.rect.topleft = (self.pos_x, self.pos_y)
+            self.rect.topleft = self.position
             screen.blit(self.image, self.position)
             # Render the entity's sight lines
             for line in self.sight_lines:
                 line.draw(self)
+            # Draw each child if there are any
+            if self.children:
+                for child in self.children:
+                    child.draw(screen, obj_container)
 
-    def interact(self, obj1):
-        pass
-
-    def interact_children(self, obj1):
-        i = 0
-        if self.children:
-            for child in self.children:
-                if child.alive:
-                    if obj1.rect.colliderect(child):
-                        if obj1.killable:
-                            print("Child collision")
-                            # Play obj1 death sound
-                            sound = obj1.sound_death
-                            self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-                            sound.set_volume(obj1.sound_death_volume)
-                            pygame.mixer.Sound.play(sound)
-                            # Loose the game if obj1 is the player
-                            if obj1.player:
-                                self.app.game.menu.menu_option = 3
-                            # Kill obj1
-                            obj1.alive = False
+    def interact(self, interacting_obj):
+        # Play interacting_obj death sound
+        sound = interacting_obj.sound_death
+        interacting_obj.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        sound.set_volume(interacting_obj.sound_death_volume)
+        pygame.mixer.Sound.play(sound)
+        # Loose the game if interacting_obj is the player
+        if interacting_obj.player:
+            self.app.game.menu.menu_option = 3
+        # Kill interacting_obj
+        interacting_obj.die(f"collided with {self.ID} and died")
 
     def die(self, death_reason):
         if self.killable:
@@ -145,11 +136,11 @@ class Entity(Sprite):
                 self.app.game.menu.menu_option = 3
             # Kill self
             self.alive = False
-            self.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
+            self.position = self.death_position
             if self.children:
                 for child in self.children:
                     child.alive = False
-                    child.rect = pygame.draw.rect(self.screen, self.obj_color, self.death_obj)
+                    child.position = ()
 
     def collision_checks(self):
         '''
@@ -162,14 +153,18 @@ class Entity(Sprite):
         for obj in self.app.game.obj_container:
             # Make sure not checking collision with dead obj's
             if self.alive and obj.alive:
-                # Make sure not checking collision with self
-                if self != obj:
-                    # Collision check between obj and other obj
-                    self.check_obj_to_obj_collision(obj)
-                    # Screen edge collision check
-                    self.check_edge_collision()
-                # Collision check between self and obj's children even if self=obj
-                obj.interact_children(self)
+                collision = False
+                while not collision: # Allow for early termination of checks
+                    # Make sure not checking collision with self
+                    if self != obj:
+                        # Collision check between self and other obj
+                        collision = self.check_obj_collision(obj)
+                        # Screen edge collision check
+                        collision = self.check_edge_collision()
+                    # Collision check between self and obj's children even if self=obj
+                    collision = self.check_child_collision(obj)
+                    # Always exit the while loop at the end
+                    collision = True
 
     def check_edge_collision(self):
         '''
@@ -179,28 +174,108 @@ class Entity(Sprite):
         Check for self collision/interaction to the edge of the screen
         '''
         # Collision check for edge of screen (Right and Bottom)
-        if (self.pos_x > self.screen_size[0]-self.size) or (
-                self.pos_y > self.screen_size[1]-self.size):
+        if (self.position[0] > self.screen_size[0]-self.size) or (
+                self.position[1] > self.screen_size[1]-self.size):
             self.die("Edge of screen")
+            return True
         # Collision check for edge of screen (Left and Top)
-        elif self.pos_x < 0 or self.pos_y < 0:
+        elif self.position[0] < 0 or self.position[1] < 0:
             self.die("Edge of screen")
+            return True
+        return False
 
-    def check_obj_to_obj_collision(self, obj2):
+    def check_obj_collision(self, obj):
         '''
-        check_obj_to_obj_collision
+        check_obj_collision
         ~~~~~~~~~~
 
-        Check for obj1 to obj2 collision/interaction
+        Check for self to other obj collision/interaction
         '''
-        # Collision check between obj1 and other obj2
-        if self.rect.colliderect(obj2):
-            if self.secondary_target:
+        # Collision check between self and other obj
+        if pygame.sprite.collide_rect(self, obj):
+            if self.secondary_target == obj.position:
                 self.secondary_target = None
+            # print(self.ID, " Interacting with obj ", obj.ID)
+            # Do obj's interaction method
+            obj.interact(self)
+            return True
 
-            # print(self, " Interacting with ", obj2)
-            # Do obj2's interaction method
-            obj2.interact(self)
+
+        return False
+
+    def check_child_collision(self, obj):
+        '''
+        check_child_collision
+        ~~~~~~~~~~
+
+        Check for self to other obj's child collision/interaction
+        '''
+        # Collision check between self and other obj's child
+        if obj.children:
+            # print(f"{obj.ID} has children {obj.children}")
+            for child in obj.children:
+                if pygame.sprite.collide_rect(self, child):
+                    # if self.secondary_target == child.position:
+                    #     self.secondary_target = None
+                    print(f"----{self.ID} Interacting with child 1 {child.ID}-----")
+                    print(f"child pos: {child.tail_pos}/{len(obj.children)}")
+                    child.interact(self)
+                    return True
+                elif self.rect.colliderect(child.rect):
+                    print(f"----{self.ID} Interacting with child 3 {child.ID}-----")
+
+            # print(self.ID, " Not interacting with child ", child.ID)
+        return False
+
+    def set_random_spawn(self, obj_container):
+        '''
+        set_random_spawn
+        ~~~~~~~~~~
+
+        Check for a random spawn location and if it's taken already
+        '''
+        found_spawn = False
+        # pylint: enable=access-member-before-definition
+        while not found_spawn:
+            # Where the food is located
+            x = self.screen_size[0] - random.randrange(
+                self.size*5, self.screen_size[0] - self.size * 5, self.size
+            )
+            y = self.screen_size[1] - random.randrange(
+                self.size*5, self.screen_size[1] - self.size * 5, self.size
+            )
+            self.position = (x, y)
+
+            # Check if the chosen random spawn location is taken
+            taken = False
+            for obj in obj_container:
+                if obj != self: # don't check self
+                    if self.position == obj.position:
+                        taken = True
+                        break
+                    elif obj.children:
+                        for child in obj.children:
+                            if self.position == child.position:
+                                taken = True
+                                break
+                    if taken == True:
+                        break
+            if taken == True:
+                continue
+            self.rect = self.image.get_rect(topleft=self.position)
+            found_spawn = True
+
+    def aquire_primary_target(self, target_name):
+        primary_target = (None, 10000*100000)
+        for obj in self.app.game.obj_container:
+            if target_name in obj.ID:
+                dist_self = math.hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
+                if dist_self < primary_target[1]:
+                    primary_target = (obj, dist_self)
+        self.target = (primary_target[0].position[0], primary_target[0].position[1])
+        self.direction = self.app.game.chosen_ai.decide_direction(
+            self, self.target, self.app.game.obj_container, difficulty=0
+        )
 
     def grow(self, eaten_obj):
         pass
@@ -212,9 +287,6 @@ class Entity(Sprite):
         pass
 
     def move(self):
-        pass
-
-    def aquire_primary_target(self, target_name):
         pass
 
     def spawn(self, obj_container):
@@ -245,8 +317,12 @@ class Line():
         }.get(self.direction)
         # Run the chosen line to draw
         draw_line()
+        if self.opasity == 0:
+            chosen_screen = entity.alpha_screen
+        else :
+            chosen_screen = entity.screen
         self.rect = pygame.draw.line(
-            entity.alpha_screen,
+            chosen_screen,
             self.color,
             entity.rect.center,
             self.end,
@@ -270,8 +346,12 @@ class Line():
         # Run the chosen line to draw
         draw_line()
         # Draw the line representing the rect
+        if self.opasity == 0:
+            chosen_screen = entity.alpha_screen
+        else :
+            chosen_screen = entity.screen
         self.rect = pygame.draw.line(
-            entity.alpha_screen,
+            chosen_screen,
             self.color,
             entity.rect.center,
             self.end,

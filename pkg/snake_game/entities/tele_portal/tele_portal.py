@@ -39,14 +39,20 @@ class TelePortal(Entity):
         # When obj should be spawned
         self.spawn_timer = datetime.now() #+ timedelta(seconds=random.randint(1, 5))
         # Where the portal is located
-        self.pos_x = self.screen_size[0] - random.randrange(
+        x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
         )
-        self.pos_y = self.screen_size[1] - random.randrange(
+        y = self.screen_size[1] - random.randrange(
             16, self.screen_size[1], 16
         )
+        self.position = (x, y)
         # TelePortal color = blue
         self.obj_color = (0, 0, 255)
+        # Entity's visual representation
+        self.image = pygame.Surface((self.size, self.size))
+        self.image.fill(self.obj_color)
+        # Entity is a rectangle object
+        self.rect = self.image.get_rect(topleft=self.position)
         # Interact sound
         self.sound_interact = self.app.game.sounds[2]
         self.sound_mod = 2.5
@@ -72,16 +78,17 @@ class TelePortal(Entity):
             # pylint: enable=access-member-before-definition
             while not found_spawn:
                 # Where the portal is located
-                self.pos_x = self.screen_size[0] - random.randrange(
+                x = self.screen_size[0] - random.randrange(
                     self.size*5, self.screen_size[0] - self.size * 5, self.size
                 )
-                self.pos_y = self.screen_size[1] - random.randrange(
+                y = self.screen_size[1] - random.randrange(
                     self.size*5, self.screen_size[1] - self.size * 5, self.size
                 )
+                self.position = (x, y)
 
                 # Check if the chosen random spawn location is taken
                 for oth_obj in obj_container:
-                    collision_bool = self.rect.collidepoint(self.pos_x, self.pos_y)
+                    collision_bool = self.rect.collidepoint(self.position[0], self.position[1])
 
                     if collision_bool:
                         break
@@ -105,25 +112,23 @@ class TelePortal(Entity):
                 child.spawn(obj_container)
 
 
-    def teleport(self, oth_obj):
+    def teleport(self, obj):
         '''
         teleport
         ~~~~~~~~~~
 
         teleport does stuff
         '''
-        # Is the parent portal
-        if self.parent is None:
-            # move obj to the child portal
-            oth_obj.pos_x = self.children[0].pos_x
-            oth_obj.pos_y = self.children[0].pos_y
-            self.children[0].activated = datetime.now()
-        # Is the child portal
-        else:
+        # Is the child portal cuz has a parent
+        if self.parent:
             # move obj to the parent portal
-            oth_obj.pos_x = self.parent.pos_x
-            oth_obj.pos_y = self.parent.pos_y
+            obj.position = (self.parent.position[0], self.parent.position[1])
             self.parent.activated = datetime.now()
+        # Is the parent portal cuz doesn't have a parent
+        else:
+            # move obj to the child portal
+            obj.position = (self.children[0].position[0], self.children[0].position[1])
+            self.children[0].activated = datetime.now()
 
         self.activated = datetime.now()
 

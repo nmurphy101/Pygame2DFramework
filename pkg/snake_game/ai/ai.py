@@ -44,14 +44,14 @@ class DecisionBox:
         # print("Simple Intent Chosen")
         intent = None
         # Equal, Right, or left  Intent
-        if entity.pos_x < target[0]:
+        if entity.position[0] < target[0]:
             intent = 1
-        elif entity.pos_x > target[0]:
+        elif entity.position[0] > target[0]:
             intent = 3
         # Equal, down, or up  Intent
-        elif entity.pos_y < target[1]:
+        elif entity.position[1] < target[1]:
             intent = 2
-        elif entity.pos_y > target[1]:
+        elif entity.position[1] > target[1]:
             intent = 0
 
         intent = self.check_intent(entity, intent)
@@ -65,30 +65,30 @@ class DecisionBox:
         intent = None
         if not entity.secondary_target:
             # Equal, Right, or left  Intent
-            if entity.pos_x < target[0]:
+            if entity.position[0] < target[0]:
                 intent = 1
-            elif entity.pos_x > target[0]:
+            elif entity.position[0] > target[0]:
                 intent = 3
             # Equal, down, or up  Intent
-            elif entity.pos_y < target[1]:
+            elif entity.position[1] < target[1]:
                 intent = 2
-            elif entity.pos_y > target[1]:
+            elif entity.position[1] > target[1]:
                 intent = 0
         else:
             # Equal, Right, or left  Intent
-            if entity.pos_x < entity.secondary_target[0]:
+            if entity.position[0] < entity.secondary_target[0]:
                 intent = 1
-            elif entity.pos_x > entity.secondary_target[0]:
+            elif entity.position[0] > entity.secondary_target[0]:
                 intent = 3
             # Equal, down, or up  Intent
-            elif entity.pos_y < entity.secondary_target[1]:
+            elif entity.position[1] < entity.secondary_target[1]:
                 intent = 2
-            elif entity.pos_y > entity.secondary_target[1]:
+            elif entity.position[1] > entity.secondary_target[1]:
                 intent = 0
 
         intent = self.check_intent(entity, intent)
 
-        # print("Got simple intent")
+        # print("Got situational intent")
 
         return intent
 
@@ -98,9 +98,9 @@ class DecisionBox:
             self.reset_sight_lines(entity)
             for obj in self.obj_container:
                 # Ignore the target object
-                if entity.target != (obj.pos_x, obj.pos_y):
+                if entity.target != obj.position:
                 # if "food" not in obj.name:
-                    # Check if object obstructs entity
+                    # Check if object obstructs entity (and isn't self)
                     if obj != entity:
                         self.verify_sight_lines(obj, entity)
                         intent = self.get_intent(intent, entity)
@@ -121,14 +121,14 @@ class DecisionBox:
             # Edge of screen detection
             if line.direction == 0 and line.end[1] < 0 - entity.size:
                 line.open = False
-            elif line.direction == 3 and line.end[1] < 0 - entity.size:
-                line.open = False
             elif line.direction == 2 and line.end[1] > entity.screen_size[1] + entity.size:
+                line.open = False
+            elif line.direction == 3 and line.end[1] < 0 - entity.size:
                 line.open = False
             elif line.direction == 1 and line.end[1] > entity.screen_size[0] + entity.size:
                 line.open = False
             # Check the sight lines for a open direction
-            if obj.rect.colliderect(line):
+            if pygame.sprite.collide_rect(obj, line):
                 # Will Ai see and use portals?
                 if self.difficulty >= self.portal_use_difficulty:
                     line.open = self.decide_portal(obj, entity)
@@ -192,24 +192,24 @@ class DecisionBox:
     def decide_portal(self, obj, entity):
         if "TelePortal" in obj.name:
             if obj.parent:
-                dist_oth_portal = math.hypot(entity.target[0] - obj.parent.pos_x, entity.target[1] - obj.parent.pos_y)
-                dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
+                dist_oth_portal = math.hypot(entity.target[0] - obj.parent.position[0], entity.target[1] - obj.parent.position[1])
+                dist_self = math.hypot(entity.target[0] - entity.position[0], entity.target[1] - entity.position[1])
                 if dist_oth_portal < dist_self:
                     if entity.secondary_target:
                         return True
                     else:
-                        entity.secondary_target = (obj.pos_x, obj.pos_y)
+                        entity.secondary_target = obj.position
                         self.situational_intent(entity, entity.target)
                 else:
                     return False
             else:
-                dist_oth_portal = math.hypot(entity.target[0] - obj.children[0].pos_x, entity.target[1] - obj.children[0].pos_y)
-                dist_self = math.hypot(entity.target[0] - entity.pos_x, entity.target[1] - entity.pos_y)
+                dist_oth_portal = math.hypot(entity.target[0] - obj.children[0].position[0], entity.target[1] - obj.children[0].position[1])
+                dist_self = math.hypot(entity.target[0] - entity.position[0], entity.target[1] - entity.position[1])
                 if dist_oth_portal < dist_self:
                     if entity.secondary_target:
                         return True
                     else:
-                        entity.secondary_target = (obj.pos_x, obj.pos_y)
+                        entity.secondary_target = obj.position
                         self.situational_intent(entity, entity.target)
                 else:
                     return False

@@ -31,14 +31,20 @@ class Food(Entity):
         # Initilize parent init
         super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Where the food is located
-        self.pos_x = self.screen_size[0] - random.randrange(
+        x = self.screen_size[0] - random.randrange(
             16, self.screen_size[0], 16
         )
-        self.pos_y = self.screen_size[1] - random.randrange(
+        y = self.screen_size[1] - random.randrange(
             16, self.screen_size[1], 16
         )
+        self.position = (x, y)
         # Food color = green
         self.obj_color = (0, 255, 0)
+        # Entity's visual representation
+        self.image = pygame.Surface((self.size, self.size))
+        self.image.fill(self.obj_color)
+        # Entity is a rectangle object
+        self.rect = self.image.get_rect(topleft=self.position)
         # How much an obj grows from eating this food
         self.growth = 5
         # Point value of the food
@@ -51,7 +57,6 @@ class Food(Entity):
         self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         self.children = None
 
-
     def spawn(self, obj_container):
         '''
         spawn
@@ -59,29 +64,9 @@ class Food(Entity):
 
         spawn does stuff
         '''
-        found_spawn = False
         # pylint: disable=access-member-before-definition
         if not self.alive:
-            # pylint: enable=access-member-before-definition
-            while not found_spawn:
-                # Where the food is located
-                self.pos_x = self.screen_size[0] - random.randrange(
-                    self.size*5, self.screen_size[0] - self.size * 5, self.size
-                )
-                self.pos_y = self.screen_size[1] - random.randrange(
-                    self.size*5, self.screen_size[1] - self.size * 5, self.size
-                )
-
-                # Check if the chosen random spawn location is taken
-                for obj in obj_container:
-                    collision_bool = self.rect.collidepoint(self.pos_x, self.pos_y)
-                    if collision_bool:
-                        break
-                    elif obj.children:
-                            self.rect.collidelist(obj.children)
-
-                found_spawn = True
-
+            self.set_random_spawn(obj_container)
             self.alive = True
 
     def interact(self, obj1):
