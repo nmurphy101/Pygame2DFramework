@@ -35,6 +35,8 @@ class Entity(Sprite):
         self.alive = False
         # Determines if entity can be killed
         self.killable = True
+        # Entity is a child/follower in a train of same children
+        self.child_train = False
         # Entity ability cooldown timer
         self.abilty_cooldown = 1
         # Entity is player
@@ -88,7 +90,7 @@ class Entity(Sprite):
         self.target = None
         self.secondary_target = None
         # children list
-        self.children = []
+        self.children = pygame.sprite.OrderedUpdates()
 
     def update(self):
 
@@ -114,8 +116,18 @@ class Entity(Sprite):
                 line.draw(self)
             # Draw each child if there are any
             if self.children:
-                for child in self.children:
-                    child.draw(screen, obj_container)
+                if self.child_train:
+                    last_child = self.children.sprites()[-1]
+                    print(f"{last_child.ID}, {last_child.tail_pos}/{len(self.children)}")
+                    last_child.update()
+                    self.children.remove(last_child)
+                    self.children.add(last_child)
+                    dirty_rects = self.children.draw(screen)
+                    pygame.display.update(dirty_rects)
+                else:
+                    for child in self.children:
+                        child.draw(screen, obj_container)
+
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

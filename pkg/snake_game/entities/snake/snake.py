@@ -71,14 +71,16 @@ class Snake(Entity):
         self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
+        # Entity's children/followers in a train of same children objs
+        self.child_train = True
         # Number of tail segments
         self.num_tails = 5
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self.ID, player=self.player))
+                self.children.add(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
             else:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, self.ID, player=self.player))
+                self.children.add(TailSegment(alpha_screen, screen, screen_size, app, self.children.sprites()[pos-1], pos, self, player=self.player))
 
     def grow(self, eaten_obj):
         '''
@@ -95,13 +97,13 @@ class Snake(Entity):
                     self.screen,
                     self.screen_size,
                     self.app,
-                    self.children[self.num_tails - 1],
+                    self.children.sprites()[self.num_tails - 1],
                     self.num_tails + 1,
-                    parent_id = self.ID,
+                    parent = self,
                     player=self.player,
                 )
                 tail.player = self.player
-                self.children.append(tail)
+                self.children.add(tail)
                 self.num_tails += 1
 
     def up_score(self, eaten_obj):
@@ -184,7 +186,7 @@ class TailSegment(Entity):
 
     Tail Segment for the snake
     '''
-    def __init__(self, alpha_screen, screen, screen_size, app, ahead_obj, tail_pos, parent_id, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, app, ahead_obj, tail_pos, parent, player=False):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
@@ -192,7 +194,7 @@ class TailSegment(Entity):
         # Entity is dead or alive
         self.alive = True
         # Parent of this child
-        self.parent_id = parent_id
+        self.parent = parent
         # Is this a entity part of the player obj?
         self.player = player
         # Determines if entity can be killed
@@ -228,21 +230,21 @@ class TailSegment(Entity):
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
-    def draw(self, screen, _):
+    def update(self):
         '''
-        draw
+        update
         ~~~~~~~~~~
 
-        draw does stuff
+        update does stuff
         '''
         if self.alive:
             # Save current position as last position
             self.prev_position = self.position
-            # located where the ahead obj was last
-            self.position = self.ahead_obj.prev_position
+            # located where the parent obj was last
+            self.position = self.parent.prev_position
             self.rect.topleft = self.position
             # Render the tail segment based on it's parameters
-            screen.blit(self.image, self.position)
+            # screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

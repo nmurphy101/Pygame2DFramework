@@ -59,6 +59,6 @@ def pause_menu(self):
         (return_obj, self.MainMenu, 1),
     ]
 
-    print(len(self.game.obj_container[2].children))
+    # print(len(self.game.obj_container[2].children))
 
     return menu

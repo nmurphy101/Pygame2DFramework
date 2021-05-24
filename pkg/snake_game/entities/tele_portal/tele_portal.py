@@ -63,7 +63,7 @@ class TelePortal(Entity):
         self.sight_lines = []
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
-            self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
+            self.children.add(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
 
     def spawn(self, obj_container):
         '''
