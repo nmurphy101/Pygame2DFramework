@@ -27,14 +27,16 @@ def main_menu(self):
     self.root_menu = 0
 
     # Check settings if just left settings page
-    if self.prev_menu not in [1, 2]:
+
+    if self.prev_menu == 1:
+        # Clear game objects up to free memory
+        self.game.clean_up()
+    elif self.prev_menu not in [1, 2]:
         # Check the settings
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
         self.prev_menu = 2
-    elif self.prev_menu == 1:
-        # Clear game objects up to free memory
-        self.game.clean_up()
+
 
     # Render the Main Menu text
     _ = self.render_button("Main Menu", 8, (255, 0, 0))

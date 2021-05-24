@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 # cProfile file
-profile_dump
-profile.txt
+profile*

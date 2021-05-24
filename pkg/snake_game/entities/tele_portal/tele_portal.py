@@ -163,5 +163,5 @@ class TelePortal(Entity):
         interact_children does stuff
         '''
         for child in self.children:
-            if obj1.rect.colliderect(child):
+            if pygame.sprite.collide_rect(obj1, child):
                 child.interact(obj1)

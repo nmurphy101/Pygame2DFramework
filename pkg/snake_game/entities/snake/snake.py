@@ -57,7 +57,7 @@ class Snake(Entity):
         # How big snake parts are
         self.size = 16
         # How many moves the snake can make per second
-        self.movement = 2
+        self.speed_mod = 2
         # head color = red
         self.obj_color = (255, 0, 0)
         # Entity's visual representation
@@ -150,7 +150,7 @@ class Snake(Entity):
         move does stuff
         '''
         # pylint: disable=access-member-before-definition
-        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.movement) and self.alive:
+        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.alive:
             if not self.player:
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target("food")
@@ -245,10 +245,6 @@ class TailSegment(Entity):
             screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
-        # Skip the first tail segment for interaction with it's head
-        if interacting_obj.ID == self.parent_id and self.tail_pos == 0:
-            print(f"Avoiding hitting head")
-            return
         # Play interacting_obj death sound
         sound = interacting_obj.sound_death
         interacting_obj.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod

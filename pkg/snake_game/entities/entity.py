@@ -54,7 +54,7 @@ class Entity(Sprite):
         self.size = 16
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        self.movement = 1
+        self.speed_mod = 1
         self.base_speed = 30
         self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
@@ -64,7 +64,7 @@ class Entity(Sprite):
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight = 2 * self.size
         # Obj pos/size  = (left, top, width, height)
-        self.obj = (self.position[0], self.position[1], self.size+8, self.size)
+        # self.obj = (self.position[0], self.position[1], self.size+8, self.size)
         self.death_position = (-10000*10000, -10000*10000)
         # RGB color = pink default
         self.obj_color = (255,105,180)
@@ -76,7 +76,7 @@ class Entity(Sprite):
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
-        self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Sight lines
         self.sight_lines = [
             Line(0, self),
@@ -90,6 +90,13 @@ class Entity(Sprite):
         # children list
         self.children = []
 
+    def update(self):
+
+        # try to choose a direction if self can
+        self.choose_direction()
+        # Try to move if self can
+        self.move()
+
     def draw(self, screen, obj_container):
         '''
         draw
@@ -98,10 +105,9 @@ class Entity(Sprite):
         draw does stuff
         '''
         if self.alive:
-            # obj pos/size  = (left, top, width, height)
-            self.obj = (self.position[0], self.position[1], self.size, self.size)
-            # Render the entity's obj based on it's parameters
+            # Set current position for hitbox
             self.rect.topleft = self.position
+            # Render the entity's obj based on it's parameters
             screen.blit(self.image, self.position)
             # Render the entity's sight lines
             for line in self.sight_lines:
@@ -136,13 +142,22 @@ class Entity(Sprite):
                 self.app.game.menu.menu_option = 3
             # Kill self
             self.alive = False
-            self.position = self.death_position
-            self.rect.topleft = self.position
-            if self.children:
-                for child in self.children:
-                    child.alive = False
-                    child.position = self.death_position
-                    child.rect.topleft = child.position
+            if "snake" in self.name:
+                # Kill self
+                self.alive = False
+                # "remove" the entity from the game
+                self.app.game.obj_container.remove(self)
+                self.app.game.sprite_group.remove(self)
+            else:
+                self.position = self.death_position
+                self.rect.topleft = self.position
+                if self.children:
+                    for child in self.children:
+                        # Kill child
+                        child.alive = False
+                        # "remove" the child from the game
+                        child.position = self.death_position
+                        child.rect.topleft = child.position
 
     def collision_checks(self):
         '''

@@ -20,6 +20,7 @@ __version__ = '1.0.0-alpha'
 import io
 import pstats
 import cProfile
+import pygame
 from functools import wraps
 from pkg.snake_game.game import SnakeGame
 from pkg.app import App
@@ -59,9 +60,8 @@ def main():
     # Run the loaded game
     game.run()
     #pylint: disable=no-member
-    #pylint: disable=no-member
-    # pygame.display.quit()
-    # pygame.quit()
+    pygame.display.quit()
+    pygame.quit()
     #pylint: enable=no-member
     # sys.exit()
     #pylint: enable=no-member

@@ -100,12 +100,10 @@ class SnakeGame():
             for obj in self.obj_container:
                 # try to spawn if obj can
                 obj.spawn(self.obj_container)
+                # take obj tick actions
+                obj.update()
                 # Draw game objects
                 obj.draw(self.screen, self.obj_container)
-                # try to choose a direction if obj can
-                obj.choose_direction()
-                # Try to move if obj can
-                obj.move()
                 # collision of obj to other objects/children-of-other-objs
                 obj.collision_checks()
             # The game loop FPS counter
@@ -114,7 +112,8 @@ class SnakeGame():
         else:
             # The game loop FPS counter
             self.app.update_fps()
-            # Show which ever menu option that has been chosen
+            # Show which ever menu option that has been chosen:
+            #   Main, Pause, Settings, GameOver, Display, Sound
             return self.menu.menu_options.get(self.menu.menu_option)()
 
     def start(self):
@@ -135,20 +134,21 @@ class SnakeGame():
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
-        # player_snake.movement = .75
+        # player_snake.speed_mod = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.movement = 3
-        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake2.movement = 3
-        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        enemy_snake.speed_mod = 20
+        enemy_snake.killable = False
+        # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # enemy_snake2.speed_mod = 3
+        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         self.obj_container = [ # Order of these objects actually matter
             food,
             food2,
-            tele_portal,
+            # tele_portal,
             # player_snake,
             enemy_snake,
-            enemy_snake2,
+            # enemy_snake2,
         ]
         # Sprite Group obj
         for obj in self.obj_container:
@@ -208,6 +208,7 @@ class SnakeGame():
 
         unpause does stuff
         '''
+        self.menu.prev_menu = self.menu.menu_option
         self.menu.menu_option = None
         self.pause_game_music = True
 

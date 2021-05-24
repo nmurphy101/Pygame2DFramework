@@ -20,15 +20,21 @@ Major:
     - Replace "if elif" logic with "dict.get()" where possible as seen here: - DONE
         - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
         - Make sure this is actually faster when the temp dict with lambdas have to constantly be remade...
-    - Impliment "dirty rect animation" for faster rendering seen here:
+    - Impliment "dirty rect animation" for faster rendering seen here: - NO
         - https://www.pygame.org/docs/tut/newbieguide.html
-    - Impliment list comprehensions like this:
+    - Impliment list comprehensions like this: - NO
         - https://www.python.org/dev/peps/pep-0202/
-    - Look into integrating OpenGL rendering for hardware acceleration
+    - Look into integrating OpenGL rendering for hardware acceleration - WIP Maybe...
+    - I can have about 2281 objects before game goes sub-60 fps, this needs improvement
+      - optimizing gc.collect, AI-verify_sight_lines, Sprite-collide_rect, display-flip, check_child_collision, draw
+        in that order will speed things up
+          - 2831 without gc.collect every loop
 10. Test the ai by making a maze for it to solve
 11. Impliment a stack obj for the menu "history"/navigation for consistant
     functionality for the esc key or mouse click on a button
-12. Make the game speed/logic dependent on the game timer not game frames
+12. Make the game speed/logic dependent on the game timer not game frames - DONE
+13. Child handling improvement
+    - Instead of moving each child in a train, move only the last child to the front where the head was last
 
 
 Minor:
@@ -43,7 +49,9 @@ Minor:
     a. Only does damage to hit section (tail segment or head)
     b. loose part of tail for taking damage
     c. die if hit in the head
-12. consumable-items/pick-ups in level
+12. consumable-items/pick-ups in level - WIP
+    a. food/score-increasing item - DONE
+    b. ????
 13. Level design
     a. Win condition to get to next level (probably reach a certain score)
     b. window shifts towards the direction of the edge of the window the player
@@ -53,6 +61,9 @@ Minor:
 14. Environmental effects - WIP
     a. wormhole/teleportation to different areas/challenges
         i. Teleport to other portal - DONE
+        ii. Teleport to other areas
+        iii. Teleport to challenge
+    b. ???
 15. AI needs upgrade
     a. AI can be improved by a few things:
         i. Utilize diagonal movement

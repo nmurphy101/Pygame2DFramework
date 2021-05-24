@@ -73,6 +73,7 @@ class App():
             KEYDOWN: lambda **kwargs: self.key_down(**kwargs),
             MOUSEBUTTONDOWN: lambda **kwargs: self.mouse_down(**kwargs),
         }
+        self.pause_menu_options = {}
 
     def run(self):
         '''
@@ -95,11 +96,11 @@ class App():
             # Gameplay logic this turn/tick
             menu = self.game.play()
             # Update the screen display
-            pygame.display.flip()
+            pygame.display.update()
             # System/window events to be checked
             self.event_checks(menu)
             # Free unreferenced memory
-            gc.collect()
+            # gc.collect()
 
     def set_window_settings(self):
         '''
@@ -122,11 +123,16 @@ class App():
         pygame.display.flip()
         # Instantiate the Game Obj
         self.game = self.game_pkg(alpha_screen, screen, self)
-        # Instatiate the ui sound options
+        # Instatiate options dict's
         self.ui_sound_options = {
             self.game.start: 2,
             self.game.quit_game: 1,
             self.game.unpause: 1,
+        }
+        self.pause_menu_options = {
+            0: self.game.menu.menu_option,
+            1: None,
+            None: 1,
         }
 
     def update_fps(self):
@@ -152,7 +158,7 @@ class App():
         '''
         for event in pygame.event.get():
             # Possible event options:
-            # QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,  KEYDOWN, MOUSEBUTTONDOWN,
+            #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,  KEYDOWN, MOUSEBUTTONDOWN,
             decision_func = self.event_options.get(event.type)
             if decision_func:
                 decision_func(event=event, menu=menu)
@@ -169,12 +175,9 @@ class App():
             # If not game over
             if self.game.menu.menu_option != 3:
                 self.play_ui_sound(1)
-                # If already paused
-                self.game.menu.menu_option = {
-                    0: self.game.menu.menu_option,
-                    1: None,
-                    None: 1,
-                }.get(self.game.menu.menu_option, self.game.menu.prev_menu)
+                # Either unpause or pause the game
+                self.game.menu.prev_menu = self.game.menu.menu_option
+                self.game.menu.menu_option = self.pause_menu_options.get(self.game.menu.menu_option, self.game.menu.prev_menu)
             # If game over
             else:
                 self.game.start()

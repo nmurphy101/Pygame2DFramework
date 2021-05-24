@@ -11,7 +11,7 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
+import gc
 
 
 def pause_menu(self):
@@ -21,10 +21,14 @@ def pause_menu(self):
 
     pause_menu does stuff
     '''
-
     # Make sure the right menu option is selected
     self.menu_option = 1
     self.root_menu = 1
+
+    if self.prev_menu == None:
+        # Free unreferenced memory
+        gc.collect()
+        self.prev_menu = 2
 
     # Pause game music
     self.game.pause_game_music = True
@@ -54,5 +58,7 @@ def pause_menu(self):
         (settings_obj, self.SettingsMenu, 1),
         (return_obj, self.MainMenu, 1),
     ]
+
+    print(len(self.game.obj_container[2].children))
 
     return menu

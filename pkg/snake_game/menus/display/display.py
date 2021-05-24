@@ -31,7 +31,7 @@ def display_menu(self):
     _ = self.render_button("Display", 10, (255, 0, 0))
 
     # Render the Return button
-    back_obj = self.render_button("Back", 8)
+    back_obj = self.render_button("Back", -8)
 
     menu = [
         (back_obj, self.SettingsMenu, 4),
