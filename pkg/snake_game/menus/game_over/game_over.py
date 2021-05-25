@@ -20,6 +20,8 @@ def game_over(self):
 
     game_over_menu does stuff
     '''
+    # Clear previous frame render
+    self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
     self.menu_option = 3
@@ -32,7 +34,7 @@ def game_over(self):
 
     # Get the player score
     score = "NA"
-    for obj in self.game.obj_container:
+    for obj in self.game.sprite_group.sprites():
         if obj.player:
             score = obj.score
     # Render the score

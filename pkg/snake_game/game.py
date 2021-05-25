@@ -76,7 +76,6 @@ class SnakeGame():
         # Game timer
         self.timer = None
         # Game object containers
-        self.obj_container = []
         self.sprite_group = pygame.sprite.Group()
         # AI blackbox
         self.chosen_ai = None
@@ -92,20 +91,27 @@ class SnakeGame():
         '''
 
         # Clear previous frame render
-        self.screen.fill((0, 0, 0, 0))
+        # self.screen.fill((0, 0, 0, 0))
 
         # Check if not in a menu
         if self.menu.menu_option is None:
             # Execute game object actions
-            for obj in self.obj_container:
-                # try to spawn if obj can
-                obj.spawn(self.obj_container)
+            for obj in self.sprite_group.sprites():
+                # Make sure to refresh coming out of pause_menu
+                if self.menu.prev_menu in [0, 1]:
+                    # Clear previous frame render
+                    self.screen.fill((0, 0, 0, 0))
+                    # Draw game objects
+                    obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
-                obj.update()
+                updated = obj.update(self.sprite_group.sprites())
                 # Draw game objects
-                obj.draw(self.screen, self.obj_container)
+                obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs
-                obj.collision_checks()
+                obj.collision_checks(updated)
+            # Only 1 tick to refresh from pause_menu
+            if self.menu.prev_menu in [0, 1]:
+                self.menu.prev_menu = None
             # The game loop FPS counter
             self.app.update_fps()
 
@@ -136,13 +142,13 @@ class SnakeGame():
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
         # player_snake.speed_mod = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.speed_mod = 1
+        enemy_snake.speed_mod = 60
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
         # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
-        self.obj_container = [ # Order of these objects actually matter
+        obj_container = [ # Order of these objects actually matter
             food,
             food2,
             # tele_portal,
@@ -151,7 +157,7 @@ class SnakeGame():
             # enemy_snake2,
         ]
         # Sprite Group obj
-        for obj in self.obj_container:
+        for obj in obj_container:
             self.sprite_group.add(obj)
         # Start the game timer
         self.timer = datetime.now()
@@ -168,7 +174,7 @@ class SnakeGame():
         # Game timer
         self.timer = None
         # Game object list
-        self.obj_container = []
+        self.sprite_group.empty()
         # AI blackbox
         self.chosen_ai = None
         # Menu Obj

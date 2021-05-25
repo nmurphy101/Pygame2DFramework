@@ -50,7 +50,7 @@ class Menu():
         }
 
     def MainMenu(self):
-       return main_menu(self)
+        return main_menu(self)
 
     def PauseMenu(self):
         return pause_menu(self)

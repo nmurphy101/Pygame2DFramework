@@ -20,7 +20,6 @@ def settings_menu(self):
     ~~~~~~~~~~
     settings_menu does stuff
     '''
-    print("out2: ", self.menu_option)
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 

@@ -1,9 +1,9 @@
 {
     "settings": {
         "sound": {
-            "music": true,
+            "music": false,
             "music_volume": "0.10000000000000007",
-            "effect_volume": "0.05000000000000007",
+            "effect_volume": "6.938893903907228e-17",
             "menu_volume": "0.05000000000000007"
         },
         "display": {

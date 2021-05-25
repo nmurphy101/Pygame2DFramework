@@ -21,6 +21,9 @@ def pause_menu(self):
 
     pause_menu does stuff
     '''
+    # Clear previous frame render
+    self.game.screen.fill((0, 0, 0, 0))
+
     # Make sure the right menu option is selected
     self.menu_option = 1
     self.root_menu = 1
@@ -38,7 +41,7 @@ def pause_menu(self):
 
     # Get the player score
     score = "NA"
-    for obj in self.game.obj_container:
+    for obj in self.game.sprite_group.sprites():
         if obj.player:
             score = obj.score
     # Render the score
@@ -59,6 +62,6 @@ def pause_menu(self):
         (return_obj, self.MainMenu, 1),
     ]
 
-    # print(len(self.game.obj_container[2].children))
+    print(len(self.game.sprite_group.sprites()[2].children))
 
     return menu

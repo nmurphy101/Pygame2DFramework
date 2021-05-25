@@ -78,9 +78,9 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.add(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
             else:
-                self.children.add(TailSegment(alpha_screen, screen, screen_size, app, self.children.sprites()[pos-1], pos, self, player=self.player))
+                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, self, player=self.player))
 
     def grow(self, eaten_obj):
         '''
@@ -97,14 +97,15 @@ class Snake(Entity):
                     self.screen,
                     self.screen_size,
                     self.app,
-                    self.children.sprites()[self.num_tails - 1],
+                    self.children[self.num_tails - 1],
                     self.num_tails + 1,
                     parent = self,
                     player=self.player,
                 )
                 tail.player = self.player
-                self.children.add(tail)
+                self.children.append(tail)
                 self.num_tails += 1
+
 
     def up_score(self, eaten_obj):
         '''
@@ -177,6 +178,10 @@ class Snake(Entity):
                 self.position = (self.position[0] + self.size, self.position[1])
             # Set the new last moved time
             self.time_last_moved = datetime.now()
+            # Entity updated
+            return True
+        # Entity didn't update
+        return False
 
 
 class TailSegment(Entity):
@@ -229,22 +234,41 @@ class TailSegment(Entity):
         self.image.fill(self.obj_color)
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
+        #
+        self.child_train = None
 
-    def update(self):
+    def draw(self, _):
         '''
-        update
+        draw
         ~~~~~~~~~~
 
-        update does stuff
+        draw does stuff
         '''
+        # render if alive
         if self.alive:
+            # Clear previous frame obj's location
+            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Save current position as last position
             self.prev_position = self.position
             # located where the parent obj was last
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
             # Render the tail segment based on it's parameters
-            # screen.blit(self.image, self.position)
+            self.screen.blit(self.image, self.position)
+            # Move the child to the front of the list
+            self.parent.children.rotate()
+
+    def refresh_draw(self, _):
+        '''
+        refresh_draw
+        ~~~~~~~~~~
+
+        refresh_draw does stuff
+        '''
+        # render if alive
+        if self.alive:
+            # Render the tail segment based on it's parameters
+            self.screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

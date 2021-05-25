@@ -136,6 +136,11 @@ class App():
         }
 
     def update_fps(self):
+        # Clear previous frame obj's location
+        self.game.screen.fill((0, 0, 0, 0), (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 545,
+                                              self.game.screen_size[1]/2 - self.game.game_font.size * 11.5,
+                                              250, 138)
+                                              )
         fps = str(int(self.clock.get_fps()))
         _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
         self.fps_list.append(int(fps))

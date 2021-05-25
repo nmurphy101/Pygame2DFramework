@@ -14,6 +14,7 @@
 import random
 import math
 from datetime import datetime
+from typing import Deque
 import uuid
 import pygame
 from pygame.sprite import Sprite
@@ -36,7 +37,7 @@ class Entity(Sprite):
         # Determines if entity can be killed
         self.killable = True
         # Entity is a child/follower in a train of same children
-        self.child_train = False
+        self.child_train = None
         # Entity ability cooldown timer
         self.abilty_cooldown = 1
         # Entity is player
@@ -64,7 +65,8 @@ class Entity(Sprite):
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
-        self.sight = 2 * self.size
+        self.sight_mod = 2
+        self.sight = self.sight_mod * self.size
         # Obj pos/size  = (left, top, width, height)
         # self.obj = (self.position[0], self.position[1], self.size+8, self.size)
         self.death_position = (-10000*10000, -10000*10000)
@@ -90,43 +92,44 @@ class Entity(Sprite):
         self.target = None
         self.secondary_target = None
         # children list
-        self.children = pygame.sprite.OrderedUpdates()
+        self.children = Deque()
 
-    def update(self):
-
-        # try to choose a direction if self can
+    def update(self, _):
+        # try to choose a direction if entity can
         self.choose_direction()
-        # Try to move if self can
-        self.move()
+        # Try to move if entity can
+        updated = self.move()
+        # Return if this entity updated since last tick
+        return updated
 
-    def draw(self, screen, obj_container):
+    def draw(self, obj_container, updated_refresh):
         '''
         draw
         ~~~~~~~~~~
 
         draw does stuff
         '''
-        if self.alive:
+        if self.alive and (updated_refresh[0] or updated_refresh[1]):
+            # Clear previous frame obj's location
+            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Set current position for hitbox
             self.rect.topleft = self.position
             # Render the entity's obj based on it's parameters
-            screen.blit(self.image, self.position)
+            self.screen.blit(self.image, self.position)
             # Render the entity's sight lines
             for line in self.sight_lines:
                 line.draw(self)
-            # Draw each child if there are any
-            if self.children:
-                if self.child_train:
-                    last_child = self.children.sprites()[-1]
-                    print(f"{last_child.ID}, {last_child.tail_pos}/{len(self.children)}")
-                    last_child.update()
-                    self.children.remove(last_child)
-                    self.children.add(last_child)
-                    dirty_rects = self.children.draw(screen)
-                    pygame.display.update(dirty_rects)
-                else:
-                    for child in self.children:
-                        child.draw(screen, obj_container)
+            # Draw all children on refresh or optimized one child per
+            if updated_refresh[1]:
+                print(f"refreshing children of {self.ID}")
+                # Draw each child if there are any
+                for child in self.children:
+                    child.refresh_draw(obj_container)
+            elif len(self.children) > 0:
+                # Only move/render the last tail segment
+                self.children[-1].draw(obj_container)
+                # for child in self.children:
+                #     child.refresh_draw(obj_container)
 
 
     def interact(self, interacting_obj):
@@ -158,7 +161,6 @@ class Entity(Sprite):
                 # Kill self
                 self.alive = False
                 # "remove" the entity from the game
-                self.app.game.obj_container.remove(self)
                 self.app.game.sprite_group.remove(self)
             else:
                 self.position = self.death_position
@@ -171,7 +173,7 @@ class Entity(Sprite):
                         child.position = self.death_position
                         child.rect.topleft = child.position
 
-    def collision_checks(self):
+    def collision_checks(self, updated):
         '''
         collision_checks
         ~~~~~~~~~~
@@ -179,13 +181,13 @@ class Entity(Sprite):
         collision_checks does stuff
         '''
         # Collision check for all entities
-        for obj in self.app.game.obj_container:
+        for obj in self.app.game.sprite_group.sprites():
             # Make sure not checking collision with dead obj's
             if self.alive and obj.alive:
                 collision = False
                 while not collision: # Allow for early termination of checks
                     # Make sure not checking collision with self
-                    if self != obj:
+                    if self != obj and updated:
                         # Collision check between self and other obj
                         collision = self.check_obj_collision(obj)
                         # Screen edge collision check
@@ -292,14 +294,14 @@ class Entity(Sprite):
 
     def aquire_primary_target(self, target_name):
         primary_target = (None, 10000*100000)
-        for obj in self.app.game.obj_container:
+        for obj in self.app.game.sprite_group.sprites():
             if target_name in obj.ID:
                 dist_self = math.hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
                 if dist_self < primary_target[1]:
                     primary_target = (obj, dist_self)
         self.target = (primary_target[0].position[0], primary_target[0].position[1])
         self.direction = self.app.game.chosen_ai.decide_direction(
-            self, self.target, self.app.game.obj_container, difficulty=0
+            self, self.target, self.app.game.sprite_group, difficulty=0
         )
 
     def grow(self, eaten_obj):
@@ -312,10 +314,10 @@ class Entity(Sprite):
         pass
 
     def move(self):
-        pass
+        return None
 
     def spawn(self, obj_container):
-        pass
+        return None
 
     def teleport(self, oth_obj):
         pass
@@ -361,6 +363,13 @@ class Line():
 
         draw does stuff
         '''
+        # Choose the screen to draw to
+        if self.opasity == 0:
+            chosen_screen = entity.alpha_screen
+        else :
+            chosen_screen = entity.screen
+        # Clear previous frame obj's location
+        chosen_screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
         # determine entity's sightline end point
         draw_line = {
             0: lambda: self.draw_up(entity),
@@ -371,10 +380,6 @@ class Line():
         # Run the chosen line to draw
         draw_line()
         # Draw the line representing the rect
-        if self.opasity == 0:
-            chosen_screen = entity.alpha_screen
-        else :
-            chosen_screen = entity.screen
         self.rect = pygame.draw.line(
             chosen_screen,
             self.color,

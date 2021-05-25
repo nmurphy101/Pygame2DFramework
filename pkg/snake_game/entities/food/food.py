@@ -55,7 +55,11 @@ class Food(Entity):
         self.sound_death = self.app.game.sounds[1]
         self.sound_mod = 1.5
         self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-        self.children = None
+
+    def update(self, obj_container):
+        # try to spawn if obj can
+        updated = self.spawn(obj_container)
+        return updated
 
     def spawn(self, obj_container):
         '''
@@ -68,6 +72,8 @@ class Food(Entity):
         if not self.alive:
             self.set_random_spawn(obj_container)
             self.alive = True
+            return True
+        return False
 
     def interact(self, obj1):
         # Grow obj1 and up obj1's score
