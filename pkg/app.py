@@ -110,14 +110,17 @@ class App():
             set_endevent(NEXT)
             # Gameplay logic this turn/tick
             menu, dirty_rects = play(update_fps)
-            if dirty_rects:
-                # Update the screen display
-                update(dirty_rects)
-                # reset loop variables
-                self.dirty_rects = []
-            elif menu:
-                # Update the screen display
-                update()
+            # TODO: Re-enable this code when the feature-bug-#3 is fixed
+            # if dirty_rects:
+            #     # Update the screen display
+            #     update(dirty_rects)
+            #     # reset loop variables
+            #     self.dirty_rects = []
+            # elif menu:
+            #     # Update the screen display
+            #     update()
+            # Update the screen display
+            update()
             # System/window events to be checked
             event_checks(menu, event_get)
             # Free unreferenced memory
