@@ -83,6 +83,11 @@ Minor:
         iii. Make current sightlines into actionlines and remake sightlines
              to be used for calculated decisions
 
+Future Ideas:
+1. impliment coyote-time for precision user inputs as seen here or input buffering:
+    - https://developer.amazon.com/blogs/appstore/post/9d2094ed-53cb-4a3a-a5cf-c7f34bca6cd3/coding-imprecise-controls-to-make-them-feel-more-precise
+    - though I already have input buffering every frame
+
 
 Bugs:
 1. can you move diagonally anymore????
@@ -90,7 +95,8 @@ Bugs:
    through a enemy thus appearing to "phase" through them without dying...
 3. Seems like the last tail segment isn't always the correct one to grab
     which must be why some random tail segments sometimes vanish before they should...
-
+4. FPS suffers when in a video call for some reason...
+   - might have to do with the sounds trying to be played?
 
 
 

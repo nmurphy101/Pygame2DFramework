@@ -77,6 +77,7 @@ class SnakeGame():
         self.timer = None
         # Game object containers
         self.sprite_group = pygame.sprite.Group()
+        self.dirty_rects = []
         # AI blackbox
         self.chosen_ai = None
         # Menu Obj
@@ -97,17 +98,20 @@ class SnakeGame():
         # Check if not in a menu
         if self.menu.menu_option is None:
             # eval func's only once before loops
-            fill = self.screen.fill
+            fill_screen = self.screen.fill
+            append_dirty_rects = self.dirty_rects.append
             # Execute game object actions
             for obj in self.sprite_group.sprites():
                 # Make sure to refresh coming out of pause_menu
                 if self.menu.prev_menu in [0, 1]:
                     # Clear previous frame render
-                    fill((0, 0, 0, 0))
+                    fill_screen((0, 0, 0, 0))
                     # Draw game objects
                     obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
                 updated = obj.update(self.sprite_group.sprites())
+                if updated or not obj.dirty_rect:
+                    append_dirty_rects(obj)
                 # Draw game objects
                 obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs
@@ -116,14 +120,15 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
             # The game loop FPS counter
-            update_fps()
+            append_dirty_rects(update_fps())
+            return None, self.dirty_rects
 
         else:
             # The game loop FPS counter
             update_fps()
             # Show which ever menu option that has been chosen:
             #   Main, Pause, Settings, GameOver, Display, Sound
-            return self.menu.menu_options.get(self.menu.menu_option)()
+            return self.menu.menu_options.get(self.menu.menu_option)(), None
 
     def start(self):
         '''
@@ -145,16 +150,16 @@ class SnakeGame():
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
         # player_snake.speed_mod = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.speed_mod = 60
+        enemy_snake.speed_mod = 10
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
-        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         obj_container = [ # Order of these objects actually matter
             food,
             food2,
-            tele_portal,
+            # tele_portal,
             # player_snake,
             enemy_snake,
             # enemy_snake2,

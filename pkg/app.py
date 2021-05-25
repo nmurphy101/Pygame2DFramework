@@ -47,6 +47,8 @@ class App():
         self.running = True
         self.fps = 1000
         self.fps_list = []
+        self.fps_pos = None
+        self.fps_rect = None
         self.clock = None
         self.screen_width = 1280
         self.screen_height = 720
@@ -63,6 +65,7 @@ class App():
             UI_1, UI_2, UI_3
         ]
         self.ui_sound_options = {}
+        self.pause_menu_options = {}
         # event = None
         # menu = None
         self.event_options = {
@@ -73,7 +76,11 @@ class App():
             KEYDOWN: lambda **kwargs: self.key_down(**kwargs),
             MOUSEBUTTONDOWN: lambda **kwargs: self.mouse_down(**kwargs),
         }
-        self.pause_menu_options = {}
+        events = []
+        for event in self.event_options.keys():
+            events.append(event)
+        # Limit the type of game events that can happen
+        pygame.event.set_allowed(events)
 
     def run(self):
         '''
@@ -102,9 +109,15 @@ class App():
             # Send event NEXT every time music tracks ends
             set_endevent(NEXT)
             # Gameplay logic this turn/tick
-            menu = play(update_fps)
-            # Update the screen display
-            update()
+            menu, dirty_rects = play(update_fps)
+            if dirty_rects:
+                # Update the screen display
+                update(dirty_rects)
+                # reset loop variables
+                self.dirty_rects = []
+            elif menu:
+                # Update the screen display
+                update()
             # System/window events to be checked
             event_checks(menu, event_get)
             # Free unreferenced memory
@@ -119,9 +132,9 @@ class App():
         '''
         # Game window settings
         background_colour = (0, 0, 0)
-        # flags = pygame.HWSURFACE | pygame.DOUBLEBUF
-        flags = 0
-        screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags)#, RESIZABLE)
+        flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN |
+        # flags = 0
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
         # screen.set_mode()
         alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
         alpha_screen.fill([0,0,0,0])
@@ -142,13 +155,14 @@ class App():
             1: None,
             None: 1,
         }
+        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 545,
+                        self.game.screen_size[1]/2 - self.game.game_font.size * 11.5,
+                        250, 138)
+        self.fps_rect = pygame.Rect(self.fps_pos)
 
     def update_fps(self):
         # Clear previous frame obj's location
-        self.game.screen.fill((0, 0, 0, 0), (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 545,
-                                              self.game.screen_size[1]/2 - self.game.game_font.size * 11.5,
-                                              250, 138)
-                                              )
+        self.game.screen.fill((0, 0, 0, 0), self.fps_pos)
         fps = str(int(self.clock.get_fps()))
         _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
         self.fps_list.append(int(fps))
@@ -161,6 +175,7 @@ class App():
         # High and low FPS
         _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 8.8, h_offset=565)
         _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 7.8, h_offset=565)
+        return self.fps_rect
 
     def event_checks(self, menu, event_get):
         '''

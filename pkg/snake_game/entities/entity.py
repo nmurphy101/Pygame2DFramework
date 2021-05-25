@@ -81,15 +81,19 @@ class Entity(Sprite):
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
         self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        # Dirty rect or not
+        self.dirty_rect = False
         # Sight lines
         self.sight_lines = [
             Line(0, self),
-            Line(.5, self),
             Line(1, self),
-            Line(1.5, self),
             Line(2, self),
-            Line(2.5, self),
             Line(3, self),
+        ]
+        self.sight_lines_diag = [
+            Line(.5, self),
+            Line(1.5, self),
+            Line(2.5, self),
             Line(3.5, self),
         ]
         # Pathfinding variables

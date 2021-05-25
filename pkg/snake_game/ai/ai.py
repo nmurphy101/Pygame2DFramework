@@ -65,6 +65,7 @@ class DecisionBox:
     def situational_intent(self, entity, target):
         # print("situational Intent Chosen")
         intent = None
+        # print(entity.secondary_target)
         if entity.secondary_target == None:
             # Equal, Right, or left  Intent
             if entity.position[0] < target[0]:
@@ -79,7 +80,6 @@ class DecisionBox:
         else:
             # Go for secondary target within timeframe
             if datetime.now() <= entity.since_secondary_target + timedelta(seconds=self.time_chase):
-                print("tracking secondary target")
                 # Equal, Right, or left  Intent
                 if entity.position[0] < entity.secondary_target[0]:
                     intent = 1
@@ -91,10 +91,16 @@ class DecisionBox:
                 elif entity.position[1] > entity.secondary_target[1]:
                     intent = 0
             else:
-                print("Giving up on secondary target")
-                # Give up on going for the secondary target
-                entity.secondary_target = None
-                self.situational_intent(entity, target)
+                # Equal, Right, or left  Intent
+                if entity.position[0] < target[0]:
+                    intent = 1
+                elif entity.position[0] > target[0]:
+                    intent = 3
+                # Equal, down, or up  Intent
+                elif entity.position[1] < target[1]:
+                    intent = 2
+                elif entity.position[1] > target[1]:
+                    intent = 0
 
         intent = self.check_intent(entity, intent)
 
@@ -113,7 +119,7 @@ class DecisionBox:
         situational_intent = self.situational_intent
         hypot = math.hypot
         # Loop to check intent
-        while True:
+        while 1:
             reset_sight_lines(entity)
             for obj in self.obj_container:
                 # Ignore the target object
@@ -138,13 +144,13 @@ class DecisionBox:
         # Verify intention with sight lines
         for line in entity.sight_lines:
             # Edge of screen detection
-            if line.direction == 0 and line.end[1] < 0 - entity.size:
+            if line.direction == 0 and line.end[1] <= 0:
                 line.open = False
-            elif line.direction == 2 and line.end[1] > entity.screen_size[1] + entity.size:
+            elif line.direction == 2 and line.end[1] >= entity.screen_size[1]:
                 line.open = False
-            elif line.direction == 3 and line.end[1] < 0 - entity.size:
+            elif line.direction == 3 and line.end[0] <= 0:
                 line.open = False
-            elif line.direction == 1 and line.end[1] > entity.screen_size[0] + entity.size:
+            elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
                 line.open = False
             # Check the sight lines for a open direction
             if collide_rect(obj, line):

@@ -71,6 +71,8 @@ class Snake(Entity):
         self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
+        # Dirty rect or not
+        self.dirty_rect = True
         # Entity's children/followers in a train of same children objs
         self.child_train = True
         # Number of tail segments
@@ -98,16 +100,21 @@ class Snake(Entity):
             self.rect.topleft = self.position
             # Render the entity's obj based on it's parameters
             self.screen.blit(self.image, self.position)
+            # eval func's only once before loop
+            draw = Line.draw
+            append_dirty_rects = self.app.game.dirty_rects.append
             # Render the entity's sight lines
-            draw = Line.draw # eval func only once
             for line in self.sight_lines:
                 draw(line, self)
             # Draw all children on refresh or optimized one child per
             if updated_refresh[1]:
                 # Draw each child if there are any
                 for child in self.children:
+                    append_dirty_rects(child)
                     child.refresh_draw()
             elif len(self.children) > 0 and self.child_train:
+                # Add this child to the dirty rects
+                append_dirty_rects(self.children[-1])
                 # Only move/render the last child to front of the train
                 self.children[-1].draw(obj_container, updated_refresh)
 
