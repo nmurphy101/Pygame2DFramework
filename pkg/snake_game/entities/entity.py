@@ -90,12 +90,12 @@ class Entity(Sprite):
             Line(2, self),
             Line(3, self),
         ]
-        self.sight_lines_diag = [
-            Line(.5, self),
-            Line(1.5, self),
-            Line(2.5, self),
-            Line(3.5, self),
-        ]
+        # self.sight_lines_diag = [
+        #     Line(.5, self),
+        #     Line(1.5, self),
+        #     Line(2.5, self),
+        #     Line(3.5, self),
+        # ]
         # Pathfinding variables
         self.target = None
         self.secondary_target = None
@@ -143,6 +143,8 @@ class Entity(Sprite):
         '''
         # render if alive
         if self.alive:
+            # place hitbox at position
+            self.rect.topleft = self.position
             # Render the entity based on it's parameters
             self.screen.blit(self.image, self.position)
 

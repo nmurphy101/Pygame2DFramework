@@ -137,6 +137,8 @@ class SnakeGame():
 
         start does stuff
         '''
+        # Clear previous frame render
+        self.screen.fill((0, 0, 0, 0))
         # Check settings
         self.settings_checks()
         # Starting variables
@@ -147,10 +149,11 @@ class SnakeGame():
         # Initilize game objects
         food = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         food2 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
+        # food3 = Food(self.alpha_screen, self.screen, self.screen_size, self.app)
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
         # player_snake.speed_mod = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.speed_mod = 10
+        enemy_snake.speed_mod = 60
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
@@ -159,6 +162,7 @@ class SnakeGame():
         obj_container = [ # Order of these objects actually matter
             food,
             food2,
+            # food3,
             # tele_portal,
             # player_snake,
             enemy_snake,

@@ -11,7 +11,9 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+
 import random
+from typing import Deque
 from datetime import datetime, timedelta
 import pygame
 # pylint: disable=no-name-in-module
@@ -81,9 +83,9 @@ class Snake(Entity):
         append = self.children.append # eval func only once
         for pos in range(self.num_tails+1):
             if pos == 0:
-                append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
+                append(TailSegment(alpha_screen, screen, screen_size, app, pos, self, player=self.player))
             else:
-                append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, self, player=self.player))
+                append(TailSegment(alpha_screen, screen, screen_size, app, pos, self, player=self.player))
 
     def draw(self, obj_container, updated_refresh):
         '''
@@ -127,21 +129,20 @@ class Snake(Entity):
         '''
         # Add a new tail segment
         if self.alive:
-            append = self.children.append # eval only once
+            new_tails = Deque()
             for _ in range(eaten_obj.growth):
                 tail = TailSegment(
                     self.alpha_screen,
                     self.screen,
                     self.screen_size,
                     self.app,
-                    self.children[self.num_tails - 1],
-                    self.num_tails + 1,
+                    1,
                     parent = self,
                     player=self.player,
                 )
-                tail.player = self.player
-                append(tail)
+                new_tails.append(tail)
                 self.num_tails += 1
+            self.children = self.children + new_tails
 
 
     def up_score(self, eaten_obj):
@@ -228,7 +229,7 @@ class TailSegment(Entity):
 
     Tail Segment for the snake
     '''
-    def __init__(self, alpha_screen, screen, screen_size, app, ahead_obj, tail_pos, parent, player=False):
+    def __init__(self, alpha_screen, screen, screen_size, app, tail_pos, parent, player=False):
         # Name for this type of object
         self.name = "tail-segment_"
         # Initilize parent init
@@ -241,23 +242,21 @@ class TailSegment(Entity):
         self.player = player
         # Determines if entity can be killed
         self.killable = False
-        # Obj ahead of this obj in the chain of tails/head
-        self.ahead_obj = ahead_obj
         # Position in the chain of tails/head
         self.tail_pos = tail_pos
         # Where the tail was/is located
-        prev_x = ahead_obj.position[0] # was
-        prev_y = None
-        x = ahead_obj.prev_position[0] # is
-        y = None
-        if tail_pos == 0:
-            prev_y = ahead_obj.position[1]-self.size # was
-            y = ahead_obj.prev_position[1]-self.size # is
-        else:
-            prev_y = ahead_obj.prev_position[1] # was
-            y = ahead_obj.prev_position[1] # is
-        self.prev_position = (prev_x, prev_y)
-        self.position = (x, y)
+        # prev_x = ahead_obj.position[0] # was
+        # prev_y = None
+        # x = ahead_obj.prev_position[0] # is
+        # y = None
+        # if tail_pos == 0:
+        #     prev_y = ahead_obj.position[1]-self.size # was
+        #     y = ahead_obj.prev_position[1]-self.size # is
+        # else:
+        #     prev_y = ahead_obj.prev_position[1] # was
+        #     y = ahead_obj.prev_position[1] # is
+        # self.prev_position = (prev_x, prev_y)
+        # self.position = (x, y)
         if self.player:
             # Tail color = white
             self.obj_color = (255, 255, 255)

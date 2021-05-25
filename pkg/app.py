@@ -104,8 +104,6 @@ class App():
 
          # Game loop
         while self.running:
-            # The game loop clocktarget FPS
-            tick(self.fps)
             # Send event NEXT every time music tracks ends
             set_endevent(NEXT)
             # Gameplay logic this turn/tick
@@ -119,12 +117,14 @@ class App():
             # elif menu:
             #     # Update the screen display
             #     update()
-            # Update the screen display
-            update()
+            # # Update the screen display
+            # update()
             # System/window events to be checked
             event_checks(menu, event_get)
             # Free unreferenced memory
             # gc.collect()
+            # The game loop clocktarget FPS
+            tick(self.fps)
 
     def set_window_settings(self):
         '''
