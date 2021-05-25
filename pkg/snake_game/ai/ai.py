@@ -12,6 +12,7 @@
 '''
 
 import math
+from datetime import datetime, timedelta
 import pygame
 
 class DecisionBox:
@@ -25,6 +26,7 @@ class DecisionBox:
         self.difficulty = None
         self.obj_container = None
         self.portal_use_difficulty = 1
+        self.time_chase = 0
 
     def decide_direction(self, entity, target, obj_container, difficulty=0):
         if not target:
@@ -63,7 +65,7 @@ class DecisionBox:
     def situational_intent(self, entity, target):
         # print("situational Intent Chosen")
         intent = None
-        if not entity.secondary_target:
+        if entity.secondary_target == None:
             # Equal, Right, or left  Intent
             if entity.position[0] < target[0]:
                 intent = 1
@@ -75,16 +77,24 @@ class DecisionBox:
             elif entity.position[1] > target[1]:
                 intent = 0
         else:
-            # Equal, Right, or left  Intent
-            if entity.position[0] < entity.secondary_target[0]:
-                intent = 1
-            elif entity.position[0] > entity.secondary_target[0]:
-                intent = 3
-            # Equal, down, or up  Intent
-            elif entity.position[1] < entity.secondary_target[1]:
-                intent = 2
-            elif entity.position[1] > entity.secondary_target[1]:
-                intent = 0
+            # Go for secondary target within timeframe
+            if datetime.now() <= entity.since_secondary_target + timedelta(seconds=self.time_chase):
+                print("tracking secondary target")
+                # Equal, Right, or left  Intent
+                if entity.position[0] < entity.secondary_target[0]:
+                    intent = 1
+                elif entity.position[0] > entity.secondary_target[0]:
+                    intent = 3
+                # Equal, down, or up  Intent
+                elif entity.position[1] < entity.secondary_target[1]:
+                    intent = 2
+                elif entity.position[1] > entity.secondary_target[1]:
+                    intent = 0
+            else:
+                print("Giving up on secondary target")
+                # Give up on going for the secondary target
+                entity.secondary_target = None
+                self.situational_intent(entity, target)
 
         intent = self.check_intent(entity, intent)
 

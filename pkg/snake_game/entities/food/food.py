@@ -61,37 +61,6 @@ class Food(Entity):
         updated = self.spawn(obj_container)
         return updated
 
-    def draw(self, _, __):
-        '''
-        draw
-        ~~~~~~~~~~
-
-        draw does stuff
-        '''
-        # render if alive
-        if self.alive:
-            # Clear previous frame obj's location
-            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-            # place hitbox at position
-            self.rect.topleft = self.position
-            # Render the tail segment based on it's parameters
-            self.screen.blit(self.image, self.position)
-
-    def spawn(self, obj_container):
-        '''
-        spawn
-        ~~~~~~~~~~
-
-        spawn does stuff
-        '''
-        # pylint: disable=access-member-before-definition
-        if not self.alive:
-            # print(f"Spawning {self.ID}")
-            self.set_random_spawn(obj_container)
-            self.alive = True
-            return True
-        return False
-
     def interact(self, obj1):
         # Grow obj1 and up obj1's score
         obj1.grow(self)

@@ -106,14 +106,10 @@ class Snake(Entity):
             if updated_refresh[1]:
                 # Draw each child if there are any
                 for child in self.children:
-                    child.refresh_draw(obj_container)
+                    child.refresh_draw()
             elif len(self.children) > 0 and self.child_train:
                 # Only move/render the last child to front of the train
                 self.children[-1].draw(obj_container, updated_refresh)
-            else:
-                # Draw each child if there are any
-                for child in self.children:
-                    child.refresh_draw(obj_container)
 
     def grow(self, eaten_obj):
         '''

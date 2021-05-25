@@ -11,8 +11,9 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-from datetime import datetime, timedelta
+
 import random
+from datetime import datetime, timedelta
 import pygame
 # pylint: disable=relative-beyond-top-level
 from ..entity import Entity
@@ -66,46 +67,12 @@ class TelePortal(Entity):
             self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
 
     def update(self, obj_container):
+        # if datetime.now() >= self.spawn_timer:
         # try to spawn if obj can
         updated = self.spawn(obj_container)
+        # else:
+            # updated = False
         return updated
-
-    def draw(self, _, __):
-        '''
-        draw
-        ~~~~~~~~~~
-
-        draw does stuff
-        '''
-        # render if alive
-        if self.alive:
-            # Clear previous frame obj's location
-            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-            # place hitbox at position
-            self.rect.topleft = self.position
-            # Render the tail segment based on it's parameters
-            self.screen.blit(self.image, self.position)
-            # Draw each child if there are any
-            for child in self.children:
-                child.draw(_, __)
-
-    def spawn(self, obj_container):
-        '''
-        spawn
-        ~~~~~~~~~~
-
-        spawn does stuff
-        '''
-        # pylint: disable=access-member-before-definition
-        if not self.alive and datetime.now() > self.spawn_timer:
-            self.set_random_spawn(obj_container)
-            self.alive = True
-            if self.children:
-                for child in self.children:
-                    child.spawn(obj_container)
-            return True
-        return False
-
 
     def teleport(self, obj):
         '''
@@ -134,7 +101,7 @@ class TelePortal(Entity):
 
         interact does stuff
         '''
-        if self.activated + timedelta(seconds=self.abilty_cooldown) < datetime.now():
+        if self.activated + timedelta(seconds=self.abilty_cooldown) <= datetime.now():
             # teleport not on cooldown
             self.activated = datetime.now()
         else:

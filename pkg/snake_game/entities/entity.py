@@ -84,13 +84,18 @@ class Entity(Sprite):
         # Sight lines
         self.sight_lines = [
             Line(0, self),
-            Line(2, self),
-            Line(3, self),
+            Line(.5, self),
             Line(1, self),
+            Line(1.5, self),
+            Line(2, self),
+            Line(2.5, self),
+            Line(3, self),
+            Line(3.5, self),
         ]
         # Pathfinding variables
         self.target = None
         self.secondary_target = None
+        self.since_secondary_target = datetime.now()
         # children list
         self.children = Deque()
 
@@ -123,9 +128,9 @@ class Entity(Sprite):
                 draw(line, self)
             # Draw each child if there are any
             for child in self.children:
-                child.draw(_, __)
+                child.draw(obj_container, updated_refresh)
 
-    def refresh_draw(self, _):
+    def refresh_draw(self):
         '''
         refresh_draw
         ~~~~~~~~~~
@@ -294,7 +299,6 @@ class Entity(Sprite):
                         break
             if taken == True:
                 continue
-            self.rect = self.image.get_rect(topleft=self.position)
             found_spawn = True
 
     def aquire_primary_target(self, target_name):
@@ -313,6 +317,23 @@ class Entity(Sprite):
         self.direction = self.app.game.chosen_ai.decide_direction(
             self, self.target, self.app.game.sprite_group, difficulty=10
         )
+        self.since_secondary_target = datetime.now()
+
+    def spawn(self, obj_container):
+        '''
+        spawn
+        ~~~~~~~~~~
+
+        spawn does stuff
+        '''
+        if not self.alive:
+            self.set_random_spawn(obj_container)
+            self.alive = True
+            if self.children:
+                for child in self.children:
+                    child.spawn(obj_container)
+            return True
+        return False
 
     def grow(self, eaten_obj):
         pass
@@ -324,9 +345,6 @@ class Entity(Sprite):
         pass
 
     def move(self):
-        return None
-
-    def spawn(self, obj_container):
         return None
 
     def teleport(self, oth_obj):
@@ -346,14 +364,17 @@ class Line(Sprite):
         self.color = (255, 105, 180, (self.opasity))
         self.direction = direction
         # determine entity's sightline end point
-        draw_line = {
-            0: lambda: self.draw_up(entity),
-            2: lambda: self.draw_down(entity),
-            3: lambda: self.draw_left(entity),
-            1: lambda: self.draw_right(entity),
-        }.get(self.direction)
-        # Run the chosen line to draw
-        draw_line()
+        self.line_options = {
+            0: lambda *args: self.draw_up(*args),
+            .5: lambda *args: self.draw_up_right(*args),
+            1: lambda *args: self.draw_right(*args),
+            1.5: lambda *args: self.draw_down_right(*args),
+            2: lambda *args: self.draw_down(*args),
+            2.5: lambda *args: self.draw_down_left(*args),
+            3: lambda *args: self.draw_left(*args),
+            3.5: lambda *args: self.draw_up_left(*args),
+        }
+        self.line_options.get(self.direction)(entity)
         if self.opasity == 0:
             chosen_screen = entity.alpha_screen
         else :
@@ -380,15 +401,8 @@ class Line(Sprite):
             chosen_screen = entity.screen
         # Clear previous frame obj's location
         chosen_screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-        # determine entity's sightline end point
-        draw_line = {
-            0: lambda: self.draw_up(entity),
-            2: lambda: self.draw_down(entity),
-            3: lambda: self.draw_left(entity),
-            1: lambda: self.draw_right(entity),
-        }.get(self.direction)
-        # Run the chosen line to draw
-        draw_line()
+        # determine entity's sightline end point and draw it
+        self.line_options.get(self.direction)(entity)
         # Draw the line representing the rect
         self.rect = pygame.draw.line(
             chosen_screen,
@@ -401,11 +415,23 @@ class Line(Sprite):
     def draw_up(self, entity):
         self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
 
+    def draw_up_right(self, entity):
+        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1] - entity.sight
+
+    def draw_right(self, entity):
+        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+
+    def draw_down_right(self, entity):
+        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1] + entity.sight
+
     def draw_down(self, entity):
         self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
+
+    def draw_down_left(self, entity):
+        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1] + entity.sight
 
     def draw_left(self, entity):
         self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
 
-    def draw_right(self, entity):
-        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+    def draw_up_left(self, entity):
+        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1] - entity.sight
