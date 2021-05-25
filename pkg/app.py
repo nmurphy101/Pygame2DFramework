@@ -86,19 +86,27 @@ class App():
         self.set_window_settings()
         # Game loop clock
         self.clock = pygame.time.Clock()
+        # eval func's only once before loops
+        event_get = self.event_options.get
+        update_fps = self.update_fps
+        play = self.game.play
+        event_checks = self.event_checks
+        update = pygame.display.update
+        set_endevent = mixer.music.set_endevent
+        tick = self.clock.tick
 
          # Game loop
         while self.running:
             # The game loop clocktarget FPS
-            self.clock.tick(self.fps)
+            tick(self.fps)
             # Send event NEXT every time music tracks ends
-            mixer.music.set_endevent(NEXT)
+            set_endevent(NEXT)
             # Gameplay logic this turn/tick
-            menu = self.game.play()
+            menu = play(update_fps)
             # Update the screen display
-            pygame.display.update()
+            update()
             # System/window events to be checked
-            self.event_checks(menu)
+            event_checks(menu, event_get)
             # Free unreferenced memory
             # gc.collect()
 
@@ -154,7 +162,7 @@ class App():
         _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 8.8, h_offset=565)
         _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 7.8, h_offset=565)
 
-    def event_checks(self, menu):
+    def event_checks(self, menu, event_get):
         '''
         event_checks
         ~~~~~~~~~~
@@ -164,7 +172,7 @@ class App():
         for event in pygame.event.get():
             # Possible event options:
             #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,  KEYDOWN, MOUSEBUTTONDOWN,
-            decision_func = self.event_options.get(event.type)
+            decision_func = event_get(event.type)
             if decision_func:
                 decision_func(event=event, menu=menu)
 

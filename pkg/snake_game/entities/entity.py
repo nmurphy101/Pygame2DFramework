@@ -109,28 +109,33 @@ class Entity(Sprite):
 
         draw does stuff
         '''
-        if self.alive and (updated_refresh[0] or updated_refresh[1]):
+        # render if alive
+        if self.alive:
             # Clear previous frame obj's location
             self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-            # Set current position for hitbox
+            # place hitbox at position
             self.rect.topleft = self.position
-            # Render the entity's obj based on it's parameters
+            # Render the tail segment based on it's parameters
             self.screen.blit(self.image, self.position)
             # Render the entity's sight lines
+            draw = Line.draw # eval func only once
             for line in self.sight_lines:
-                line.draw(self)
-            # Draw all children on refresh or optimized one child per
-            if updated_refresh[1]:
-                print(f"refreshing children of {self.ID}")
-                # Draw each child if there are any
-                for child in self.children:
-                    child.refresh_draw(obj_container)
-            elif len(self.children) > 0:
-                # Only move/render the last tail segment
-                self.children[-1].draw(obj_container)
-                # for child in self.children:
-                #     child.refresh_draw(obj_container)
+                draw(line, self)
+            # Draw each child if there are any
+            for child in self.children:
+                child.draw(_, __)
 
+    def refresh_draw(self, _):
+        '''
+        refresh_draw
+        ~~~~~~~~~~
+
+        refresh_draw does stuff
+        '''
+        # render if alive
+        if self.alive:
+            # Render the entity based on it's parameters
+            self.screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound
@@ -157,21 +162,11 @@ class Entity(Sprite):
                 self.app.game.menu.menu_option = 3
             # Kill self
             self.alive = False
+            # "remove" the entity from the game
             if "snake" in self.name:
-                # Kill self
-                self.alive = False
-                # "remove" the entity from the game
                 self.app.game.sprite_group.remove(self)
             else:
-                self.position = self.death_position
-                self.rect.topleft = self.position
-                if self.children:
-                    for child in self.children:
-                        # Kill child
-                        child.alive = False
-                        # "remove" the child from the game
-                        child.position = self.death_position
-                        child.rect.topleft = child.position
+                self.alive = False
 
     def collision_checks(self, updated):
         '''
@@ -180,6 +175,10 @@ class Entity(Sprite):
 
         collision_checks does stuff
         '''
+        # eval func's only once before loops
+        check_obj_collision = self.check_obj_collision
+        check_edge_collision = self.check_edge_collision
+        check_child_collision = self.check_child_collision
         # Collision check for all entities
         for obj in self.app.game.sprite_group.sprites():
             # Make sure not checking collision with dead obj's
@@ -189,11 +188,11 @@ class Entity(Sprite):
                     # Make sure not checking collision with self
                     if self != obj and updated:
                         # Collision check between self and other obj
-                        collision = self.check_obj_collision(obj)
+                        collision = check_obj_collision(obj)
                         # Screen edge collision check
-                        collision = self.check_edge_collision()
+                        collision = check_edge_collision()
                     # Collision check between self and obj's children even if self=obj
-                    collision = self.check_child_collision(obj)
+                    collision = check_child_collision(obj)
                     # Always exit the while loop at the end
                     collision = True
 
@@ -243,9 +242,11 @@ class Entity(Sprite):
         '''
         # Collision check between self and other obj's child
         if obj.children:
+            # eval func only once before loop
+            collide_rect = pygame.sprite.collide_rect
             # print(f"{obj.ID} has children {obj.children}")
             for child in obj.children:
-                if pygame.sprite.collide_rect(self, child):
+                if collide_rect(self, child):
                     if self.secondary_target == child.position:
                         self.secondary_target = None
                     # print(f"----{self.ID} Interacting with child 1 {child.ID}-----")
@@ -261,14 +262,17 @@ class Entity(Sprite):
 
         Check for a random spawn location and if it's taken already
         '''
+        # eval func's only once before loops
+        randrange = random.randrange
+        # set pre loop variables
         found_spawn = False
         # pylint: enable=access-member-before-definition
         while not found_spawn:
             # Where the food is located
-            x = self.screen_size[0] - random.randrange(
+            x = self.screen_size[0] - randrange(
                 self.size*5, self.screen_size[0] - self.size * 5, self.size
             )
-            y = self.screen_size[1] - random.randrange(
+            y = self.screen_size[1] - randrange(
                 self.size*5, self.screen_size[1] - self.size * 5, self.size
             )
             self.position = (x, y)
@@ -282,9 +286,10 @@ class Entity(Sprite):
                         break
                     elif obj.children:
                         for child in obj.children:
-                            if self.position == child.position:
-                                taken = True
-                                break
+                            if child != self: # don't check self
+                                if self.position == child.position:
+                                    taken = True
+                                    break
                     if taken == True:
                         break
             if taken == True:
@@ -293,15 +298,20 @@ class Entity(Sprite):
             found_spawn = True
 
     def aquire_primary_target(self, target_name):
+        # Eval func's only once before loop
+        hypot = math.hypot
+        # Set variables pre loop
         primary_target = (None, 10000*100000)
+        pos = (self.app.game.screen_size[0]/2, self.app.game.screen_size[1]/2)
         for obj in self.app.game.sprite_group.sprites():
             if target_name in obj.ID:
-                dist_self = math.hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
+                dist_self = hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
                 if dist_self < primary_target[1]:
-                    primary_target = (obj, dist_self)
-        self.target = (primary_target[0].position[0], primary_target[0].position[1])
+                    pos = (obj.position[0], obj.position[1])
+                    primary_target = (pos, dist_self)
+        self.target = (primary_target[0][0], primary_target[0][1])
         self.direction = self.app.game.chosen_ai.decide_direction(
-            self, self.target, self.app.game.sprite_group, difficulty=0
+            self, self.target, self.app.game.sprite_group, difficulty=10
         )
 
     def grow(self, eaten_obj):
@@ -323,7 +333,7 @@ class Entity(Sprite):
         pass
 
 
-class Line():
+class Line(Sprite):
     '''
     Line
     ~~~~~~~~~~

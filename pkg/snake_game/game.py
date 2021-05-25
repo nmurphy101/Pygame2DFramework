@@ -82,7 +82,7 @@ class SnakeGame():
         # Menu Obj
         self.menu = Menu(self)
 
-    def play(self):
+    def play(self, update_fps):
         '''
         play
         ~~~~~~~~~~
@@ -92,15 +92,18 @@ class SnakeGame():
 
         # Clear previous frame render
         # self.screen.fill((0, 0, 0, 0))
+        # print(self.sprite_group)
 
         # Check if not in a menu
         if self.menu.menu_option is None:
+            # eval func's only once before loops
+            fill = self.screen.fill
             # Execute game object actions
             for obj in self.sprite_group.sprites():
                 # Make sure to refresh coming out of pause_menu
                 if self.menu.prev_menu in [0, 1]:
                     # Clear previous frame render
-                    self.screen.fill((0, 0, 0, 0))
+                    fill((0, 0, 0, 0))
                     # Draw game objects
                     obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
@@ -113,11 +116,11 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
             # The game loop FPS counter
-            self.app.update_fps()
+            update_fps()
 
         else:
             # The game loop FPS counter
-            self.app.update_fps()
+            update_fps()
             # Show which ever menu option that has been chosen:
             #   Main, Pause, Settings, GameOver, Display, Sound
             return self.menu.menu_options.get(self.menu.menu_option)()
@@ -146,12 +149,12 @@ class SnakeGame():
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
-        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         obj_container = [ # Order of these objects actually matter
             food,
             food2,
-            # tele_portal,
+            tele_portal,
             # player_snake,
             enemy_snake,
             # enemy_snake2,

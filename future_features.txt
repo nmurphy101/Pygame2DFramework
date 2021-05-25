@@ -85,11 +85,11 @@ Minor:
 
 
 Bugs:
-1. Food was able to spawn onto a portal/tail... That's not right...
-2. The game slows down after awhile with more tail segments fix performance issues
-3. As a player holding two directions at once can have you move diagonally
+1. can you move diagonally anymore????
+2. As a player holding two directions at once can have you move diagonally
    through a enemy thus appearing to "phase" through them without dying...
-
+3. Seems like the last tail segment isn't always the correct one to grab
+    which must be why some random tail segments sometimes vanish before they should...
 
 
 

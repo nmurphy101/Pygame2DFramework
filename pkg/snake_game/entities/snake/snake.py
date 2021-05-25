@@ -20,7 +20,7 @@ from pygame.constants import (
 )
 # pylint: enable=no-name-in-module
 # pylint: disable=relative-beyond-top-level
-from ..entity import Entity
+from ..entity import Entity, Line
 # pylint: enable=relative-beyond-top-level
 
 SNAKE_DEATH = 0
@@ -76,11 +76,44 @@ class Snake(Entity):
         # Number of tail segments
         self.num_tails = 5
         # Initilize starting tails
+        append = self.children.append # eval func only once
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
+                append(TailSegment(alpha_screen, screen, screen_size, app, self, pos, self, player=self.player))
             else:
-                self.children.append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, self, player=self.player))
+                append(TailSegment(alpha_screen, screen, screen_size, app, self.children[pos-1], pos, self, player=self.player))
+
+    def draw(self, obj_container, updated_refresh):
+        '''
+        draw
+        ~~~~~~~~~~
+
+        draw does stuff
+        '''
+
+        if self.alive and (updated_refresh[0] or updated_refresh[1]):
+            # Clear previous frame obj's location
+            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # Set current position for hitbox
+            self.rect.topleft = self.position
+            # Render the entity's obj based on it's parameters
+            self.screen.blit(self.image, self.position)
+            # Render the entity's sight lines
+            draw = Line.draw # eval func only once
+            for line in self.sight_lines:
+                draw(line, self)
+            # Draw all children on refresh or optimized one child per
+            if updated_refresh[1]:
+                # Draw each child if there are any
+                for child in self.children:
+                    child.refresh_draw(obj_container)
+            elif len(self.children) > 0 and self.child_train:
+                # Only move/render the last child to front of the train
+                self.children[-1].draw(obj_container, updated_refresh)
+            else:
+                # Draw each child if there are any
+                for child in self.children:
+                    child.refresh_draw(obj_container)
 
     def grow(self, eaten_obj):
         '''
@@ -91,6 +124,7 @@ class Snake(Entity):
         '''
         # Add a new tail segment
         if self.alive:
+            append = self.children.append # eval only once
             for _ in range(eaten_obj.growth):
                 tail = TailSegment(
                     self.alpha_screen,
@@ -103,7 +137,7 @@ class Snake(Entity):
                     player=self.player,
                 )
                 tail.player = self.player
-                self.children.append(tail)
+                append(tail)
                 self.num_tails += 1
 
 
@@ -237,7 +271,7 @@ class TailSegment(Entity):
         #
         self.child_train = None
 
-    def draw(self, _):
+    def draw(self, _, __):
         '''
         draw
         ~~~~~~~~~~
@@ -257,18 +291,6 @@ class TailSegment(Entity):
             self.screen.blit(self.image, self.position)
             # Move the child to the front of the list
             self.parent.children.rotate()
-
-    def refresh_draw(self, _):
-        '''
-        refresh_draw
-        ~~~~~~~~~~
-
-        refresh_draw does stuff
-        '''
-        # render if alive
-        if self.alive:
-            # Render the tail segment based on it's parameters
-            self.screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

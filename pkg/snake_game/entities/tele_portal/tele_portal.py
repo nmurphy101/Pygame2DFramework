@@ -27,7 +27,7 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     '''
     def __init__(self, alpha_screen, screen, screen_size, app, parent=None):
-        self.name = "TelePortal_"
+        self.name = "teleportal_"
         # Initilize parent init
         super().__init__(alpha_screen, screen, screen_size, self.name, app)
         # Determines if entity can be killed
@@ -63,7 +63,31 @@ class TelePortal(Entity):
         self.sight_lines = []
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
-            self.children.add(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
+            self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
+
+    def update(self, obj_container):
+        # try to spawn if obj can
+        updated = self.spawn(obj_container)
+        return updated
+
+    def draw(self, _, __):
+        '''
+        draw
+        ~~~~~~~~~~
+
+        draw does stuff
+        '''
+        # render if alive
+        if self.alive:
+            # Clear previous frame obj's location
+            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # place hitbox at position
+            self.rect.topleft = self.position
+            # Render the tail segment based on it's parameters
+            self.screen.blit(self.image, self.position)
+            # Draw each child if there are any
+            for child in self.children:
+                child.draw(_, __)
 
     def spawn(self, obj_container):
         '''
@@ -72,44 +96,15 @@ class TelePortal(Entity):
 
         spawn does stuff
         '''
-        found_spawn = False
         # pylint: disable=access-member-before-definition
         if not self.alive and datetime.now() > self.spawn_timer:
-            # pylint: enable=access-member-before-definition
-            while not found_spawn:
-                # Where the portal is located
-                x = self.screen_size[0] - random.randrange(
-                    self.size*5, self.screen_size[0] - self.size * 5, self.size
-                )
-                y = self.screen_size[1] - random.randrange(
-                    self.size*5, self.screen_size[1] - self.size * 5, self.size
-                )
-                self.position = (x, y)
-
-                # Check if the chosen random spawn location is taken
-                for oth_obj in obj_container:
-                    collision_bool = self.rect.collidepoint(self.position[0], self.position[1])
-
-                    if collision_bool:
-                        break
-
-                if collision_bool:
-                    continue
-
-                for oth_obj in obj_container:
-                    try:
-                        if oth_obj.children:
-                            self.rect.collidelist(oth_obj.children)
-                    except AttributeError:
-                        pass
-
-                found_spawn = True
-
+            self.set_random_spawn(obj_container)
             self.alive = True
-
-        if self.children:
-            for child in self.children:
-                child.spawn(obj_container)
+            if self.children:
+                for child in self.children:
+                    child.spawn(obj_container)
+            return True
+        return False
 
 
     def teleport(self, obj):
@@ -132,7 +127,7 @@ class TelePortal(Entity):
 
         self.activated = datetime.now()
 
-    def interact(self, obj1):
+    def interact(self, obj):
         '''
         interact
         ~~~~~~~~~~
@@ -153,15 +148,4 @@ class TelePortal(Entity):
         pygame.mixer.Sound.play(sound)
 
         # Teleport the obj to the paired portal
-        self.teleport(obj1)
-
-    def interact_children(self, obj1):
-        '''
-        interact_children
-        ~~~~~~~~~~
-
-        interact_children does stuff
-        '''
-        for child in self.children:
-            if pygame.sprite.collide_rect(obj1, child):
-                child.interact(obj1)
+        self.teleport(obj)
