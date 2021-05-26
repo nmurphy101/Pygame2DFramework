@@ -109,3 +109,5 @@ https://en.wikipedia.org/wiki/A*_search_algorithm
 
 https://stackoverflow.com/questions/41637139/choppy-animation-in-pygame
 https://stackoverflow.com/questions/37780639/bullet-object-has-no-attribute-sprite-g-when-adding-sprite-to-group/37785640
+
+https://gamedev.stackexchange.com/questions/185928/delta-time-with-discrete-movement
