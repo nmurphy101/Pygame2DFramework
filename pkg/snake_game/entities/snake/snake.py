@@ -283,7 +283,7 @@ class TailSegment(Entity):
         # render if alive
         if self.alive:
             # Clear previous frame obj's location
-            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            self.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
             # Save current position as last position
             self.prev_position = self.position
             # located where the parent obj was last

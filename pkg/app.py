@@ -111,14 +111,15 @@ class App():
             # TODO: Re-enable this code when the feature-bug-#3 is fixed
             # if dirty_rects:
             #     # Update the screen display
+            #     print(len(dirty_rects))
             #     update(dirty_rects)
             #     # reset loop variables
-            #     self.dirty_rects = []
+            #     dirty_rects.clear()
             # elif menu:
             #     # Update the screen display
             #     update()
-            # # Update the screen display
-            # update()
+            # Update the screen display
+            update()
             # System/window events to be checked
             event_checks(menu, event_get)
             # Free unreferenced memory
@@ -138,6 +139,7 @@ class App():
         flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN |
         # flags = 0
         screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
+        screen.set_alpha(None)
         # screen.set_mode()
         alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
         alpha_screen.fill([0,0,0,0])

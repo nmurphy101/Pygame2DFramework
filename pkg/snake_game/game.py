@@ -15,6 +15,7 @@
 import os
 import gc
 from datetime import datetime
+from typing import Deque
 import json
 import pygame
 # pylint: disable=relative-beyond-top-level
@@ -77,7 +78,7 @@ class SnakeGame():
         self.timer = None
         # Game object containers
         self.sprite_group = pygame.sprite.Group()
-        self.dirty_rects = []
+        self.dirty_rects = Deque()
         # AI blackbox
         self.chosen_ai = None
         # Menu Obj
@@ -112,6 +113,8 @@ class SnakeGame():
                 updated = obj.update(self.sprite_group.sprites())
                 if updated or not obj.dirty_rect:
                     append_dirty_rects(obj)
+                self.dirty_rects += obj.children
+
                 # Draw game objects
                 obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs
