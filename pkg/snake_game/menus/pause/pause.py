@@ -62,6 +62,6 @@ def pause_menu(self):
         (return_obj, self.MainMenu, 1),
     ]
 
-    # print(self.game.sprite_group.sprites()[3].ID, len(self.game.sprite_group.sprites()[3].children))
+    print(self.game.sprite_group.sprites()[2].ID, len(self.game.sprite_group.sprites()[2].children))
 
     return menu

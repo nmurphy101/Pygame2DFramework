@@ -111,3 +111,9 @@ https://stackoverflow.com/questions/41637139/choppy-animation-in-pygame
 https://stackoverflow.com/questions/37780639/bullet-object-has-no-attribute-sprite-g-when-adding-sprite-to-group/37785640
 
 https://gamedev.stackexchange.com/questions/185928/delta-time-with-discrete-movement
+
+
+Work on improving the ai with diagonal sight lines implimented so it doesn't kill itself
+as easily as it does now.
+
+Then work on further optimizing from profileold_2

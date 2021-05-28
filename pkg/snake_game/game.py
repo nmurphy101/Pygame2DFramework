@@ -91,11 +91,6 @@ class SnakeGame():
 
         play does stuff
         '''
-
-        # Clear previous frame render
-        # self.screen.fill((0, 0, 0, 0))
-        # print(self.sprite_group)
-
         # Check if not in a menu
         if self.menu.menu_option is None:
             # eval func's only once before loops
@@ -111,10 +106,10 @@ class SnakeGame():
                     obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
                 updated = obj.update(self.sprite_group.sprites())
+                # Adding updated sprites to the dirty rects container
                 if updated or not obj.dirty_rect:
                     append_dirty_rects(obj)
                 self.dirty_rects += obj.children
-
                 # Draw game objects
                 obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs

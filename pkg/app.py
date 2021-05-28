@@ -45,7 +45,7 @@ class App():
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 1000
+        self.fps = 900
         self.fps_list = []
         self.fps_pos = None
         self.fps_rect = None
@@ -98,7 +98,7 @@ class App():
         update_fps = self.update_fps
         play = self.game.play
         event_checks = self.event_checks
-        update = pygame.display.update
+        render = pygame.display.update
         set_endevent = mixer.music.set_endevent
         tick = self.clock.tick
 
@@ -108,22 +108,10 @@ class App():
             set_endevent(NEXT)
             # Gameplay logic this turn/tick
             menu, dirty_rects = play(update_fps)
-            # TODO: Re-enable this code when the feature-bug-#3 is fixed
-            # if dirty_rects:
-            #     # Update the screen display
-            #     print(len(dirty_rects))
-            #     update(dirty_rects)
-            #     # reset loop variables
-            #     dirty_rects.clear()
-            # elif menu:
-            #     # Update the screen display
-            #     update()
-            # Update the screen display
-            update()
             # System/window events to be checked
             event_checks(menu, event_get)
-            # Free unreferenced memory
-            # gc.collect()
+            # Display the game screen
+            render()
             # The game loop clocktarget FPS
             tick(self.fps)
 

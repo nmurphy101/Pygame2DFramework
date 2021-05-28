@@ -90,12 +90,12 @@ class Entity(Sprite):
             Line(2, self),
             Line(3, self),
         ]
-        # self.sight_lines_diag = [
-        #     Line(.5, self),
-        #     Line(1.5, self),
-        #     Line(2.5, self),
-        #     Line(3.5, self),
-        # ]
+        self.sight_lines_diag = [
+            Line(.5, self),
+            Line(1.5, self),
+            Line(2.5, self),
+            Line(3.5, self),
+        ]
         # Pathfinding variables
         self.target = None
         self.secondary_target = None
