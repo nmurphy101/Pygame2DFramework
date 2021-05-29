@@ -40,6 +40,8 @@ class Food(Entity):
         self.position = (x, y)
         # Food color = green
         self.obj_color = (0, 255, 0)
+        # Food Sprite images
+        self.food_images = self.app.game.food_images
         # Entity's visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
@@ -60,6 +62,22 @@ class Food(Entity):
         # try to spawn if obj can
         updated = self.spawn(obj_container)
         return updated
+
+    def draw(self, obj_container, updated_refresh):
+        '''
+        draw
+        ~~~~~~~~~~
+
+        draw does stuff
+        '''
+        # render if alive
+        if self.alive:
+            # place hitbox at position
+            self.rect.topleft = self.position
+            # Choose the correct image
+            self.image = self.food_images[0]
+            # Render the tail segment based on it's parameters
+            self.screen.blit(self.image, self.position)
 
     def interact(self, obj1):
         # Grow obj1 and up obj1's score

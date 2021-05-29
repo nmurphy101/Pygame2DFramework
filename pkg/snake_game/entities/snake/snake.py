@@ -62,7 +62,12 @@ class Snake(Entity):
         self.speed_mod = 2
         # head color = red
         self.obj_color = (255, 0, 0)
-        # Entity's visual representation
+        # Snake Sprite images
+        if self.player:
+            self.snake_images = self.app.game.snake_images
+        else:
+            self.snake_images = self.app.game.snake_enemy_images
+        # Entity's default no sprite visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
         # Entity is a rectangle object
@@ -200,18 +205,22 @@ class Snake(Entity):
             self.prev_position = self.position
             # Moving up
             if self.direction == 0:
+                self.image = self.snake_images[14]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] - self.size)
             # Moving down
             elif self.direction == 2:
+                self.image = self.snake_images[15]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] + self.size)
             # Moving left
             elif self.direction == 3:
+                self.image = self.snake_images[17]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] - self.size, self.position[1])
             # Moving right
             elif self.direction == 1:
+                self.image = self.snake_images[16]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] + self.size, self.position[1])
             # Set the new last moved time
@@ -238,6 +247,7 @@ class TailSegment(Entity):
         self.alive = True
         # Parent of this child
         self.parent = parent
+        self.parent_dir = parent.direction
         # Is this a entity part of the player obj?
         self.player = player
         # Determines if entity can be killed
@@ -289,10 +299,42 @@ class TailSegment(Entity):
             # located where the parent obj was last
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
+            # Choose the right image for this segment
+            self.choose_img()
             # Render the tail segment based on it's parameters
             self.screen.blit(self.image, self.position)
             # Move the child to the front of the list
             self.parent.children.rotate()
+            # Change render dir for this tail
+            self.parent_dir = self.parent.prev_direction
+
+    def choose_img(self):
+         # Moving up
+        if self.parent.direction == 0:
+            if self.parent.children[-1] == self and False:
+                self.image = self.parent.snake_images[10]
+            else:
+                self.image = self.parent.snake_images[0]
+        # Moving down
+        elif self.parent.direction == 2:
+            if self.parent.children[-1] == self and False:
+                self.image = self.parent.snake_images[11]
+            else:
+                self.image = self.parent.snake_images[0]
+        # Moving left
+        elif self.parent.direction == 3:
+            if self.parent.children[-1] == self and False:
+                self.image = self.parent.snake_images[13]
+            else:
+                self.image = self.parent.snake_images[1]
+        # Moving right
+        elif self.parent.direction == 1:
+            if self.parent.children[-1] == self and False:
+                self.image = self.parent.snake_images[12]
+            else:
+                self.image = self.parent.snake_images[1]
+        else:
+            self.image = self.image
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

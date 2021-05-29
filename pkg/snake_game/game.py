@@ -29,6 +29,7 @@ from .entities.entities import (
 # All the game menus
 from .menus.menus import Menu
 from .ai.ai import DecisionBox
+from .graphics.sprite_sheet import SpriteSheet
 # pylint: enable=relative-beyond-top-level
 
 
@@ -61,6 +62,7 @@ class SnakeGame():
         )
         # Game settings
         self.pause_game_music = False
+        self.timer = None
         # Game music
         self.game_music_intro = "assets/music/8bit_Stage1_Intro.wav"
         self.game_music_loop = "assets/music/8bit_Stage1_Loop.wav"
@@ -74,11 +76,30 @@ class SnakeGame():
             pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
             pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav"),
         ]
-        # Game timer
-        self.timer = None
         # Game object containers
         self.sprite_group = pygame.sprite.Group()
         self.dirty_rects = Deque()
+        ## Game sprite Sheets
+        # Snake Sprite Images
+        self.snake_sprite_sheet = SpriteSheet("assets/sprites/snake/snake-sheet.png")
+        self.snake_images = self.snake_sprite_sheet.load_grid_images(
+            num_rows=2, num_cols=10, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        # Snake Enemy Sprite Images
+        self.snake_enemy_sprite_sheet = SpriteSheet("assets/sprites/snake/snake_enemy-sheet.png")
+        self.snake_enemy_images = self.snake_enemy_sprite_sheet.load_grid_images(
+            num_rows=2, num_cols=10, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        self.food_sprite_sheet = SpriteSheet("assets/sprites/food/food-sheet.png")
+        # Food Sprite images
+        self.food_images = self.food_sprite_sheet.load_grid_images(
+            num_rows=1, num_cols=1, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        # Teleportal Sprite images
+        self.tele_portal_sprite_sheet = SpriteSheet("assets/sprites/tele_portal/tele_portal-sheet.png")
+        self.tele_portal_images = self.tele_portal_sprite_sheet.load_grid_images(
+            num_rows=1, num_cols=1, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
         # AI blackbox
         self.chosen_ai = None
         # Menu Obj
@@ -151,17 +172,17 @@ class SnakeGame():
         # player_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app, player=True)
         # player_snake.speed_mod = .75
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        enemy_snake.speed_mod = 60
+        enemy_snake.speed_mod = 2
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
-        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         obj_container = [ # Order of these objects actually matter
             food,
             food2,
             # food3,
-            # tele_portal,
+            tele_portal,
             # player_snake,
             enemy_snake,
             # enemy_snake2,
