@@ -113,6 +113,8 @@ class Snake(Entity):
             # Render the entity's sight lines
             for line in self.sight_lines:
                 draw(line, self)
+            for line in self.sight_lines_diag:
+                draw(line, self)
             # Draw all children on refresh or optimized one child per
             if updated_refresh[1]:
                 # Draw each child if there are any
@@ -124,6 +126,8 @@ class Snake(Entity):
                 append_dirty_rects(self.children[-1])
                 # Only move/render the last child to front of the train
                 self.children[-1].draw(obj_container, updated_refresh)
+                # Change the new last child's image
+                self.children[-1]
 
     def grow(self, eaten_obj):
         '''
@@ -307,8 +311,6 @@ class TailSegment(Entity):
             self.screen.blit(self.image, self.position)
             # Move the child to the front of the list
             self.parent.children.rotate()
-            # Change render dir for this tail
-            self.parent_dir = self.parent.prev_direction
 
     def choose_img(self):
         # Moving up

@@ -115,7 +115,7 @@ class DecisionBox:
         get_intent = self.get_intent
         reset_sight_lines = self.reset_sight_lines
         decide_portal = self.decide_portal
-        collide_rect = pygame.sprite.collide_rect
+        collide_rect = pygame.Rect.colliderect
         situational_intent = self.situational_intent
         hypot = math.hypot
         # Loop to check intent
@@ -141,6 +141,26 @@ class DecisionBox:
         return intent
 
     def verify_sight_lines(self, obj, entity, decide_portal, collide_rect, situational_intent, hypot):
+        # for line in entity.sight_lines_diag:
+            # # Edge of screen detection
+            # if line.direction == 0 and line.end[1] <= 0:
+            #     line.open = False
+            # elif line.direction == 2 and line.end[1] >= entity.screen_size[1]:
+            #     line.open = False
+            # elif line.direction == 3 and line.end[0] <= 0:
+            #     line.open = False
+            # elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
+            #     line.open = False
+            # Check the sight lines for a open direction
+            # if collide_rect(obj, line):
+            #     if not "segment" in obj.ID:
+            #         print(f"Diagonal line collision {obj.ID} and {line.direction}")
+            #     line.open = False
+                # # Will Ai see and use portals?
+                # if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
+                #     line.open = decide_portal(obj, entity, situational_intent, hypot)
+                # else:
+                    # line.open = False
         # Verify intention with sight lines
         for line in entity.sight_lines:
             # Edge of screen detection
@@ -152,8 +172,25 @@ class DecisionBox:
                 line.open = False
             elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
                 line.open = False
+            # Verify with diagonal sight lines
+            # elif line.direction == 0:
+            #     if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[3].open:
+            #         print(f"Test1: {entity.direction} -- {line.direction}")
+            #         line.open = False
+            # elif line.direction == 2:
+            #     if not entity.sight_lines_diag[1].open and not entity.sight_lines_diag[2].open:
+            #         print(f"Test2: {entity.sight_lines_diag[1].open} -- {entity.sight_lines_diag[2].open}")
+            #         line.open = False
+            # elif line.direction == 3:
+            #     if not entity.sight_lines_diag[2].open and not entity.sight_lines_diag[3].open:
+            #         print(f"Test3: {entity.direction} -- {line.direction}")
+            #         line.open = False
+            # elif line.direction == 1:
+            #     if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[1].open:
+            #         print(f"Test4: {entity.direction} -- {line.direction}")
+            #         line.open = False
             # Check the sight lines for a open direction
-            if collide_rect(obj, line):
+            if collide_rect(obj.rect, line.rect):
                 # Will Ai see and use portals?
                 if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
                     line.open = decide_portal(obj, entity, situational_intent, hypot)
@@ -161,8 +198,10 @@ class DecisionBox:
                     line.open = False
 
     def reset_sight_lines(self, entity):
-         for line in entity.sight_lines:
+        for line in entity.sight_lines_diag:
              line.open = True
+        for line in entity.sight_lines:
+            line.open = True
 
     def get_intent(self, intent, entity):
         # Check which open direction to use

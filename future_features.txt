@@ -37,7 +37,7 @@ Minor:
 9. immobile enemies
     a. "walls" for future level design
     b. explosive mine
-    c. AOE turret on a visible timer
+    c. AOE turret on a visible timerxxx
 10. moving enemies - WIP
     a. Situational enemy
     b. Hostile enemy
