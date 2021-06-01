@@ -62,6 +62,7 @@ class Entity(Sprite):
         self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.prev_direction = 2
+        self.child_prev_direction = 2
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking

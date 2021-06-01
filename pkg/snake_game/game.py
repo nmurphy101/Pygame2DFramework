@@ -83,12 +83,12 @@ class SnakeGame():
         # Snake Sprite Images
         self.snake_sprite_sheet = SpriteSheet("assets/sprites/snake/snake-sheet.png")
         self.snake_images = self.snake_sprite_sheet.load_grid_images(
-            num_rows=2, num_cols=10, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+            num_rows=2, num_cols=8, x_margin=1, x_padding=1, y_margin=1, y_padding=1
         )
         # Snake Enemy Sprite Images
         self.snake_enemy_sprite_sheet = SpriteSheet("assets/sprites/snake/snake_enemy-sheet.png")
         self.snake_enemy_images = self.snake_enemy_sprite_sheet.load_grid_images(
-            num_rows=2, num_cols=10, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+            num_rows=2, num_cols=8, x_margin=1, x_padding=1, y_margin=1, y_padding=1
         )
         self.food_sprite_sheet = SpriteSheet("assets/sprites/food/food-sheet.png")
         # Food Sprite images

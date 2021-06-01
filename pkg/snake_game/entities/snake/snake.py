@@ -64,9 +64,9 @@ class Snake(Entity):
         self.obj_color = (255, 0, 0)
         # Snake Sprite images
         if self.player:
-            self.snake_images = self.app.game.snake_images
+            self.sprite_images = self.app.game.snake_images
         else:
-            self.snake_images = self.app.game.snake_enemy_images
+            self.sprite_images = self.app.game.snake_enemy_images
         # Entity's default no sprite visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
@@ -203,24 +203,26 @@ class Snake(Entity):
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_position = self.position
+            # Save prev_direction for child stuff
+            self.child_prev_direction = self.prev_direction
             # Moving up
             if self.direction == 0:
-                self.image = self.snake_images[14]
+                self.image = self.sprite_images[10]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] - self.size)
             # Moving down
             elif self.direction == 2:
-                self.image = self.snake_images[15]
+                self.image = self.sprite_images[11]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] + self.size)
             # Moving left
             elif self.direction == 3:
-                self.image = self.snake_images[17]
+                self.image = self.sprite_images[13]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] - self.size, self.position[1])
             # Moving right
             elif self.direction == 1:
-                self.image = self.snake_images[16]
+                self.image = self.sprite_images[12]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] + self.size, self.position[1])
             # Set the new last moved time
@@ -309,30 +311,38 @@ class TailSegment(Entity):
             self.parent_dir = self.parent.prev_direction
 
     def choose_img(self):
-         # Moving up
+        # Moving up
         if self.parent.direction == 0:
-            if self.parent.children[-1] == self and False:
-                self.image = self.parent.snake_images[10]
-            else:
-                self.image = self.parent.snake_images[0]
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[0]
+            elif self.parent.child_prev_direction == 1:
+                self.image = self.parent.sprite_images[5]
+            elif self.parent.child_prev_direction == 3:
+                self.image = self.parent.sprite_images[4]
         # Moving down
         elif self.parent.direction == 2:
-            if self.parent.children[-1] == self and False:
-                self.image = self.parent.snake_images[11]
-            else:
-                self.image = self.parent.snake_images[0]
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[0]
+            elif self.parent.child_prev_direction == 1:
+                self.image = self.parent.sprite_images[2]
+            elif self.parent.child_prev_direction == 3:
+                self.image = self.parent.sprite_images[3]
         # Moving left
         elif self.parent.direction == 3:
-            if self.parent.children[-1] == self and False:
-                self.image = self.parent.snake_images[13]
-            else:
-                self.image = self.parent.snake_images[1]
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[1]
+            elif self.parent.child_prev_direction == 0:
+                self.image = self.parent.sprite_images[2]
+            elif self.parent.child_prev_direction == 2:
+                self.image = self.parent.sprite_images[5]
         # Moving right
         elif self.parent.direction == 1:
-            if self.parent.children[-1] == self and False:
-                self.image = self.parent.snake_images[12]
-            else:
-                self.image = self.parent.snake_images[1]
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[1]
+            elif self.parent.child_prev_direction == 0:
+                self.image = self.parent.sprite_images[3]
+            elif self.parent.child_prev_direction == 2:
+                self.image = self.parent.sprite_images[4]
         else:
             self.image = self.image
 
