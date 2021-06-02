@@ -67,7 +67,11 @@ class Menu():
     def SoundMenu(self):
         return sound_menu(self)
 
-    def render_button(self, title, position, color=(255, 255, 255), h_offset=0):
+    def render_button(self, title, position, color=(255, 255, 255), h_offset=0, screen=None):
+        if screen:
+            chosen_screen = screen
+        else:
+            chosen_screen = self.game.screen
         # Render the Display text
         text_str = str(title)
         position = (
@@ -75,13 +79,16 @@ class Menu():
             self.game.screen_size[1]/2 - self.game.game_font.size * position
         )
         obj = self.game.game_font.render_to(
-            self.game.screen,
+            chosen_screen,
             position,
             text_str,
             color
         )
-
         return obj
+
+    def save_settings(self):
+        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
 
     def toggle_game_music(self):
         '''
@@ -91,8 +98,7 @@ class Menu():
         toggle_game_music does stuff
         '''
         self.game.game_config["settings"]["sound"]["music"] = not self.game.game_config["settings"]["sound"]["music"]
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
 
     def increase_music_volume(self):
         '''
@@ -102,8 +108,7 @@ class Menu():
         increase_music_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.game_config["settings"]["sound"]["music_volume"]) + .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
         pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["sound"]["music_volume"]))
 
     def decrease_music_volume(self):
@@ -114,8 +119,7 @@ class Menu():
         decrease_music_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.game_config["settings"]["sound"]["music_volume"]) - .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
         pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["sound"]["music_volume"]))
 
     def increase_effect_volume(self):
@@ -126,8 +130,7 @@ class Menu():
         increase_effect_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.game_config["settings"]["sound"]["effect_volume"]) + .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
 
     def decrease_effect_volume(self):
         '''
@@ -137,8 +140,7 @@ class Menu():
         decrease_effect_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.game_config["settings"]["sound"]["effect_volume"]) - .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
 
     def increase_menu_volume(self):
         '''
@@ -148,8 +150,7 @@ class Menu():
         increase_menu_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.game_config["settings"]["sound"]["menu_volume"]) + .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
 
     def decrease_menu_volume(self):
         '''
@@ -159,5 +160,15 @@ class Menu():
         decrease_menu_volume does stuff
         '''
         self.game.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.game_config["settings"]["sound"]["menu_volume"]) - .05)
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        self.save_settings()
+
+
+    def toggle_fps_display(self):
+        '''
+        toggle_fps_display
+        ~~~~~~~~~~
+
+        toggle_fps_display does stuff
+        '''
+        self.game.game_config["settings"]["display"]["fps_display"] = not self.game.game_config["settings"]["display"]["fps_display"]
+        self.save_settings()

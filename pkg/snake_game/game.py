@@ -116,7 +116,7 @@ class SnakeGame():
         if self.menu.menu_option is None:
             # eval func's only once before loops
             fill_screen = self.screen.fill
-            append_dirty_rects = self.dirty_rects.append
+            ### append_dirty_rects = self.dirty_rects.append
             # Execute game object actions
             for obj in self.sprite_group.sprites():
                 # Make sure to refresh coming out of pause_menu
@@ -127,10 +127,10 @@ class SnakeGame():
                     obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
                 updated = obj.update(self.sprite_group.sprites())
-                # Adding updated sprites to the dirty rects container
-                if updated or not obj.dirty_rect:
-                    append_dirty_rects(obj)
-                self.dirty_rects += obj.children
+                ## Adding updated sprites to the dirty rects container
+                ### if updated or not obj.dirty_rect:
+                ###     append_dirty_rects(obj)
+                ### self.dirty_rects += obj.children
                 # Draw game objects
                 obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs
@@ -139,12 +139,16 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
             # The game loop FPS counter
-            append_dirty_rects(update_fps())
+            if self.game_config["settings"]["display"]["fps_display"]:
+                ### append_dirty_rects(update_fps())
+                update_fps()
+            # Return to app
             return None, self.dirty_rects
-
+        # In a menu
         else:
             # The game loop FPS counter
-            update_fps()
+            if self.game_config["settings"]["display"]["fps_display"]:
+                update_fps()
             # Show which ever menu option that has been chosen:
             #   Main, Pause, Settings, GameOver, Display, Sound
             return self.menu.menu_options.get(self.menu.menu_option)(), None
