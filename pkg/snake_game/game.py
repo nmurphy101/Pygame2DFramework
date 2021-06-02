@@ -100,7 +100,7 @@ class SnakeGame():
             for obj in self.sprite_group.sprites():
                 # Make sure to refresh coming out of pause_menu
                 if self.menu.prev_menu in [0, 1]:
-                    # Clear previous frame render
+                    # Clear previous frame render (from menu)
                     fill_screen((0, 0, 0, 0))
                     # Draw game objects
                     obj.draw(self.sprite_group.sprites(), (False, True))

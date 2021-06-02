@@ -82,6 +82,8 @@ Minor:
         ii. to situationally deal with a secondary target - DONE
         iii. Make current sightlines into actionlines and remake sightlines
              to be used for calculated decisions
+16. Abstract Raw input
+    a. ex. left instead of "K_LEFT". So keybindings can be changed later
 
 Future Ideas:
 1. impliment coyote-time for precision user inputs as seen here or input buffering:
