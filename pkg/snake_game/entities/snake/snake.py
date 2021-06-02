@@ -62,7 +62,12 @@ class Snake(Entity):
         self.speed_mod = 2
         # head color = red
         self.obj_color = (255, 0, 0)
-        # Entity's visual representation
+        # Snake Sprite images
+        if self.player:
+            self.sprite_images = self.app.game.snake_images
+        else:
+            self.sprite_images = self.app.game.snake_enemy_images
+        # Entity's default no sprite visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
         # Entity is a rectangle object
@@ -108,6 +113,8 @@ class Snake(Entity):
             # Render the entity's sight lines
             for line in self.sight_lines:
                 draw(line, self)
+            for line in self.sight_lines_diag:
+                draw(line, self)
             # Draw all children on refresh or optimized one child per
             if updated_refresh[1]:
                 # Draw each child if there are any
@@ -119,6 +126,8 @@ class Snake(Entity):
                 append_dirty_rects(self.children[-1])
                 # Only move/render the last child to front of the train
                 self.children[-1].draw(obj_container, updated_refresh)
+                # Change the new last child's image
+                self.children[-1]
 
     def grow(self, eaten_obj):
         '''
@@ -198,20 +207,26 @@ class Snake(Entity):
             # pylint: disable=access-member-before-definition
             # Save current position as last position
             self.prev_position = self.position
+            # Save prev_direction for child stuff
+            self.child_prev_direction = self.prev_direction
             # Moving up
             if self.direction == 0:
+                self.image = self.sprite_images[10]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] - self.size)
             # Moving down
             elif self.direction == 2:
+                self.image = self.sprite_images[11]
                 self.prev_direction = self.direction
                 self.position = (self.position[0], self.position[1] + self.size)
             # Moving left
             elif self.direction == 3:
+                self.image = self.sprite_images[13]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] - self.size, self.position[1])
             # Moving right
             elif self.direction == 1:
+                self.image = self.sprite_images[12]
                 self.prev_direction = self.direction
                 self.position = (self.position[0] + self.size, self.position[1])
             # Set the new last moved time
@@ -238,6 +253,7 @@ class TailSegment(Entity):
         self.alive = True
         # Parent of this child
         self.parent = parent
+        self.parent_dir = parent.direction
         # Is this a entity part of the player obj?
         self.player = player
         # Determines if entity can be killed
@@ -289,10 +305,48 @@ class TailSegment(Entity):
             # located where the parent obj was last
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
+            # Choose the right image for this segment
+            self.choose_img()
             # Render the tail segment based on it's parameters
             self.screen.blit(self.image, self.position)
             # Move the child to the front of the list
             self.parent.children.rotate()
+
+    def choose_img(self):
+        # Moving up
+        if self.parent.direction == 0:
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[0]
+            elif self.parent.child_prev_direction == 1:
+                self.image = self.parent.sprite_images[5]
+            elif self.parent.child_prev_direction == 3:
+                self.image = self.parent.sprite_images[4]
+        # Moving down
+        elif self.parent.direction == 2:
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[0]
+            elif self.parent.child_prev_direction == 1:
+                self.image = self.parent.sprite_images[2]
+            elif self.parent.child_prev_direction == 3:
+                self.image = self.parent.sprite_images[3]
+        # Moving left
+        elif self.parent.direction == 3:
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[1]
+            elif self.parent.child_prev_direction == 0:
+                self.image = self.parent.sprite_images[2]
+            elif self.parent.child_prev_direction == 2:
+                self.image = self.parent.sprite_images[5]
+        # Moving right
+        elif self.parent.direction == 1:
+            if self.parent.child_prev_direction == self.parent.direction:
+                self.image = self.parent.sprite_images[1]
+            elif self.parent.child_prev_direction == 0:
+                self.image = self.parent.sprite_images[3]
+            elif self.parent.child_prev_direction == 2:
+                self.image = self.parent.sprite_images[4]
+        else:
+            self.image = self.image
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound

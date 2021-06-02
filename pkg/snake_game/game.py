@@ -29,6 +29,7 @@ from .entities.entities import (
 # All the game menus
 from .menus.menus import Menu
 from .ai.ai import DecisionBox
+from .graphics.sprite_sheet import SpriteSheet
 # pylint: enable=relative-beyond-top-level
 
 
@@ -61,6 +62,7 @@ class SnakeGame():
         )
         # Game settings
         self.pause_game_music = False
+        self.timer = None
         # Game music
         self.game_music_intro = "assets/music/8bit_Stage1_Intro.wav"
         self.game_music_loop = "assets/music/8bit_Stage1_Loop.wav"
@@ -74,11 +76,30 @@ class SnakeGame():
             pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
             pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav"),
         ]
-        # Game timer
-        self.timer = None
         # Game object containers
         self.sprite_group = pygame.sprite.Group()
         self.dirty_rects = Deque()
+        ## Game sprite Sheets
+        # Snake Sprite Images
+        self.snake_sprite_sheet = SpriteSheet("assets/sprites/snake/snake-sheet.png")
+        self.snake_images = self.snake_sprite_sheet.load_grid_images(
+            num_rows=2, num_cols=8, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        # Snake Enemy Sprite Images
+        self.snake_enemy_sprite_sheet = SpriteSheet("assets/sprites/snake/snake_enemy-sheet.png")
+        self.snake_enemy_images = self.snake_enemy_sprite_sheet.load_grid_images(
+            num_rows=2, num_cols=8, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        self.food_sprite_sheet = SpriteSheet("assets/sprites/food/food-sheet.png")
+        # Food Sprite images
+        self.food_images = self.food_sprite_sheet.load_grid_images(
+            num_rows=1, num_cols=1, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
+        # Teleportal Sprite images
+        self.tele_portal_sprite_sheet = SpriteSheet("assets/sprites/tele_portal/tele_portal-sheet.png")
+        self.tele_portal_images = self.tele_portal_sprite_sheet.load_grid_images(
+            num_rows=1, num_cols=1, x_margin=1, x_padding=1, y_margin=1, y_padding=1
+        )
         # AI blackbox
         self.chosen_ai = None
         # Menu Obj
@@ -95,7 +116,7 @@ class SnakeGame():
         if self.menu.menu_option is None:
             # eval func's only once before loops
             fill_screen = self.screen.fill
-            append_dirty_rects = self.dirty_rects.append
+            ### append_dirty_rects = self.dirty_rects.append
             # Execute game object actions
             for obj in self.sprite_group.sprites():
                 # Make sure to refresh coming out of pause_menu
@@ -106,10 +127,10 @@ class SnakeGame():
                     obj.draw(self.sprite_group.sprites(), (False, True))
                 # take obj tick actions
                 updated = obj.update(self.sprite_group.sprites())
-                # Adding updated sprites to the dirty rects container
-                if updated or not obj.dirty_rect:
-                    append_dirty_rects(obj)
-                self.dirty_rects += obj.children
+                ## Adding updated sprites to the dirty rects container
+                ### if updated or not obj.dirty_rect:
+                ###     append_dirty_rects(obj)
+                ### self.dirty_rects += obj.children
                 # Draw game objects
                 obj.draw(self.sprite_group.sprites(), (updated, False))
                 # collision of obj to other objects/children-of-other-objs
@@ -118,12 +139,16 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
             # The game loop FPS counter
-            append_dirty_rects(update_fps())
+            if self.game_config["settings"]["display"]["fps_display"]:
+                ### append_dirty_rects(update_fps())
+                update_fps()
+            # Return to app
             return None, self.dirty_rects
-
+        # In a menu
         else:
             # The game loop FPS counter
-            update_fps()
+            if self.game_config["settings"]["display"]["fps_display"]:
+                update_fps()
             # Show which ever menu option that has been chosen:
             #   Main, Pause, Settings, GameOver, Display, Sound
             return self.menu.menu_options.get(self.menu.menu_option)(), None
@@ -155,13 +180,13 @@ class SnakeGame():
         enemy_snake.killable = False
         # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         # enemy_snake2.speed_mod = 3
-        # tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
+        tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         obj_container = [ # Order of these objects actually matter
             food,
             food2,
             # food3,
-            # tele_portal,
+            tele_portal,
             # player_snake,
             enemy_snake,
             # enemy_snake2,

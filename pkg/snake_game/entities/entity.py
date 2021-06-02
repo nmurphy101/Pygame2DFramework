@@ -62,6 +62,7 @@ class Entity(Sprite):
         self.time_last_moved = datetime.now()
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.prev_direction = 2
+        self.child_prev_direction = 2
         # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
         self.direction = 2
         # Determines how far the entity can see ahead of itself in the direction it's looking
@@ -91,10 +92,10 @@ class Entity(Sprite):
             Line(3, self),
         ]
         self.sight_lines_diag = [
-            Line(.5, self),
-            Line(1.5, self),
-            Line(2.5, self),
-            Line(3.5, self),
+            # Line(.5, self),
+            # Line(1.5, self),
+            # Line(2.5, self),
+            # Line(3.5, self),
         ]
         # Pathfinding variables
         self.target = None
@@ -129,6 +130,8 @@ class Entity(Sprite):
             # Render the entity's sight lines
             draw = Line.draw # eval func only once
             for line in self.sight_lines:
+                draw(line, self)
+            for line in self.sight_lines_diag:
                 draw(line, self)
             # Draw each child if there are any
             for child in self.children:
@@ -233,7 +236,7 @@ class Entity(Sprite):
         Check for self to other obj collision/interaction
         '''
         # Collision check between self and other obj
-        if pygame.sprite.collide_rect(self, obj):
+        if self.rect.colliderect(obj):
             if self.secondary_target == obj.position:
                 self.secondary_target = None
             # print(self.ID, " Interacting with obj ", obj.ID)
@@ -254,10 +257,10 @@ class Entity(Sprite):
         # Collision check between self and other obj's child
         if obj.children:
             # eval func only once before loop
-            collide_rect = pygame.sprite.collide_rect
+            collide_rect = pygame.Rect.colliderect
             # print(f"{obj.ID} has children {obj.children}")
             for child in obj.children:
-                if collide_rect(self, child):
+                if collide_rect(self.rect, child.rect):
                     if self.secondary_target == child.position:
                         self.secondary_target = None
                     # print(f"----{self.ID} Interacting with child 1 {child.ID}-----")
@@ -340,6 +343,9 @@ class Entity(Sprite):
                     child.spawn(obj_container)
             return True
         return False
+
+    def choose_img(self):
+        pass
 
     def grow(self, eaten_obj):
         pass

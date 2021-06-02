@@ -30,10 +30,15 @@ def display_menu(self):
     # Render the Display text
     _ = self.render_button("Display", 10, (255, 0, 0))
 
+    # Render the fps button
+    text_str = 'FPS: ' + str(self.game.game_config["settings"]["display"]["fps_display"])
+    fps_obj = self.render_button(text_str, 8)
+
     # Render the Return button
     back_obj = self.render_button("Back", -8)
 
     menu = [
+        (fps_obj, self.toggle_fps_display, self.prev_menu),
         (back_obj, self.SettingsMenu, 4),
     ]
 

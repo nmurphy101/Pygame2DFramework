@@ -49,6 +49,8 @@ class TelePortal(Entity):
         self.position = (x, y)
         # TelePortal color = blue
         self.obj_color = (0, 0, 255)
+        # teleportation portal Sprite images
+        self.tele_portal_images = self.app.game.tele_portal_images
         # Entity's visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
@@ -73,6 +75,25 @@ class TelePortal(Entity):
         # else:
             # updated = False
         return updated
+
+    def draw(self, obj_container, updated_refresh):
+        '''
+        draw
+        ~~~~~~~~~~
+
+        draw does stuff
+        '''
+        # render if alive
+        if self.alive:
+            # place hitbox at position
+            self.rect.topleft = self.position
+            # Choose the correct image
+            self.image = self.tele_portal_images[0]
+            # Render the tail segment based on it's parameters
+            self.screen.blit(self.image, self.position)
+            # Draw each child if there are any
+            for child in self.children:
+                child.draw(obj_container, updated_refresh)
 
     def teleport(self, obj):
         '''

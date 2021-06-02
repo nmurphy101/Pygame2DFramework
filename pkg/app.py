@@ -45,7 +45,7 @@ class App():
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 900
+        self.fps = 3000
         self.fps_list = []
         self.fps_pos = None
         self.fps_rect = None
@@ -58,6 +58,9 @@ class App():
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
 
+        self.debug_screen = None
+        self.background_0 = None
+
         UI_1 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI01.wav")
         UI_2 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI02.wav")
         UI_3 = pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI03.wav")
@@ -66,8 +69,6 @@ class App():
         ]
         self.ui_sound_options = {}
         self.pause_menu_options = {}
-        # event = None
-        # menu = None
         self.event_options = {
             QUIT: lambda **kwargs: self.quit(**kwargs),
             NEXT: lambda **kwargs: self.next_music(**kwargs),
@@ -76,10 +77,10 @@ class App():
             KEYDOWN: lambda **kwargs: self.key_down(**kwargs),
             MOUSEBUTTONDOWN: lambda **kwargs: self.mouse_down(**kwargs),
         }
+        # Limit the type of game events that can happen
         events = []
         for event in self.event_options.keys():
             events.append(event)
-        # Limit the type of game events that can happen
         pygame.event.set_allowed(events)
 
     def run(self):
@@ -128,6 +129,10 @@ class App():
         # flags = 0
         screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
         screen.set_alpha(None)
+        self.debug_screen = pygame.Surface((self.screen_width, self.screen_height))
+        self.debug_screen.set_colorkey((0, 0, 0))
+        self.background_0 = pygame.Surface((self.screen_width, self.screen_height))
+        self.background_0.set_colorkey((0, 0, 0))
         # screen.set_mode()
         alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
         alpha_screen.fill([0,0,0,0])
@@ -148,14 +153,15 @@ class App():
             1: None,
             None: 1,
         }
-        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 545,
-                        self.game.screen_size[1]/2 - self.game.game_font.size * 11.5,
-                        250, 138)
+        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
+                        self.game.screen_size[1]/2 - self.game.game_font.size * 12,
+                        250, 163)
         self.fps_rect = pygame.Rect(self.fps_pos)
 
     def update_fps(self):
         # Clear previous frame obj's location
-        self.game.screen.fill((0, 0, 0, 0), self.fps_pos)
+        # self.debug_screen.fill((0, 0, 0), self.fps_pos)
+        pygame.draw.rect(self.game.screen, (0, 0, 0), self.fps_pos)
         fps = str(int(self.clock.get_fps()))
         _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
         self.fps_list.append(int(fps))
@@ -179,7 +185,7 @@ class App():
         '''
         for event in pygame.event.get():
             # Possible event options:
-            #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST,  KEYDOWN, MOUSEBUTTONDOWN,
+            #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN
             decision_func = event_get(event.type)
             if decision_func:
                 decision_func(event=event, menu=menu)
