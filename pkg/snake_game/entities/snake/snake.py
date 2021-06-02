@@ -126,8 +126,8 @@ class Snake(Entity):
                 append_dirty_rects(self.children[-1])
                 # Only move/render the last child to front of the train
                 self.children[-1].draw(obj_container, updated_refresh)
-                # Change the new last child's image
-                self.children[-1]
+                # Change the new last child's image to the tail
+                self.children[-1].make_end_img()
 
     def grow(self, eaten_obj):
         '''
@@ -284,6 +284,7 @@ class TailSegment(Entity):
         # Entity's visual representation
         self.image = pygame.Surface((self.size, self.size))
         self.image.fill(self.obj_color)
+        self.img_index = 2
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
         #
@@ -316,37 +317,64 @@ class TailSegment(Entity):
         # Moving up
         if self.parent.direction == 0:
             if self.parent.child_prev_direction == self.parent.direction:
-                self.image = self.parent.sprite_images[0]
+                self.img_index = 0
             elif self.parent.child_prev_direction == 1:
-                self.image = self.parent.sprite_images[5]
+                self.img_index = 5
             elif self.parent.child_prev_direction == 3:
-                self.image = self.parent.sprite_images[4]
+                self.img_index = 4
         # Moving down
         elif self.parent.direction == 2:
             if self.parent.child_prev_direction == self.parent.direction:
-                self.image = self.parent.sprite_images[0]
+                self.img_index = 0
             elif self.parent.child_prev_direction == 1:
-                self.image = self.parent.sprite_images[2]
+                self.img_index = 2
             elif self.parent.child_prev_direction == 3:
-                self.image = self.parent.sprite_images[3]
+                self.img_index = 3
         # Moving left
         elif self.parent.direction == 3:
             if self.parent.child_prev_direction == self.parent.direction:
-                self.image = self.parent.sprite_images[1]
+                self.img_index = 1
             elif self.parent.child_prev_direction == 0:
-                self.image = self.parent.sprite_images[2]
+                self.img_index = 2
             elif self.parent.child_prev_direction == 2:
-                self.image = self.parent.sprite_images[5]
+                self.img_index = 5
         # Moving right
         elif self.parent.direction == 1:
             if self.parent.child_prev_direction == self.parent.direction:
-                self.image = self.parent.sprite_images[1]
+                self.img_index = 1
             elif self.parent.child_prev_direction == 0:
-                self.image = self.parent.sprite_images[3]
+                self.img_index = 3
             elif self.parent.child_prev_direction == 2:
-                self.image = self.parent.sprite_images[4]
+                self.img_index = 4
         else:
-            self.image = self.image
+            self.img_index = self.img_index
+
+        self.image = self.parent.sprite_images[self.img_index]
+        self.parent_dir = self.parent.direction
+
+    def make_end_img(self):
+        ahead_img_index = self.parent.children[-2].img_index
+        if ahead_img_index in [0, 4, 5]:
+            if self.parent_dir == 0:
+                self.img_index = 6
+            elif self.parent_dir == 1:
+                self.img_index = 8
+            elif self.parent_dir == 3:
+                self.img_index = 9
+            else:
+                self.img_index = 7
+        elif ahead_img_index in [1, 2, 3]:
+            if self.parent_dir == 1:
+                self.img_index = 8
+            elif self.parent_dir == 0:
+                self.img_index = 6
+            elif self.parent_dir == 0:
+                self.img_index = 7
+            else:
+                self.img_index = 9
+        self.image = self.parent.sprite_images[self.img_index]
+        # Render the tail segment based on it's parameters
+        self.screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
         # Play interacting_obj death sound
