@@ -50,14 +50,13 @@ class App():
         self.fps_pos = None
         self.fps_rect = None
         self.clock = None
-        self.screen_width = 1280
-        self.screen_height = 720
         self.title = "Game Platform - "
         mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
         init()
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
 
+        self.screen = None
         self.debug_screen = None
         self.background_0 = None
 
@@ -86,6 +85,9 @@ class App():
         self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
         with open(self.game_config_file_path) as json_data_file:
             self.game_config = json.load(json_data_file)
+        resolution = self.game_config["settings"]["display"]["resolution"].split("x")
+        self.screen_width = int(resolution[0])
+        self.screen_height = int(resolution[1])
 
     def run(self):
         '''
@@ -134,8 +136,8 @@ class App():
         else:
             flags = pygame.DOUBLEBUF
         # flags = 0
-        screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
-        screen.set_alpha(None)
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
+        self.screen.set_alpha(None)
         self.debug_screen = pygame.Surface((self.screen_width, self.screen_height))
         self.debug_screen.set_colorkey((0, 0, 0))
         self.background_0 = pygame.Surface((self.screen_width, self.screen_height))
@@ -144,11 +146,11 @@ class App():
         alpha_screen = pygame.Surface((self.screen_width, self.screen_height)).convert_alpha()
         alpha_screen.fill([0,0,0,0])
         pygame.display.set_caption(self.title)
-        screen.fill(background_colour)
+        self.screen.fill(background_colour)
         # Show game window
         pygame.display.flip()
         # Instantiate the Game Obj
-        self.game = self.game_pkg(alpha_screen, screen, self)
+        self.game = self.game_pkg(alpha_screen, self.screen, self)
         # Instatiate options dict's
         self.ui_sound_options = {
             self.game.start: 2,
@@ -168,6 +170,9 @@ class App():
     def update_fps(self):
         # Clear previous frame obj's location
         # self.debug_screen.fill((0, 0, 0), self.fps_pos)
+        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
+                        self.game.screen_size[1]/2 - self.game.game_font.size * 12,
+                        250, 163)
         pygame.draw.rect(self.game.screen, (0, 0, 0), self.fps_pos)
         fps = str(int(self.clock.get_fps()))
         _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
@@ -202,6 +207,9 @@ class App():
 
     def window_focus(self, focus, **_):
         self.game.focus_pause = focus
+
+    def window_resize(self, **kwargs):
+        pass
 
     def key_down(self, **kwargs):
         # Pressed escape to pause/unpause/back

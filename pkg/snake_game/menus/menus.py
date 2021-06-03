@@ -183,3 +183,27 @@ class Menu():
         self.game.app.game_config["settings"]["display"]["fullscreen"] = not self.game.app.game_config["settings"]["display"]["fullscreen"]
         self.save_settings()
         pygame.display.toggle_fullscreen()
+
+    def change_resolution(self, resolution):
+        '''
+        change_resolution
+        ~~~~~~~~~~
+
+        change_resolution does stuff
+        '''
+        self.game.app.game_config["settings"]["display"]["resolution"] = resolution
+        self.save_settings()
+        self.game.app.screen_width = int(resolution.split("x")[0])
+        self.game.app.screen_height = int(resolution.split("x")[1])
+        self.game.screen_size = (self.game.app.screen_width, self.game.app.screen_height)
+        if self.game.app.game_config["settings"]["display"]["fullscreen"]:
+            flags = pygame.DOUBLEBUF | pygame.FULLSCREEN
+        else:
+            flags = pygame.DOUBLEBUF
+        # Modify all game screens with new resolution
+        self.game.screen = pygame.display.set_mode((self.game.app.screen_width, self.game.app.screen_height), flags, 16)#, RESIZABLE)
+        self.game.screen.set_alpha(None)
+        self.game.app.debug_screen = pygame.Surface((self.game.app.screen_width, self.game.app.screen_height))
+        self.game.app.debug_screen.set_colorkey((0, 0, 0))
+        self.game.app.background_0 = pygame.Surface((self.game.app.screen_width, self.game.app.screen_height))
+        self.game.app.background_0.set_colorkey((0, 0, 0))

@@ -9,7 +9,8 @@
         "display": {
             "fps": 1000,
             "fps_display": true,
-            "fullscreen": false
+            "fullscreen": false,
+            "resolution": "1280x720"
         }
     }
 }
