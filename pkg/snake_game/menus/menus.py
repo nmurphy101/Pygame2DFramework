@@ -87,8 +87,8 @@ class Menu():
         return obj
 
     def save_settings(self):
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+        with open(self.game.app.game_config_file_path, 'w', encoding='utf-8') as _file:
+            json.dump(self.game.app.game_config, _file, ensure_ascii=False, indent=4)
 
     def toggle_game_music(self):
         '''
@@ -97,7 +97,7 @@ class Menu():
 
         toggle_game_music does stuff
         '''
-        self.game.game_config["settings"]["sound"]["music"] = not self.game.game_config["settings"]["sound"]["music"]
+        self.game.app.game_config["settings"]["sound"]["music"] = not self.game.app.game_config["settings"]["sound"]["music"]
         self.save_settings()
 
     def increase_music_volume(self):
@@ -107,9 +107,9 @@ class Menu():
 
         increase_music_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.game_config["settings"]["sound"]["music_volume"]) + .05)
+        self.game.app.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["music_volume"]) + .05)
         self.save_settings()
-        pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["sound"]["music_volume"]))
+        pygame.mixer.music.set_volume(float(self.game.app.game_config["settings"]["sound"]["music_volume"]))
 
     def decrease_music_volume(self):
         '''
@@ -118,9 +118,9 @@ class Menu():
 
         decrease_music_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.game_config["settings"]["sound"]["music_volume"]) - .05)
+        self.game.app.game_config["settings"]["sound"]["music_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["music_volume"]) - .05)
         self.save_settings()
-        pygame.mixer.music.set_volume(float(self.game.game_config["settings"]["sound"]["music_volume"]))
+        pygame.mixer.music.set_volume(float(self.game.app.game_config["settings"]["sound"]["music_volume"]))
 
     def increase_effect_volume(self):
         '''
@@ -129,7 +129,7 @@ class Menu():
 
         increase_effect_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.game_config["settings"]["sound"]["effect_volume"]) + .05)
+        self.game.app.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["effect_volume"]) + .05)
         self.save_settings()
 
     def decrease_effect_volume(self):
@@ -139,7 +139,7 @@ class Menu():
 
         decrease_effect_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.game_config["settings"]["sound"]["effect_volume"]) - .05)
+        self.game.app.game_config["settings"]["sound"]["effect_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["effect_volume"]) - .05)
         self.save_settings()
 
     def increase_menu_volume(self):
@@ -149,7 +149,7 @@ class Menu():
 
         increase_menu_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.game_config["settings"]["sound"]["menu_volume"]) + .05)
+        self.game.app.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["menu_volume"]) + .05)
         self.save_settings()
 
     def decrease_menu_volume(self):
@@ -159,7 +159,7 @@ class Menu():
 
         decrease_menu_volume does stuff
         '''
-        self.game.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.game_config["settings"]["sound"]["menu_volume"]) - .05)
+        self.game.app.game_config["settings"]["sound"]["menu_volume"] = str(float(self.game.app.game_config["settings"]["sound"]["menu_volume"]) - .05)
         self.save_settings()
 
 
@@ -170,5 +170,16 @@ class Menu():
 
         toggle_fps_display does stuff
         '''
-        self.game.game_config["settings"]["display"]["fps_display"] = not self.game.game_config["settings"]["display"]["fps_display"]
+        self.game.app.game_config["settings"]["display"]["fps_display"] = not self.game.app.game_config["settings"]["display"]["fps_display"]
         self.save_settings()
+
+    def toggle_fullscreen(self):
+        '''
+        toggle_fullscreen
+        ~~~~~~~~~~
+
+        toggle_fullscreen does stuff
+        '''
+        self.game.app.game_config["settings"]["display"]["fullscreen"] = not self.game.app.game_config["settings"]["display"]["fullscreen"]
+        self.save_settings()
+        pygame.display.toggle_fullscreen()

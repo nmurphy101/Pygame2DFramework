@@ -81,7 +81,7 @@ class Entity(Sprite):
         # Default death sound
         self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
-        self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Dirty rect or not
         self.dirty_rect = False
         # Sight lines
@@ -154,7 +154,7 @@ class Entity(Sprite):
     def interact(self, interacting_obj):
         # Play interacting_obj death sound
         sound = interacting_obj.sound_death
-        interacting_obj.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        interacting_obj.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         sound.set_volume(interacting_obj.sound_death_volume)
         pygame.mixer.Sound.play(sound)
         # Loose the game if interacting_obj is the player
@@ -168,7 +168,7 @@ class Entity(Sprite):
             # print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
-            self.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
             sound.set_volume(self.sound_death_volume)
             pygame.mixer.Sound.play(sound)
             # Loose the game if self is the player

@@ -12,11 +12,9 @@
 '''
 
 
-import os
 import gc
 from datetime import datetime
 from typing import Deque
-import json
 import pygame
 # pylint: disable=relative-beyond-top-level
 from pygame import (
@@ -43,12 +41,8 @@ class SnakeGame():
     def __init__(self, alpha_screen, screen, app):
         # Calling game platform
         self.app = app
-        # Game config file
-        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
-        with open(self.game_config_file_path) as json_data_file:
-            self.game_config = json.load(json_data_file)
         # Set starting fps from the config file
-        self.app.fps = int(self.game_config["settings"]["display"]["fps"])
+        self.app.fps = int(self.app.game_config["settings"]["display"]["fps"])
         # Window settings
         self.title = app.title + "Snake"
         pygame.display.set_caption(self.title)
@@ -69,7 +63,7 @@ class SnakeGame():
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
-        pygame.mixer.music.set_volume(float(self.game_config["settings"]["sound"]["music_volume"]))
+        pygame.mixer.music.set_volume(float(self.app.game_config["settings"]["sound"]["music_volume"]))
         # Game Sounds
         self.sounds = [
             pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
@@ -139,7 +133,7 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
             # The game loop FPS counter
-            if self.game_config["settings"]["display"]["fps_display"]:
+            if self.app.game_config["settings"]["display"]["fps_display"]:
                 ### append_dirty_rects(update_fps())
                 update_fps()
             # Return to app
@@ -147,7 +141,7 @@ class SnakeGame():
         # In a menu
         else:
             # The game loop FPS counter
-            if self.game_config["settings"]["display"]["fps_display"]:
+            if self.app.game_config["settings"]["display"]["fps_display"]:
                 update_fps()
             # Show which ever menu option that has been chosen:
             #   Main, Pause, Settings, GameOver, Display, Sound
@@ -225,10 +219,10 @@ class SnakeGame():
         settings_checks does stuff
         '''
         # Start the game music
-        if self.game_config["settings"]["sound"]["music"]:
+        if self.app.game_config["settings"]["sound"]["music"]:
             self.current_track = 0
             pygame.mixer.music.load(self.playlist[self.current_track])
-            pygame.mixer.music.set_volume(float(self.game_config["settings"]["sound"]["music_volume"]))
+            pygame.mixer.music.set_volume(float(self.app.game_config["settings"]["sound"]["music_volume"]))
             pygame.mixer.music.play(0, 0, 1)
         else:
             pygame.mixer.music.pause()

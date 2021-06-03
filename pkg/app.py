@@ -11,7 +11,7 @@
 '''
 
 
-# import os
+import os
 # import threading
 # import logging
 # import sys
@@ -20,7 +20,7 @@
 # import queue as q
 # from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
 import statistics
-import gc
+import json
 import pygame
 # pylint: disable=no-name-in-module
 from pygame import (
@@ -82,6 +82,10 @@ class App():
         for event in self.event_options.keys():
             events.append(event)
         pygame.event.set_allowed(events)
+        # Game config file
+        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
+        with open(self.game_config_file_path) as json_data_file:
+            self.game_config = json.load(json_data_file)
 
     def run(self):
         '''
@@ -125,7 +129,10 @@ class App():
         '''
         # Game window settings
         background_colour = (0, 0, 0)
-        flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN |
+        if self.game_config["settings"]["display"]["fullscreen"]:
+            flags = pygame.DOUBLEBUF | pygame.FULLSCREEN
+        else:
+            flags = pygame.DOUBLEBUF
         # flags = 0
         screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags, 16)#, RESIZABLE)
         screen.set_alpha(None)
@@ -231,5 +238,5 @@ class App():
 
     def play_ui_sound(self, num):
         menu_sound = self.menu_sounds[num]
-        menu_sound.set_volume(float(self.game.game_config["settings"]["sound"]["menu_volume"])/1.5)
+        menu_sound.set_volume(float(self.game_config["settings"]["sound"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)

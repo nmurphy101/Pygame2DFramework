@@ -75,7 +75,7 @@ class Snake(Entity):
         # Snake death sound
         self.sound_death = self.app.game.sounds[0]
         self.sound_mod = 4.5
-        self.sound_death_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        self.sound_death_volume = float(app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
         # Dirty rect or not
@@ -379,7 +379,7 @@ class TailSegment(Entity):
     def interact(self, interacting_obj):
         # Play interacting_obj death sound
         sound = interacting_obj.sound_death
-        interacting_obj.sound_death_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        interacting_obj.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         sound.set_volume(interacting_obj.sound_death_volume)
         pygame.mixer.Sound.play(sound)
         # Loose the game if interacting_obj is the player

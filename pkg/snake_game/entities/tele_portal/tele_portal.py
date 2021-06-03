@@ -59,7 +59,7 @@ class TelePortal(Entity):
         # Interact sound
         self.sound_interact = self.app.game.sounds[2]
         self.sound_mod = 2.5
-        self.sound_interact_volume = float(app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        self.sound_interact_volume = float(app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         # Active trigger
         self.activated = datetime.now()
         # No Sight lines for tail segments
@@ -131,7 +131,7 @@ class TelePortal(Entity):
 
         # Play second obj's interact sound
         sound = self.sound_interact
-        self.sound_interact_volume = float(self.app.game.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        self.sound_interact_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         sound.set_volume(self.sound_interact_volume)
         pygame.mixer.Sound.play(sound)
 
