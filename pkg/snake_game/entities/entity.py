@@ -92,10 +92,10 @@ class Entity(Sprite):
             Line(3, self),
         ]
         self.sight_lines_diag = [
-            # Line(.5, self),
-            # Line(1.5, self),
-            # Line(2.5, self),
-            # Line(3.5, self),
+            Line(.5, self),
+            Line(1.5, self),
+            Line(2.5, self),
+            Line(3.5, self),
         ]
         # Pathfinding variables
         self.target = None
@@ -322,7 +322,7 @@ class Entity(Sprite):
                 if dist_self < primary_target[1]:
                     pos = (obj.position[0], obj.position[1])
                     primary_target = (pos, dist_self)
-        self.target = (primary_target[0][0], primary_target[0][1])
+        self.target = (target_name, primary_target[0][0], primary_target[0][1])
         self.direction = self.app.game.chosen_ai.decide_direction(
             self, self.target, self.app.game.sprite_group, difficulty=10
         )
@@ -428,22 +428,22 @@ class Line(Sprite):
         self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
 
     def draw_up_right(self, entity):
-        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1] - entity.sight
+        self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5
 
     def draw_right(self, entity):
         self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
 
     def draw_down_right(self, entity):
-        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1] + entity.sight
+        self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
 
     def draw_down(self, entity):
         self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
 
     def draw_down_left(self, entity):
-        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1] + entity.sight
+        self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
 
     def draw_left(self, entity):
         self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
 
     def draw_up_left(self, entity):
-        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1] - entity.sight
+        self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5

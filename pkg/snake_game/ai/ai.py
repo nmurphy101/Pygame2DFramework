@@ -46,14 +46,14 @@ class DecisionBox:
         # print("Simple Intent Chosen")
         intent = None
         # Equal, Right, or left  Intent
-        if entity.position[0] < target[0]:
+        if entity.position[0] < target[1]:
             intent = 1
-        elif entity.position[0] > target[0]:
+        elif entity.position[0] > target[1]:
             intent = 3
         # Equal, down, or up  Intent
-        elif entity.position[1] < target[1]:
+        elif entity.position[1] < target[2]:
             intent = 2
-        elif entity.position[1] > target[1]:
+        elif entity.position[1] > target[2]:
             intent = 0
 
         intent = self.check_intent(entity, intent)
@@ -68,14 +68,14 @@ class DecisionBox:
         # print(entity.secondary_target)
         if entity.secondary_target == None:
             # Equal, Right, or left  Intent
-            if entity.position[0] < target[0]:
+            if entity.position[0] < target[1]:
                 intent = 1
-            elif entity.position[0] > target[0]:
+            elif entity.position[0] > target[1]:
                 intent = 3
             # Equal, down, or up  Intent
-            elif entity.position[1] < target[1]:
+            elif entity.position[1] < target[2]:
                 intent = 2
-            elif entity.position[1] > target[1]:
+            elif entity.position[1] > target[2]:
                 intent = 0
         else:
             # Go for secondary target within timeframe
@@ -92,14 +92,14 @@ class DecisionBox:
                     intent = 0
             else:
                 # Equal, Right, or left  Intent
-                if entity.position[0] < target[0]:
+                if entity.position[0] < target[1]:
                     intent = 1
-                elif entity.position[0] > target[0]:
+                elif entity.position[0] > target[1]:
                     intent = 3
                 # Equal, down, or up  Intent
-                elif entity.position[1] < target[1]:
+                elif entity.position[1] < target[2]:
                     intent = 2
-                elif entity.position[1] > target[1]:
+                elif entity.position[1] > target[2]:
                     intent = 0
 
         intent = self.check_intent(entity, intent)
@@ -123,7 +123,7 @@ class DecisionBox:
             reset_sight_lines(entity)
             for obj in self.obj_container:
                 # Ignore the target object
-                if entity.target != obj.position:
+                if entity.target[0] not in obj.name:
                 # if "food" not in obj.name:
                     # Check if object obstructs entity (and isn't self)
                     if obj != entity:
@@ -141,26 +141,18 @@ class DecisionBox:
         return intent
 
     def verify_sight_lines(self, obj, entity, decide_portal, collide_rect, situational_intent, hypot):
-        # for line in entity.sight_lines_diag:
-            # # Edge of screen detection
-            # if line.direction == 0 and line.end[1] <= 0:
-            #     line.open = False
-            # elif line.direction == 2 and line.end[1] >= entity.screen_size[1]:
-            #     line.open = False
-            # elif line.direction == 3 and line.end[0] <= 0:
-            #     line.open = False
-            # elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
-            #     line.open = False
+        for line in entity.sight_lines_diag:
             # Check the sight lines for a open direction
-            # if collide_rect(obj, line):
-            #     if not "segment" in obj.ID:
-            #         print(f"Diagonal line collision {obj.ID} and {line.direction}")
-            #     line.open = False
+            if pygame.Rect.collidepoint(obj.rect, line.end):
+                # if not "segment" in obj.ID:
+                # print(f"diagonal line collision {obj.ID} and {line.direction}")
                 # # Will Ai see and use portals?
                 # if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
                 #     line.open = decide_portal(obj, entity, situational_intent, hypot)
                 # else:
-                    # line.open = False
+                line.open = False
+            # print(line.open, line.direction, entity.direction)
+        # print("--------------")
         # Verify intention with sight lines
         for line in entity.sight_lines:
             # Edge of screen detection
@@ -172,25 +164,23 @@ class DecisionBox:
                 line.open = False
             elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
                 line.open = False
-            # Verify with diagonal sight lines
-            # elif line.direction == 0:
-            #     if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[3].open:
-            #         print(f"Test1: {entity.direction} -- {line.direction}")
-            #         line.open = False
-            # elif line.direction == 2:
-            #     if not entity.sight_lines_diag[1].open and not entity.sight_lines_diag[2].open:
-            #         print(f"Test2: {entity.sight_lines_diag[1].open} -- {entity.sight_lines_diag[2].open}")
-            #         line.open = False
-            # elif line.direction == 3:
-            #     if not entity.sight_lines_diag[2].open and not entity.sight_lines_diag[3].open:
-            #         print(f"Test3: {entity.direction} -- {line.direction}")
-            #         line.open = False
-            # elif line.direction == 1:
-            #     if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[1].open:
-            #         print(f"Test4: {entity.direction} -- {line.direction}")
-            #         line.open = False
+            # Verify with farsight sight lines
+            if line.direction == 0:
+                if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[3].open:
+                    line.open = False
+            elif line.direction == 2:
+                if not entity.sight_lines_diag[2].open and not entity.sight_lines_diag[1].open:
+                    line.open = False
+            elif line.direction == 3:
+                if not entity.sight_lines_diag[3].open and not entity.sight_lines_diag[2].open:
+                    line.open = False
+            elif line.direction == 1:
+                if not entity.sight_lines_diag[1].open and not entity.sight_lines_diag[0].open :
+                    line.open = False
             # Check the sight lines for a open direction
             if collide_rect(obj.rect, line.rect):
+                # if not "segment" in obj.ID:
+                # print(f"cardinal line collision {obj.ID} and {line.direction}")
                 # Will Ai see and use portals?
                 if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
                     line.open = decide_portal(obj, entity, situational_intent, hypot)
@@ -255,8 +245,8 @@ class DecisionBox:
 
     def decide_portal(self, obj, entity, situational_intent, hypot):
         if obj.parent:
-            dist_oth_portal = hypot(entity.target[0] - obj.parent.position[0], entity.target[1] - obj.parent.position[1])
-            dist_self = hypot(entity.target[0] - entity.position[0], entity.target[1] - entity.position[1])
+            dist_oth_portal = hypot(entity.target[1] - obj.parent.position[0], entity.target[2] - obj.parent.position[1])
+            dist_self = hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
             if dist_oth_portal < dist_self:
                 if entity.secondary_target:
                     return True
@@ -266,8 +256,8 @@ class DecisionBox:
             else:
                 return False
         else:
-            dist_oth_portal = hypot(entity.target[0] - obj.children[0].position[0], entity.target[1] - obj.children[0].position[1])
-            dist_self = hypot(entity.target[0] - entity.position[0], entity.target[1] - entity.position[1])
+            dist_oth_portal = hypot(entity.target[1] - obj.children[0].position[0], entity.target[2] - obj.children[0].position[1])
+            dist_self = hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
             if dist_oth_portal < dist_self:
                 if entity.secondary_target:
                     return True
