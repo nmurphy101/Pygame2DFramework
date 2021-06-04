@@ -112,21 +112,21 @@ class SnakeGame():
             fill_screen = self.screen.fill
             ### append_dirty_rects = self.dirty_rects.append
             # Execute game object actions
-            for obj in self.sprite_group.sprites():
+            for obj in self.sprite_group:
                 # Make sure to refresh coming out of pause_menu
                 if self.menu.prev_menu in [0, 1]:
                     # Clear previous frame render (from menu)
                     fill_screen((0, 0, 0, 0))
                     # Draw game objects
-                    obj.draw(self.sprite_group.sprites(), (False, True))
+                    obj.draw(self.sprite_group, (False, True))
                 # take obj tick actions
-                updated = obj.update(self.sprite_group.sprites())
+                updated = obj.update(self.sprite_group)
                 ## Adding updated sprites to the dirty rects container
                 ### if updated or not obj.dirty_rect:
                 ###     append_dirty_rects(obj)
                 ### self.dirty_rects += obj.children
                 # Draw game objects
-                obj.draw(self.sprite_group.sprites(), (updated, False))
+                obj.draw(self.sprite_group, (updated, False))
                 # collision of obj to other objects/children-of-other-objs
                 obj.collision_checks(updated)
             # Only 1 tick to refresh from pause_menu
@@ -172,8 +172,10 @@ class SnakeGame():
         enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
         enemy_snake.speed_mod = 3
         enemy_snake.killable = False
-        # enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-        # enemy_snake2.speed_mod = 3
+        enemy_snake2 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
+        enemy_snake2.speed_mod = 3
+        enemy_snake3 = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
+        enemy_snake3.speed_mod = 3
         tele_portal = TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app)
         # Set of game objects
         obj_container = [ # Order of these objects actually matter
@@ -184,6 +186,7 @@ class SnakeGame():
             # player_snake,
             enemy_snake,
             # enemy_snake2,
+            # enemy_snake3,
         ]
         # Sprite Group obj
         for obj in obj_container:

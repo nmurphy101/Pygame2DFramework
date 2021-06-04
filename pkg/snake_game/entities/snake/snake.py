@@ -377,13 +377,5 @@ class TailSegment(Entity):
         self.screen.blit(self.image, self.position)
 
     def interact(self, interacting_obj):
-        # Play interacting_obj death sound
-        sound = interacting_obj.sound_death
-        interacting_obj.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-        sound.set_volume(interacting_obj.sound_death_volume)
-        pygame.mixer.Sound.play(sound)
-        # Loose the game if interacting_obj is the player
-        if interacting_obj.player:
-            self.app.game.menu.menu_option = 3
         # Kill interacting_obj
         interacting_obj.die(f"collided with {self.ID} and died")

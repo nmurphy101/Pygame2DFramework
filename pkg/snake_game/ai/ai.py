@@ -25,8 +25,9 @@ class DecisionBox:
     def __init__(self):
         self.difficulty = None
         self.obj_container = None
-        self.portal_use_difficulty = 1
         self.time_chase = 0
+        self.portal_use_difficulty = 1
+        self.farsight_use_difficulty = 1
 
     def decide_direction(self, entity, target, obj_container, difficulty=0):
         if not target:
@@ -67,40 +68,41 @@ class DecisionBox:
         intent = None
         # print(entity.secondary_target)
         if entity.secondary_target == None:
-            # Equal, Right, or left  Intent
-            if entity.position[0] < target[1]:
-                intent = 1
-            elif entity.position[0] > target[1]:
-                intent = 3
             # Equal, down, or up  Intent
-            elif entity.position[1] < target[2]:
+            if entity.position[1] < target[2]:
                 intent = 2
             elif entity.position[1] > target[2]:
                 intent = 0
+            # Equal, Right, or left  Intent
+            elif entity.position[0] < target[1]:
+                intent = 1
+            elif entity.position[0] > target[1]:
+                intent = 3
+
         else:
             # Go for secondary target within timeframe
             if datetime.now() <= entity.since_secondary_target + timedelta(seconds=self.time_chase):
-                # Equal, Right, or left  Intent
-                if entity.position[0] < entity.secondary_target[0]:
-                    intent = 1
-                elif entity.position[0] > entity.secondary_target[0]:
-                    intent = 3
                 # Equal, down, or up  Intent
-                elif entity.position[1] < entity.secondary_target[1]:
+                if entity.position[1] < entity.secondary_target[1]:
                     intent = 2
                 elif entity.position[1] > entity.secondary_target[1]:
                     intent = 0
-            else:
                 # Equal, Right, or left  Intent
-                if entity.position[0] < target[1]:
+                elif entity.position[0] < entity.secondary_target[0]:
                     intent = 1
-                elif entity.position[0] > target[1]:
+                elif entity.position[0] > entity.secondary_target[0]:
                     intent = 3
+            else:
                 # Equal, down, or up  Intent
-                elif entity.position[1] < target[2]:
+                if entity.position[1] < target[2]:
                     intent = 2
                 elif entity.position[1] > target[2]:
                     intent = 0
+                # Equal, Right, or left  Intent
+                elif entity.position[0] < target[1]:
+                    intent = 1
+                elif entity.position[0] > target[1]:
+                    intent = 3
 
         intent = self.check_intent(entity, intent)
 
@@ -127,12 +129,12 @@ class DecisionBox:
                 # if "food" not in obj.name:
                     # Check if object obstructs entity (and isn't self)
                     if obj != entity:
-                        verify_sight_lines(obj, entity, decide_portal, collide_rect, situational_intent, hypot)
+                        verify_sight_lines(obj, entity, intent, decide_portal, collide_rect, situational_intent, hypot)
                         intent = get_intent(intent, entity)
                     # Check if object's children if any (even if self) obstructs entity
                     if obj.children:
                         for child in obj.children:
-                            verify_sight_lines(child, entity, decide_portal, collide_rect, situational_intent, hypot)
+                            verify_sight_lines(child, entity, intent, decide_portal, collide_rect, situational_intent, hypot)
                             intent = get_intent(intent, entity)
             # Break from while loop
             break
@@ -140,43 +142,27 @@ class DecisionBox:
         # print(f"Returning Found Intent: {intent}")
         return intent
 
-    def verify_sight_lines(self, obj, entity, decide_portal, collide_rect, situational_intent, hypot):
+    def verify_sight_lines(self, obj, entity, intent, decide_portal, collide_rect, situational_intent, hypot):
         for line in entity.sight_lines_diag:
             # Check the sight lines for a open direction
             if pygame.Rect.collidepoint(obj.rect, line.end):
-                # if not "segment" in obj.ID:
-                # print(f"diagonal line collision {obj.ID} and {line.direction}")
-                # # Will Ai see and use portals?
-                # if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
-                #     line.open = decide_portal(obj, entity, situational_intent, hypot)
-                # else:
                 line.open = False
-            # print(line.open, line.direction, entity.direction)
-        # print("--------------")
+                continue
+             # Edge of screen detection
+            elif line.end[1] <= 0:
+                line.open = False
+                continue
+            elif line.end[1] >= entity.screen_size[1]:
+                line.open = False
+                continue
+            elif line.end[0] <= 0:
+                line.open = False
+                continue
+            elif line.end[0] >= entity.screen_size[0]:
+                line.open = False
+                continue
         # Verify intention with sight lines
         for line in entity.sight_lines:
-            # Edge of screen detection
-            if line.direction == 0 and line.end[1] <= 0:
-                line.open = False
-            elif line.direction == 2 and line.end[1] >= entity.screen_size[1]:
-                line.open = False
-            elif line.direction == 3 and line.end[0] <= 0:
-                line.open = False
-            elif line.direction == 1 and line.end[0] >= entity.screen_size[0]:
-                line.open = False
-            # Verify with farsight sight lines
-            if line.direction == 0:
-                if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[3].open:
-                    line.open = False
-            elif line.direction == 2:
-                if not entity.sight_lines_diag[2].open and not entity.sight_lines_diag[1].open:
-                    line.open = False
-            elif line.direction == 3:
-                if not entity.sight_lines_diag[3].open and not entity.sight_lines_diag[2].open:
-                    line.open = False
-            elif line.direction == 1:
-                if not entity.sight_lines_diag[1].open and not entity.sight_lines_diag[0].open :
-                    line.open = False
             # Check the sight lines for a open direction
             if collide_rect(obj.rect, line.rect):
                 # if not "segment" in obj.ID:
@@ -186,6 +172,42 @@ class DecisionBox:
                     line.open = decide_portal(obj, entity, situational_intent, hypot)
                 else:
                     line.open = False
+                    continue
+            # Edge of screen detection
+            elif line.direction == 0 and line.end[1] <= (0 - entity.size):
+                line.open = False
+                continue
+            elif line.direction == 2 and line.end[1] >= (entity.screen_size[1] + entity.size):
+                line.open = False
+                continue
+            elif line.direction == 3 and line.end[0] <= (0 - entity.size):
+                line.open = False
+                continue
+            elif line.direction == 1 and line.end[0] >= (entity.screen_size[0] + entity.size):
+                line.open = False
+                continue
+            # Verify with farsight sight lines
+            if entity.sight_lines_diag != [] and self.difficulty >= self.farsight_use_difficulty:
+                if line.direction == 0 and intent == 0:
+                    if not entity.sight_lines_diag[0].open and not entity.sight_lines_diag[3].open:
+                        line.open = False
+                        # input(f"Press to continue: 0 - {entity.sight_lines_diag[0].open} and {entity.sight_lines_diag[3].open}")
+                        continue
+                elif line.direction == 2 and intent == 2:
+                    if not entity.sight_lines_diag[2].open and not entity.sight_lines_diag[1].open:
+                        line.open = False
+                        # input(f"Press to continue: 2 - {entity.sight_lines_diag[2].open} and {entity.sight_lines_diag[1].open}")
+                        continue
+                elif line.direction == 3 and intent == 3:
+                    if not entity.sight_lines_diag[3].open and not entity.sight_lines_diag[2].open:
+                        line.open = False
+                        # input(f"Press to continue: 3 - {entity.sight_lines_diag[3].open} and {entity.sight_lines_diag[2].open}")
+                        continue
+                elif line.direction == 1 and intent == 1:
+                    if not entity.sight_lines_diag[1].open and not entity.sight_lines_diag[0].open :
+                        line.open = False
+                        # input(f"Press to continue: 1 - {entity.sight_lines_diag[1].open} and {entity.sight_lines_diag[0].open}")
+                        continue
 
     def reset_sight_lines(self, entity):
         for line in entity.sight_lines_diag:

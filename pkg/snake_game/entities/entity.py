@@ -101,6 +101,7 @@ class Entity(Sprite):
         self.target = None
         self.secondary_target = None
         self.since_secondary_target = datetime.now()
+        self.ai_difficulty = 10
         # children list
         self.children = Deque()
 
@@ -165,7 +166,7 @@ class Entity(Sprite):
 
     def die(self, death_reason):
         if self.killable:
-            # print(f"{self.ID} {death_reason}")
+            print(f"{self.ID} {death_reason}")
             # Play death sound
             sound = self.sound_death
             self.sound_death_volume = float(self.app.game_config["settings"]["sound"]["effect_volume"])/self.sound_mod
@@ -181,6 +182,10 @@ class Entity(Sprite):
                 self.app.game.sprite_group.remove(self)
             else:
                 self.alive = False
+            # Clear previous frame render (from menu)
+            self.app.game.screen.fill((0, 0, 0, 0))
+            for obj in self.app.game.sprite_group:
+                obj.draw(self.app.game.sprite_group, (False, True))
 
     def collision_checks(self, updated):
         '''
@@ -324,7 +329,7 @@ class Entity(Sprite):
                     primary_target = (pos, dist_self)
         self.target = (target_name, primary_target[0][0], primary_target[0][1])
         self.direction = self.app.game.chosen_ai.decide_direction(
-            self, self.target, self.app.game.sprite_group, difficulty=10
+            self, self.target, self.app.game.sprite_group, difficulty=self.ai_difficulty
         )
         self.since_secondary_target = datetime.now()
 
