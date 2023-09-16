@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Game Over Menu
     ~~~~~~~~~~
 
@@ -9,19 +9,19 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 import pygame
 
 
 def game_over(self):
-    '''
+    """
     game_over_menu
     ~~~~~~~~~~
 
     game_over_menu does stuff
-    '''
+    """
 
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))

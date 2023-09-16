@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Game App
     ~~~~~~~~~~
 
@@ -8,7 +8,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 import os
@@ -37,12 +37,12 @@ NEXT = USEREVENT + 1
 
 
 class App():
-    '''
+    """
     Game
     ~~~~~~~~~~
 
     Base game structure.
-    '''
+    """
 
     def __init__(self, game_pkg):
         mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
@@ -96,12 +96,12 @@ class App():
 
 
     def run(self):
-        '''
+        """
         run
         ~~~~~~~~~~
 
         run does stuff
-        '''
+        """
 
         # Game window settings
         self.set_window_settings()
@@ -128,12 +128,12 @@ class App():
 
 
     def set_window_settings(self):
-        '''
+        """
         set_window_settings
         ~~~~~~~~~~
 
         set_window_settings does stuff
-        '''
+        """
 
         # Game window settings
         background_colour = (0, 0, 0)
@@ -187,7 +187,7 @@ class App():
 
 
     def update_fps(self):
-        """AI is creating summary for update_fps
+        """update_fps
 
         Returns:
             [type]: [description]
@@ -218,12 +218,12 @@ class App():
 
 
     def event_checks(self, menu, event_get):
-        '''
+        """
         event_checks
         ~~~~~~~~~~
 
         event_checks for the game
-        '''
+        """
         for event in pygame.event.get():
             # Possible event options:
             #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN
@@ -233,14 +233,14 @@ class App():
 
 
     def quit(self, **_):
-        """AI is creating summary for quit
+        """quit
         """
 
         self.running = False
 
 
     def window_focus(self, focus, **_):
-        """AI is creating summary for window_focus
+        """window_focus
 
         Args:
             focus ([type]): [description]
@@ -250,14 +250,14 @@ class App():
 
 
     def window_resize(self, **kwargs):
-        """AI is creating summary for window_resize
+        """window_resize
         """
 
         pass
 
 
     def key_down(self, **kwargs):
-        """AI is creating summary for key_down
+        """key_down
         """
 
         # Pressed escape to pause/unpause/back
@@ -275,7 +275,7 @@ class App():
                 self.game.start()
 
     def mouse_down(self, **kwargs):
-        """AI is creating summary for mouse_down
+        """mouse_down
         """
 
         if kwargs["menu"]:
@@ -287,7 +287,7 @@ class App():
 
 
     def next_music(self, **_):
-        """AI is creating summary for next_music
+        """next_music
         """
 
         # If not game over
@@ -299,7 +299,7 @@ class App():
 
 
     def play_menu_sound(self, button):
-        """AI is creating summary for play_menu_sound
+        """play_menu_sound
 
         Args:
             button ([type]): [description]
@@ -309,7 +309,7 @@ class App():
 
 
     def play_ui_sound(self, num):
-        """AI is creating summary for play_ui_sound
+        """play_ui_sound
 
         Args:
             num ([type]): [description]

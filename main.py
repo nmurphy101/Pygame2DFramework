@@ -55,9 +55,9 @@ def profiling():
 
 @profiling()
 def main():
-    '''
+    """
     main
-    '''
+    """
     # Take the game to be initalized
     snake_game = SnakeGame
     # Initilize the base game with the imported game

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Display Menu
     ~~~~~~~~~~
 
@@ -9,16 +9,16 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 def display_menu(self):
-    '''
+    """
     display_menu
     ~~~~~~~~~~
 
     display_menu does stuff
-    '''
+    """
 
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))

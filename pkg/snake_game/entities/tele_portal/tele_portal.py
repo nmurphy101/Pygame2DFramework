@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Teleport Portal
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 import random
@@ -21,12 +21,12 @@ from ..entity import Entity
 
 
 class TelePortal(Entity):
-    '''
+    """
     TelePortal
     ~~~~~~~~~~
 
     Teleport portal that entities can use to go to a connected portal elsewhere
-    '''
+    """
 
     def __init__(self, alpha_screen, screen, screen_size, app, parent=None):
         self.name = "teleportal_"
@@ -95,12 +95,12 @@ class TelePortal(Entity):
 
 
     def draw(self, obj_container, updated_refresh):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
 
         # render if alive
         if self.alive:
@@ -119,12 +119,12 @@ class TelePortal(Entity):
 
 
     def teleport(self, other_obj):
-        '''
+        """
         teleport
         ~~~~~~~~~~
 
         teleport does stuff
-        '''
+        """
 
         # Is the child portal cuz has a parent
         if self.parent:
@@ -142,12 +142,12 @@ class TelePortal(Entity):
 
 
     def interact(self, interacting_obj):
-        '''
+        """
         interact
         ~~~~~~~~~~
 
         interact does stuff
-        '''
+        """
 
         if self.activated + timedelta(seconds=self.abilty_cooldown) <= datetime.now():
             # teleport not on cooldown

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Entities
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 import json
 import pygame
@@ -26,15 +26,15 @@ from .sound import sound_menu
 
 
 class Menu():
-    '''
+    """
     Menu
     ~~~~~~~~~~
 
     All menus for the game
-    '''
+    """
 
     def __init__(self, game):
-        """AI is creating summary for __init__
+        """__init__
 
         Args:
             game ([type]): [description]
@@ -64,7 +64,7 @@ class Menu():
 
 
     def home_menu(self):
-        """AI is creating summary for home_menu
+        """home_menu
 
         Returns:
             [type]: [description]
@@ -74,7 +74,7 @@ class Menu():
 
 
     def pause_menu(self):
-        """AI is creating summary for pause_menu
+        """pause_menu
 
         Returns:
             [type]: [description]
@@ -84,7 +84,7 @@ class Menu():
 
 
     def settings_menu(self):
-        """AI is creating summary for settings_menu
+        """settings_menu
 
         Returns:
             [type]: [description]
@@ -94,7 +94,7 @@ class Menu():
 
 
     def game_over_menu(self):
-        """AI is creating summary for game_over_menu
+        """game_over_menu
 
         Returns:
             [type]: [description]
@@ -104,7 +104,7 @@ class Menu():
 
 
     def display_menu(self):
-        """AI is creating summary for display_menu
+        """display_menu
 
         Returns:
             [type]: [description]
@@ -114,7 +114,7 @@ class Menu():
 
 
     def sound_menu(self):
-        """AI is creating summary for sound_menu
+        """sound_menu
 
         Returns:
             [type]: [description]
@@ -124,7 +124,7 @@ class Menu():
 
 
     def render_button(self, title, position, color=(255, 255, 255), h_offset=0, screen=None):
-        """AI is creating summary for render_button
+        """render_button
 
         Args:
             title ([type]): [description]
@@ -162,7 +162,7 @@ class Menu():
 
 
     def save_settings(self):
-        """AI is creating summary for save_settings
+        """save_settings
         """
 
         with open(self.game.app.game_config_file_path, 'w', encoding='utf-8') as _file:
@@ -170,12 +170,12 @@ class Menu():
 
 
     def toggle_game_music(self):
-        '''
+        """
         toggle_game_music
         ~~~~~~~~~~
 
         toggle_game_music does stuff
-        '''
+        """
 
         music = self.game.app.game_config["settings"]["sound"]["music"]
         music = not music
@@ -183,12 +183,12 @@ class Menu():
 
 
     def increase_music_volume(self):
-        '''
+        """
         increase_music_volume
         ~~~~~~~~~~
 
         increase_music_volume does stuff
-        '''
+        """
 
         music_volume = self.game.app.game_config["settings"]["sound"]["music_volume"]
         music_volume = str(float(music_volume) + .05)
@@ -197,12 +197,12 @@ class Menu():
 
 
     def decrease_music_volume(self):
-        '''
+        """
         decrease_music_volume
         ~~~~~~~~~~
 
         decrease_music_volume does stuff
-        '''
+        """
 
         music_volume = self.game.app.game_config["settings"]["sound"]["music_volume"]
         music_volume = str(float(music_volume) - .05)
@@ -211,12 +211,12 @@ class Menu():
 
 
     def increase_effect_volume(self):
-        '''
+        """
         increase_effect_volume
         ~~~~~~~~~~
 
         increase_effect_volume does stuff
-        '''
+        """
 
         self.game.app.game_config["settings"]["sound"]["effect_volume"] = (
             str(float(self.game.app.game_config["settings"]["sound"]["effect_volume"]) + .05)
@@ -225,12 +225,12 @@ class Menu():
 
 
     def decrease_effect_volume(self):
-        '''
+        """
         decrease_effect_volume
         ~~~~~~~~~~
 
         decrease_effect_volume does stuff
-        '''
+        """
 
         self.game.app.game_config["settings"]["sound"]["effect_volume"] = (
             str(float(self.game.app.game_config["settings"]["sound"]["effect_volume"]) - .05)
@@ -239,12 +239,12 @@ class Menu():
 
 
     def increase_menu_volume(self):
-        '''
+        """
         increase_menu_volume
         ~~~~~~~~~~
 
         increase_menu_volume does stuff
-        '''
+        """
 
         menu_volume = self.game.app.game_config["settings"]["sound"]["menu_volume"]
         menu_volume = (
@@ -254,12 +254,12 @@ class Menu():
 
 
     def decrease_menu_volume(self):
-        '''
+        """
         decrease_menu_volume
         ~~~~~~~~~~
 
         decrease_menu_volume does stuff
-        '''
+        """
 
         menu_volume = self.game.app.game_config["settings"]["sound"]["menu_volume"]
         menu_volume = (
@@ -269,12 +269,12 @@ class Menu():
 
 
     def toggle_fps_display(self):
-        '''
+        """
         toggle_fps_display
         ~~~~~~~~~~
 
         toggle_fps_display does stuff
-        '''
+        """
 
         fps_display = self.game.app.game_config["settings"]["display"]["fps_display"]
         fps_display = not fps_display
@@ -282,12 +282,12 @@ class Menu():
 
 
     def toggle_fullscreen(self):
-        '''
+        """
         toggle_fullscreen
         ~~~~~~~~~~
 
         toggle_fullscreen does stuff
-        '''
+        """
 
         full_screen = self.game.app.game_config["settings"]["display"]["fullscreen"]
         full_screen = not full_screen
@@ -296,12 +296,12 @@ class Menu():
 
 
     def change_resolution(self, resolution):
-        '''
+        """
         change_resolution
         ~~~~~~~~~~
 
         change_resolution does stuff
-        '''
+        """
 
         self.game.app.game_config["settings"]["display"]["resolution"] = resolution
         self.save_settings()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Sound Menu
     ~~~~~~~~~~
 
@@ -9,16 +9,16 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 def sound_menu(self):
-    '''
+    """
     sound_menu
     ~~~~~~~~~~
 
     sound_menu does stuff
-    '''
+    """
 
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))

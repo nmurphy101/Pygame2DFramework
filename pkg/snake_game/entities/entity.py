@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Entity
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 import random
 import math
@@ -22,12 +22,12 @@ from pygame.sprite import Sprite
 
 
 class Entity(Sprite):
-    '''
+    """
     Entity
     ~~~~~~~~~~
 
     base obj for all entities
-    '''
+    """
 
     def __init__(self, alpha_screen, screen, screen_size, name, app):
         pygame.sprite.Sprite.__init__(self)
@@ -145,12 +145,12 @@ class Entity(Sprite):
 
 
     def draw(self, obj_container, updated_refresh):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
         # render if alive
         if self.alive:
             # place hitbox at position
@@ -169,12 +169,12 @@ class Entity(Sprite):
 
 
     def refresh_draw(self):
-        '''
+        """
         refresh_draw
         ~~~~~~~~~~
 
         refresh_draw does stuff
-        '''
+        """
         # render if alive
         if self.alive:
             # place hitbox at position
@@ -221,12 +221,12 @@ class Entity(Sprite):
 
 
     def collision_checks(self, updated):
-        '''
+        """
         collision_checks
         ~~~~~~~~~~
 
         collision_checks does stuff
-        '''
+        """
 
         # Collision check for all entities
         for obj in self.app.game.sprite_group.sprites():
@@ -254,12 +254,12 @@ class Entity(Sprite):
 
 
     def check_edge_collision(self):
-        '''
+        """
         check_edge_collision
         ~~~~~~~~~~
 
         Check for self collision/interaction to the edge of the screen
-        '''
+        """
         # Collision check for edge of screen (Right and Bottom)
         if (self.position[0] > self.screen_size[0]-self.size) or (
                 self.position[1] > self.screen_size[1]-self.size):
@@ -273,12 +273,12 @@ class Entity(Sprite):
 
 
     def check_obj_collision(self, obj):
-        '''
+        """
         check_obj_collision
         ~~~~~~~~~~
 
         Check for self to other obj collision/interaction
-        '''
+        """
         # Collision check between self and other obj
         if self.rect.colliderect(obj):
             if self.secondary_target == obj.position:
@@ -292,12 +292,12 @@ class Entity(Sprite):
 
 
     def check_child_collision(self, obj):
-        '''
+        """
         check_child_collision
         ~~~~~~~~~~
 
         Check for self to other obj's child collision/interaction
-        '''
+        """
         # Collision check between self and other obj's child
         if obj.children:
             # print(f"{obj.ID} has children {obj.children}")
@@ -313,12 +313,12 @@ class Entity(Sprite):
 
 
     def set_random_spawn(self, obj_container):
-        '''
+        """
         set_random_spawn
         ~~~~~~~~~~
 
         Check for a random spawn location and if it's taken already
-        '''
+        """
 
         # set pre loop variables
         found_spawn = False
@@ -371,12 +371,12 @@ class Entity(Sprite):
 
 
     def spawn(self, obj_container):
-        '''
+        """
         spawn
         ~~~~~~~~~~
 
         spawn does stuff
-        '''
+        """
         if not self.alive:
             self.set_random_spawn(obj_container)
             self.alive = True
@@ -406,12 +406,12 @@ class Entity(Sprite):
 
 
 class Line(Sprite):
-    '''
+    """
     Line
     ~~~~~~~~~~
 
     Sight line for a cardinal direction for an entity
-    '''
+    """
     def __init__(self, direction, entity):
         self.open = True
         self.opasity = 0 # Change this to 1 if you want to see sightlines
@@ -443,12 +443,12 @@ class Line(Sprite):
 
 
     def draw(self, entity):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
         # Choose the screen to draw to
         if self.opasity == 0:
             chosen_screen = entity.alpha_screen

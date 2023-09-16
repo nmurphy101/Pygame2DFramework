@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Snake
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 import random
@@ -27,12 +27,12 @@ from ..entity import Entity, Line
 
 
 class Snake(Entity):
-    '''
+    """
     Snake
     ~~~~~~~~~~
 
     obj for the snake
-    '''
+    """
 
     def __init__(self, alpha_screen, screen, screen_size, app, player=False):
         # Name for this type of object
@@ -109,12 +109,12 @@ class Snake(Entity):
 
 
     def draw(self, obj_container, updated_refresh):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
 
         if self.alive and (updated_refresh[0] or updated_refresh[1]):
             # Clear previous frame obj's location
@@ -154,12 +154,12 @@ class Snake(Entity):
 
 
     def grow(self, eaten_obj):
-        '''
+        """
         grow
         ~~~~~~~~~~
 
         grow does stuff
-        '''
+        """
 
         # Add a new tail segment
         if self.alive:
@@ -182,12 +182,12 @@ class Snake(Entity):
 
 
     def up_score(self, eaten_obj):
-        '''
+        """
         up_score
         ~~~~~~~~~~
 
         up_score does stuff
-        '''
+        """
 
         # Increase the score
         if self.alive:
@@ -197,12 +197,12 @@ class Snake(Entity):
 
 
     def choose_direction(self):
-        '''
+        """
         choose_direction
         ~~~~~~~~~~
 
         choose_direction does stuff
-        '''
+        """
         if self.alive:
             # Check if Ai or player controls this entity
             if self.player:
@@ -228,12 +228,12 @@ class Snake(Entity):
 
 
     def move(self):
-        '''
+        """
         move
         ~~~~~~~~~~
 
         move does stuff
-        '''
+        """
 
         # pylint: disable=access-member-before-definition
         if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.alive:
@@ -283,12 +283,12 @@ class Snake(Entity):
 
 
 class TailSegment(Entity):
-    '''
+    """
     TailSegment
     ~~~~~~~~~~
 
     Tail Segment for the snake
-    '''
+    """
 
     def __init__(self, alpha_screen, screen, screen_size, app, tail_pos, parent, player=False):
         # Name for this type of object
@@ -333,12 +333,12 @@ class TailSegment(Entity):
 
 
     def draw(self, *kwargs):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
 
         # render if alive
         if self.alive:
@@ -363,6 +363,9 @@ class TailSegment(Entity):
 
 
     def choose_img(self):
+        """choose_img
+        """
+
         # Moving up
         if self.parent.direction == 0:
             if self.parent.child_prev_direction == self.parent.direction:
@@ -371,6 +374,7 @@ class TailSegment(Entity):
                 self.img_index = 5
             elif self.parent.child_prev_direction == 3:
                 self.img_index = 4
+
         # Moving down
         elif self.parent.direction == 2:
             if self.parent.child_prev_direction == self.parent.direction:
@@ -379,6 +383,7 @@ class TailSegment(Entity):
                 self.img_index = 2
             elif self.parent.child_prev_direction == 3:
                 self.img_index = 3
+
         # Moving left
         elif self.parent.direction == 3:
             if self.parent.child_prev_direction == self.parent.direction:
@@ -387,6 +392,7 @@ class TailSegment(Entity):
                 self.img_index = 2
             elif self.parent.child_prev_direction == 2:
                 self.img_index = 5
+
         # Moving right
         elif self.parent.direction == 1:
             if self.parent.child_prev_direction == self.parent.direction:
@@ -395,6 +401,7 @@ class TailSegment(Entity):
                 self.img_index = 3
             elif self.parent.child_prev_direction == 2:
                 self.img_index = 4
+
         else:
             self.img_index = self.img_index
 
@@ -403,7 +410,7 @@ class TailSegment(Entity):
 
 
     def make_end_img(self):
-        """AI is creating summary for make_end_img
+        """make_end_img
         """
 
         ahead_img_index = self.parent.children[-2].img_index
@@ -440,5 +447,11 @@ class TailSegment(Entity):
 
 
     def interact(self, interacting_obj):
+        """interact
+
+        Args:
+            interacting_obj ([type]): [description]
+        """
+
         # Kill interacting_obj
         interacting_obj.die(f"collided with {self.ID} and died")

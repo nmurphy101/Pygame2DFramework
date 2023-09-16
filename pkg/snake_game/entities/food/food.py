@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Food
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 import random
 import pygame
@@ -18,12 +18,12 @@ from ..entity import Entity
 
 
 class Food(Entity):
-    '''
+    """
     Food
     ~~~~~~~~~~
 
     Food for the snake
-    '''
+    """
 
     def __init__(self, alpha_screen, screen, screen_size, app):
         # Name for this type of object
@@ -76,12 +76,12 @@ class Food(Entity):
 
 
     def draw(self, *kwargs):
-        '''
+        """
         draw
         ~~~~~~~~~~
 
         draw does stuff
-        '''
+        """
 
         # render if alive
         if self.alive:

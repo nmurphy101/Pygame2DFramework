@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Snake Game
     ~~~~~~~~~~
 
@@ -8,7 +8,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 import gc
@@ -36,12 +36,12 @@ from ..app import App
 
 
 class SnakeGame():
-    '''
+    """
     SnakeGame
     ~~~~~~~~~~
 
     SnakeGame for the snake
-    '''
+    """
 
 
     def __init__(self, alpha_screen: Surface, screen: Surface, app: App):
@@ -136,12 +136,12 @@ class SnakeGame():
 
 
     def play(self, update_fps):
-        '''
+        """
         play
         ~~~~~~~~~~
 
         play does stuff
-        '''
+        """
 
         is_fps_display_shown = self.app.game_config["settings"]["display"]["fps_display"]
 
@@ -192,12 +192,12 @@ class SnakeGame():
 
 
     def start(self):
-        '''
+        """
         start
         ~~~~~~~~~~
 
         start does stuff
-        '''
+        """
         # Start on a clean slate
         self.clean_up()
 
@@ -245,12 +245,12 @@ class SnakeGame():
 
 
     def clean_up(self):
-        '''
+        """
         clean_up
         ~~~~~~~~~~
 
         clean_up does stuff
-        '''
+        """
 
         # Clear previous frame render
         self.screen.fill((0, 0, 0, 0))
@@ -275,12 +275,12 @@ class SnakeGame():
 
 
     def settings_checks(self):
-        '''
+        """
         settings_checks
         ~~~~~~~~~~
 
         settings_checks does stuff
-        '''
+        """
         # Start the game music
         if self.app.game_config["settings"]["sound"]["music"]:
             self.current_track = 0
@@ -295,32 +295,32 @@ class SnakeGame():
 
 
     def quit_game(self):
-        '''
+        """
         quit_game
         ~~~~~~~~~~
 
         quit_game does stuff
-        '''
+        """
         self.app.running = False
 
 
     def unpause(self):
-        '''
+        """
         unpause
         ~~~~~~~~~~
 
         unpause does stuff
-        '''
+        """
         self.menu.prev_menu = self.menu.menu_option
         self.menu.menu_option = None
         self.pause_game_music = True
 
 
 def psudo_func(test):
-    '''
+    """
     psudo_func
     ~~~~~~~~~~
 
     psudo_func does stuff
-    '''
+    """
     print("Psudo_func: ", test)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Snake Game
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 from .ai import *
 from .entities import *

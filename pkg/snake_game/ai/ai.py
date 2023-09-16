@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Simple Pathfinding
     ~~~~~~~~~~
 
@@ -9,7 +9,7 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 import math
 from datetime import datetime, timedelta
@@ -18,12 +18,12 @@ import pygame
 
 
 class DecisionBox:
-    '''
+    """
     DecisionBox
     ~~~~~~~~~~
 
     DecisionBox for the entity
-    '''
+    """
 
     def __init__(self):
         self.difficulty = None
@@ -300,7 +300,7 @@ class DecisionBox:
 
 
     def decide_portal(self, obj, entity):
-        """AI is creating summary for decide_portal
+        """decide_portal
 
         Args:
             obj ([type]): [description]

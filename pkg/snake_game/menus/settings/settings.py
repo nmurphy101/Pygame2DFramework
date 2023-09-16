@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Settings Menu
     ~~~~~~~~~~
 
@@ -9,15 +9,15 @@
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
-'''
+"""
 
 
 def settings_menu(self):
-    '''
+    """
     settings_menu
     ~~~~~~~~~~
     settings_menu does stuff
-    '''
+    """
 
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
