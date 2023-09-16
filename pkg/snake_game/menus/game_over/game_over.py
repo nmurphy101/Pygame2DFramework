@@ -11,7 +11,9 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
+
 import pygame
+
 
 def game_over(self):
     '''
@@ -20,6 +22,7 @@ def game_over(self):
 
     game_over_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -34,9 +37,11 @@ def game_over(self):
 
     # Get the player score
     score = "NA"
+
     for obj in self.game.sprite_group.sprites():
         if obj.player:
             score = obj.score
+
     # Render the score
     _ = self.render_button('Score: ' + str(score), 8, (255, 0, 0))
 
@@ -48,7 +53,7 @@ def game_over(self):
 
     menu = [
         (restart_obj, self.game.start, 3),
-        (return_obj, self.MainMenu, 3),
+        (return_obj, self.home_menu, 3),
     ]
 
     return menu

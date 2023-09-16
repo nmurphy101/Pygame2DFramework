@@ -18,32 +18,37 @@ __version__ = '1.0.0-alpha'
 # from multiprocessing import Manager
 # from multiprocessing import freeze_support
 import io
+from functools import wraps
+
 import pstats
 import cProfile
 import pygame
-from functools import wraps
+
 from pkg.snake_game.game import SnakeGame
 from pkg.app import App
 
 # freeze_support()
 # profiling decorator
 def profiling():
-    def _profiling(f):
-        @wraps(f)
+    """
+    Profiler decorator for game optimization
+    """
+    def _profiling(function_param):
+        @wraps(function_param)
         def __profiling(*rgs, **kwargs):
-            pr = cProfile.Profile()
-            pr.enable()
+            profile = cProfile.Profile()
+            profile.enable()
 
-            result = f(*rgs, **kwargs)
+            result = function_param(*rgs, **kwargs)
 
-            pr.disable()
+            profile.disable()
             # save readable stats into file
-            s = io.StringIO()
-            p = pstats.Stats(pr, stream=s).sort_stats("tottime")
+            string_io = io.StringIO()
+            profile_stats = pstats.Stats(profile, stream=string_io).sort_stats("tottime")
             # skip strip_dirs() if you want to see full path's
-            p.print_stats()
-            with open('profile.txt', 'w+') as output_file:
-                output_file.write(s.getvalue())
+            profile_stats.print_stats()
+            with open('profile.txt', 'w+', encoding="utf8") as output_file:
+                output_file.write(string_io.getvalue())
             return result
         return __profiling
     return _profiling

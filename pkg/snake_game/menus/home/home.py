@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 '''
-    Main Menu
+    Home Menu
     ~~~~~~~~~~
 
-    Game Main menu
+    Game Home menu
 
 
     :copyright: (c) 2021 by Nicholas Murphy.
@@ -12,13 +12,14 @@
 '''
 
 
-def main_menu(self):
+def home_menu(self):
     '''
-    main_menu
+    home_menu
     ~~~~~~~~~~
 
-    main_menu does stuff
+    home_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -31,15 +32,15 @@ def main_menu(self):
     if self.prev_menu == 1:
         # Clear game objects up to free memory
         self.game.clean_up()
+
     elif self.prev_menu not in [1, 2]:
         # Check the settings
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
         self.prev_menu = 2
 
-
-    # Render the Main Menu text
-    _ = self.render_button("Main Menu", 8, (255, 0, 0))
+    # Render the Home Menu text
+    _ = self.render_button("Home Menu", 8, (255, 0, 0))
 
     # Render the play button
     play_obj = self.render_button("Play", 1)
@@ -52,7 +53,7 @@ def main_menu(self):
 
     menu = [
         (play_obj, self.game.start, 0),
-        (settings_obj, self.SettingsMenu, 0),
+        (settings_obj, self.settings_menu, 0),
         (quit_obj, self.game.quit_game, 0),
     ]
 

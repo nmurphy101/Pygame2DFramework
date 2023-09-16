@@ -21,6 +21,7 @@ def pause_menu(self):
 
     pause_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -28,7 +29,7 @@ def pause_menu(self):
     self.menu_option = 1
     self.root_menu = 1
 
-    if self.prev_menu == None:
+    if self.prev_menu is None:
         # Free unreferenced memory
         gc.collect()
         self.prev_menu = 2
@@ -36,7 +37,7 @@ def pause_menu(self):
     # Pause game music
     self.game.pause_game_music = True
 
-    # Render the Game Over text
+    # Render the paused text
     _ = self.render_button("-Paused-", 10, (255, 0, 0))
 
     # Get the player score
@@ -44,6 +45,7 @@ def pause_menu(self):
     for obj in self.game.sprite_group.sprites():
         if obj.player:
             score = obj.score
+
     # Render the score
     _ = self.render_button("Score: " + str(score), 8, (255, 0, 0))
 
@@ -58,11 +60,14 @@ def pause_menu(self):
 
     menu = [
         (resume_obj, self.game.unpause, 1),
-        (settings_obj, self.SettingsMenu, 1),
-        (return_obj, self.MainMenu, 1),
+        (settings_obj, self.settings_menu, 1),
+        (return_obj, self.home_menu, 1),
     ]
 
-    # Line used for testing obj limit
-    # print(self.game.sprite_group.sprites()[2].ID, len(self.game.sprite_group.sprites()[2].children))
+    # Lines used for testing obj limit
+    # print(
+    #   self.game.sprite_group.sprites()[2].ID,
+    #   len(self.game.sprite_group.sprites()[2].children),
+    # )
 
     return menu

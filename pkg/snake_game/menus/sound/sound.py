@@ -11,8 +11,6 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
-
 
 def sound_menu(self):
     '''
@@ -21,6 +19,7 @@ def sound_menu(self):
 
     sound_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -35,7 +34,10 @@ def sound_menu(self):
     music_obj = self.render_button(text_str, 8)
 
     # Render the Volume view button
-    volume_num = round(100 * float(self.game.app.game_config["settings"]["sound"]["music_volume"]), 2)
+    volume_num = round(
+        100 * float(self.game.app.game_config["settings"]["sound"]["music_volume"]),
+        2,
+    )
     text_str = "Music Volume: " + str(volume_num)
     _ = self.render_button(text_str, 6)
 
@@ -46,7 +48,10 @@ def sound_menu(self):
     music_volume_down_obj = self.render_button("Down", 5, h_offset=-100)
 
     # Render the Volume view button
-    volume_num = round(100 * float(self.game.app.game_config["settings"]["sound"]["effect_volume"]), 2)
+    volume_num = round(
+        100 * float(self.game.app.game_config["settings"]["sound"]["effect_volume"]),
+        2,
+    )
     text_str = "Effect Volume: " + str(volume_num)
     _ = self.render_button(text_str, 4)
 
@@ -57,7 +62,7 @@ def sound_menu(self):
     effect_volume_down_obj = self.render_button("Down", 3, h_offset=-100)
 
     # Render the Volume view button
-    volume_num = round(100 * float(self.game.app.game_config["settings"]["sound"]["menu_volume"]), 2)
+    volume_num = round(100 * float(self.game.app.game_config["settings"]["sound"]["menu_volume"]))
     text_str = "Menu Volume: " + str(volume_num)
     _ = self.render_button(text_str, 2)
 
@@ -78,7 +83,7 @@ def sound_menu(self):
         (effect_volume_down_obj, self.decrease_effect_volume, self.prev_menu),
         (menu_volume_up_obj, self.increase_menu_volume, self.prev_menu),
         (menu_volume_down_obj, self.decrease_menu_volume, self.prev_menu),
-        (back_obj, self.SettingsMenu, 5),
+        (back_obj, self.settings_menu, 5),
     ]
 
     return menu

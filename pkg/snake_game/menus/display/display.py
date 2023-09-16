@@ -11,8 +11,6 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
-
 
 def display_menu(self):
     '''
@@ -21,6 +19,7 @@ def display_menu(self):
 
     display_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -60,7 +59,7 @@ def display_menu(self):
         (resolution_obj_0, lambda: self.change_resolution("1280x720"), self.prev_menu),
         (resolution_obj_1, lambda: self.change_resolution("1366x768"), self.prev_menu),
         (resolution_obj_2, lambda: self.change_resolution("1920x1080"), self.prev_menu),
-        (back_obj, self.SettingsMenu, 4),
+        (back_obj, self.settings_menu, 4),
     ]
 
     return menu

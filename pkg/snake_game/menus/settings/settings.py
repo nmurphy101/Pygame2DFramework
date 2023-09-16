@@ -11,8 +11,6 @@
     :license: GPLv3, see LICENSE for more details.
 '''
 
-import pygame
-
 
 def settings_menu(self):
     '''
@@ -20,6 +18,7 @@ def settings_menu(self):
     ~~~~~~~~~~
     settings_menu does stuff
     '''
+
     # Clear previous frame render
     self.game.screen.fill((0, 0, 0, 0))
 
@@ -27,7 +26,7 @@ def settings_menu(self):
     self.menu_option = 2
 
     # Check settings if just left settings page
-    if self.prev_menu != 1 and self.prev_menu != 2:
+    if self.prev_menu not in (1, 2):
         self.game.settings_checks()
 
     # Render the Settings Menu text
@@ -43,8 +42,8 @@ def settings_menu(self):
     back_obj = self.render_button("Back", -8)
 
     menu = [
-        (display_obj, self.DisplayMenu, 2),
-        (sound_obj, self.SoundMenu, 2),
+        (display_obj, self.display_menu, 2),
+        (sound_obj, self.sound_menu, 2),
         (back_obj, self.game_menus[self.root_menu], 2),
     ]
 
