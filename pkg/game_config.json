@@ -2,20 +2,21 @@
     "settings": {
         "sound": {
             "music": false,
-            "music_volume": "0.05",
+            "music_volume": "0.05000000000000002",
             "effect_volume": "0.05",
             "menu_volume": "0.05000000000000002"
         },
         "display": {
-            "fps": 1000,
+            "fps": 3000,
             "fps_display": true,
             "fullscreen": false,
-            "resolution": "1280x720"
+            "resolution": "1366x768",
+            "window_title": "Game Platform - "
         },
         "gameplay": {
-            "number_of_ai": 2,
+            "number_of_ai": 20,
             "invinsible_ai": false,
-            "ai_speed": 3,
+            "ai_speed": 10,
             "human_player": false,
             "invinsible_player": false,
             "player_speed": 1,

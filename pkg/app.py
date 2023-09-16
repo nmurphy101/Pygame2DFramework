@@ -45,20 +45,29 @@ class App():
     """
 
     def __init__(self, game_pkg):
-        mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+        # setup mixer to avoid sound lag
+        mixer.pre_init(44100, -16, 2, 2048)
         init()
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
 
+        # Game config file
+        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
+        with open(self.game_config_file_path, encoding="utf8") as json_data_file:
+            self.game_config = json.load(json_data_file)
+
+        resolution = self.game_config["settings"]["display"]["resolution"].split("x")
+        self.screen_width = int(resolution[0])
+        self.screen_height = int(resolution[1])
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = 3000
+        self.fps = self.game_config["settings"]["display"]["fps"]
         self.fps_list = []
         self.fps_pos = None
         self.fps_rect = None
         self.clock = None
-        self.title = "Game Platform - "
+        self.title = self.game_config["settings"]["display"]["window_title"]
         self.screen = None
         self.debug_screen = None
         self.background_0 = None
@@ -86,14 +95,6 @@ class App():
             events.append(event)
         pygame.event.set_allowed(events)
 
-        # Game config file
-        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
-        with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config = json.load(json_data_file)
-        resolution = self.game_config["settings"]["display"]["resolution"].split("x")
-        self.screen_width = int(resolution[0])
-        self.screen_height = int(resolution[1])
-
 
     def run(self):
         """
@@ -115,7 +116,7 @@ class App():
             mixer.music.set_endevent(NEXT)
 
             # Gameplay logic this turn/tick (dirty_rects returned)
-            menu, _ = self.game.play(self.update_fps)
+            menu, _ = self.game.play(self.fps_counter_display)
 
             # System/window events to be checked
             self.event_checks(menu, self.event_options.get)
@@ -186,8 +187,8 @@ class App():
         self.fps_rect = pygame.Rect(self.fps_pos)
 
 
-    def update_fps(self):
-        """update_fps
+    def fps_counter_display(self):
+        """fps_counter_display
 
         Returns:
             [type]: [description]
@@ -214,6 +215,7 @@ class App():
         # High and low FPS
         _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 8.8, h_offset=565)
         _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 7.8, h_offset=565)
+
         return self.fps_rect
 
 
@@ -224,6 +226,7 @@ class App():
 
         event_checks for the game
         """
+
         for event in pygame.event.get():
             # Possible event options:
             #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN

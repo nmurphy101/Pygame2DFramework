@@ -12,6 +12,7 @@
 
 
 import gc
+import threading
 from datetime import datetime
 from typing import Deque
 
@@ -135,7 +136,7 @@ class SnakeGame():
         self.menu = Menu(self)
 
 
-    def play(self, update_fps):
+    def play(self, fps_counter_display):
         """
         play
         ~~~~~~~~~~
@@ -148,26 +149,16 @@ class SnakeGame():
         # Check if not in a menu
         if self.menu.menu_option is None:
 
-            fill_screen = self.screen.fill
-
-            # Execute game object actions
+            # Execute game object actions via parallel threads
+            thread_group = []
             for obj in self.sprite_group:
-                # Make sure to refresh coming out of pause_menu
-                if self.menu.prev_menu in [0, 1]:
-                    # Clear previous frame render (from menu)
-                    fill_screen((0, 0, 0, 0))
+                thread = threading.Thread(target=self._object_actions, args=(obj,))
+                thread.start()
+                thread_group.append(thread)
 
-                    # Draw game objects
-                    obj.draw(self.sprite_group, (True, True))
-
-                # take obj tick actions
-                updated = obj.update(self.sprite_group)
-
-                # Draw game objects
-                obj.draw(self.sprite_group, (updated, False))
-
-                # collision of obj to other objects/children-of-other-objs
-                obj.collision_checks(updated)
+            # Wait for threads to finish
+            for thread in thread_group:
+                thread.join()
 
             # Only 1 tick to refresh from pause_menu
             if self.menu.prev_menu in [0, 1]:
@@ -175,8 +166,8 @@ class SnakeGame():
 
             # The game loop FPS counter
             if is_fps_display_shown:
-                self.dirty_rects.append(update_fps())
-                update_fps()
+                self.dirty_rects.append(fps_counter_display())
+                fps_counter_display()
 
             # Return to app
             return None, self.dirty_rects
@@ -184,11 +175,30 @@ class SnakeGame():
         # In a menu
         # The game loop FPS counter
         if is_fps_display_shown:
-            update_fps()
+            fps_counter_display()
 
         # Show which ever menu option that has been chosen:
         #   Main, Pause, Settings, GameOver, Display, Sound
         return self.menu.menu_options.get(self.menu.menu_option)(), None
+
+
+    def _object_actions(self, obj):
+        # Make sure to refresh coming out of pause_menu
+        if self.menu.prev_menu in [0, 1]:
+            # Clear previous frame render (from menu)
+            self.screen.fill((0, 0, 0, 0))
+
+            # Draw game objects
+            obj.draw(self.sprite_group, (True, True))
+
+        # take obj tick actions
+        updated = obj.update(self.sprite_group)
+
+        # Draw game objects
+        obj.draw(self.sprite_group, (updated, False))
+
+        # collision of obj to other objects/children-of-other-objs
+        obj.collision_checks(updated)
 
 
     def start(self):
