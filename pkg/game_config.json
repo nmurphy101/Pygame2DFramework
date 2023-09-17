@@ -14,10 +14,10 @@
             "window_title": "Game Platform - "
         },
         "gameplay": {
-            "number_of_ai": 20,
+            "number_of_ai": 0,
             "invinsible_ai": false,
-            "ai_speed": 10,
-            "human_player": false,
+            "ai_speed": 1,
+            "human_player": true,
             "invinsible_player": false,
             "player_speed": 1,
             "number_of_food": 4,

@@ -192,9 +192,13 @@ class SnakeGame():
             obj.draw(self.sprite_group, (True, True))
 
         # take obj tick actions
+        # - MEMORY LEAK when leaving from active game to main menu from pause menu
+        # - Possible memory leak as game progresses over time
         updated = obj.update(self.sprite_group)
 
         # Draw game objects
+        # - MEMORY LEAK HERE when leaving from active game to main menu from pause menu
+        # - Possible memory leak as game progresses over time
         obj.draw(self.sprite_group, (updated, False))
 
         # collision of obj to other objects/children-of-other-objs
@@ -272,6 +276,8 @@ class SnakeGame():
         self.timer = None
 
         # Game object list
+        for obj in self.sprite_group:
+            obj.kill()
         self.sprite_group.empty()
 
         # AI blackbox

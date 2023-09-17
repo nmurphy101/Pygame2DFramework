@@ -37,8 +37,7 @@ def game_over(self):
 
     # Get the player score
     score = "NA"
-
-    for obj in self.game.sprite_group.sprites():
+    for obj in self.game.sprite_group:
         if obj.player:
             score = obj.score
 
