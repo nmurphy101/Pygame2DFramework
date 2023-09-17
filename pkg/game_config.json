@@ -14,7 +14,7 @@
             "window_title": "Game Platform - "
         },
         "gameplay": {
-            "number_of_ai": 0,
+            "number_of_ai": 1,
             "invinsible_ai": false,
             "ai_speed": 1,
             "human_player": true,
