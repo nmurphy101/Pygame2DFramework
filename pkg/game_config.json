@@ -8,7 +8,7 @@
         },
         "display": {
             "fps": 3000,
-            "fps_display": true,
+            "fps_display": false,
             "fullscreen": false,
             "resolution": "1366x768",
             "window_title": "Game Platform - "
@@ -16,10 +16,10 @@
         "gameplay": {
             "number_of_ai": 1,
             "invinsible_ai": false,
-            "ai_speed": 1,
-            "human_player": true,
+            "ai_speed": 0.65,
+            "human_player": false,
             "invinsible_player": false,
-            "player_speed": 1,
+            "player_speed": 0.8,
             "number_of_food": 4,
             "teleporter_active": true
         }

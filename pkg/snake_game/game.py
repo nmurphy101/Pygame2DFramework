@@ -22,17 +22,17 @@ from pygame import (
     Surface,
 )
 
-# All the game entities
-from .entities import (
-    Snake, Food, TelePortal,
-)
-
-# All the game menus
-from .menus.menus import Menu
 from .ai.ai import DecisionBox
+from .constants import game_constants as constants
+from .entities import (
+    Entity,
+    Food,
+    Snake,
+    TelePortal,
+)
 from .graphics.sprite_sheet import SpriteSheet
+from .menus.menus import Menu
 
-# The main app
 from ..app import App
 
 
@@ -62,14 +62,14 @@ class SnakeGame():
         self.app.fps = int(self.app.game_config["settings"]["display"]["fps"])
 
         # Window settings
-        self.title = app.title + "Snake"
+        self.title = app.title + constants.GAME_TITLE
         pygame.display.set_caption(self.title)
         self.screen = screen
         self.alpha_screen = alpha_screen
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
         self.game_font = freetype.Font(
-            file='assets/fonts/PressStart2P-Regular.ttf',
+            file=constants.REGULAR_FONT,
             size=32,
         )
 
@@ -78,8 +78,8 @@ class SnakeGame():
         self.timer = None
 
         # Game music
-        self.game_music_intro = "assets/music/8bit_Stage1_Intro.wav"
-        self.game_music_loop = "assets/music/8bit_Stage1_Loop.wav"
+        self.game_music_intro = constants.MUSIC_INTRO
+        self.game_music_loop = constants.MUSIC_LOOP
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
@@ -87,9 +87,9 @@ class SnakeGame():
 
         # Game Sounds
         self.sounds = [
-            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"),
-            pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"),
-            pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/SciFi05.wav"),
+            pygame.mixer.Sound(constants.SOUND_SNAKE_DEATH),
+            pygame.mixer.Sound(constants.SOUND_FOOD_PICKUP),
+            pygame.mixer.Sound(constants.SOUND_PORTAL_ENTER),
         ]
 
         # Game object containers
@@ -98,7 +98,7 @@ class SnakeGame():
 
         ## Game sprite Sheets
         # Snake Sprite Images
-        self.snake_sprite_sheet = SpriteSheet("assets/sprites/snake/snake-sheet.png")
+        self.snake_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_SNAKE_PLAYER)
         self.snake_images = self.snake_sprite_sheet.load_grid_images(
             (2, 8),
             (1, 1),
@@ -106,7 +106,7 @@ class SnakeGame():
         )
 
         # Snake Enemy Sprite Images
-        self.snake_enemy_sprite_sheet = SpriteSheet("assets/sprites/snake/snake_enemy-sheet.png")
+        self.snake_enemy_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_SNAKE_ENEMY)
         self.snake_enemy_images = self.snake_enemy_sprite_sheet.load_grid_images(
             (2, 8),
             (1, 1),
@@ -114,7 +114,7 @@ class SnakeGame():
         )
 
         # Food Sprite images
-        self.food_sprite_sheet = SpriteSheet("assets/sprites/food/food-sheet.png")
+        self.food_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_FOOD)
         self.food_images = self.food_sprite_sheet.load_grid_images(
             (1, 1),
             (1, 1),
@@ -122,7 +122,7 @@ class SnakeGame():
         )
 
         # Teleportal Sprite images
-        self.tele_portal_sprite_sheet = SpriteSheet("assets/sprites/tele_portal/tele_portal-sheet.png")
+        self.tele_portal_sprite_sheet = SpriteSheet(constants.SPIRTE_SHEET_TELEPORTAL)
         self.tele_portal_images = self.tele_portal_sprite_sheet.load_grid_images(
             (1, 1),
             (1, 1),
@@ -136,7 +136,7 @@ class SnakeGame():
         self.menu = Menu(self)
 
 
-    def play(self, fps_counter_display):
+    def play(self, fps_counter_display: callable):
         """
         play
         ~~~~~~~~~~
@@ -182,7 +182,7 @@ class SnakeGame():
         return self.menu.menu_options.get(self.menu.menu_option)(), None
 
 
-    def _object_actions(self, obj):
+    def _object_actions(self, obj: Entity):
         # Make sure to refresh coming out of pause_menu
         if self.menu.prev_menu in [0, 1]:
             # Clear previous frame render (from menu)
@@ -297,9 +297,8 @@ class SnakeGame():
 
         settings_checks does stuff
         """
-        # Start the game music
+        # Start/Restart the game music
         if self.app.game_config["settings"]["sound"]["music"]:
-            self.current_track = 0
             pygame.mixer.music.load(self.playlist[self.current_track])
             pygame.mixer.music.set_volume(
                 float(self.app.game_config["settings"]["sound"]["music_volume"])
