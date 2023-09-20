@@ -2,27 +2,20 @@
 
 """
     Game App
-    ~~~~~~~~~~
+
 
     Base for a game in a window
-
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 """
 
 
 import os
-# import threading
 # import logging
-# import sys
-# import time
-# import re
-# import queue as q
-# from multiprocessing import Pool, cpu_count, Queue, Process, Manager, Lock
 import statistics
 import json
+
 import pygame
-# pylint: disable=no-name-in-module
 from pygame import (
     init, mixer, DOUBLEBUF, FULLSCREEN
 )
@@ -30,16 +23,14 @@ from pygame.constants import (
     QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
     WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
 )
-# pylint: enable=no-name-in-module
+from guppy import hpy
 
 
 NEXT = USEREVENT + 1
 
 
 class App():
-    """
-    Game
-    ~~~~~~~~~~
+    """Game
 
     Base game structure.
     """
@@ -99,10 +90,12 @@ class App():
     def run(self):
         """
         run
-        ~~~~~~~~~~
+
 
         run does stuff
         """
+
+        # h=hpy()
 
         # Game window settings
         self.set_window_settings()
@@ -115,23 +108,26 @@ class App():
             # Send event NEXT every time music tracks ends
             mixer.music.set_endevent(NEXT)
 
-            # Gameplay logic this turn/tick (dirty_rects returned)
-            menu, _ = self.game.play(self.fps_counter_display)
+            # Gameplay logic this turn/tick
+            menu = self.game.play(self.fps_counter_display)
 
             # System/window events to be checked
             self.event_checks(menu, self.event_options.get)
+            pygame.event.clear()
 
             # Display the game screen
-            pygame.display.update()
+            pygame.display.flip()
 
             # The game loop clocktarget FPS
             self.clock.tick(self.fps)
+
+        # print(h.heap())
 
 
     def set_window_settings(self):
         """
         set_window_settings
-        ~~~~~~~~~~
+
 
         set_window_settings does stuff
         """
@@ -154,7 +150,6 @@ class App():
         self.debug_screen.set_colorkey((0, 0, 0))
         self.background_0 = pygame.Surface((self.screen_width, self.screen_height))
         self.background_0.set_colorkey((0, 0, 0))
-        # screen.set_mode()
 
         alpha_screen = pygame.Surface(
             (self.screen_width, self.screen_height)
@@ -222,7 +217,7 @@ class App():
     def event_checks(self, menu, event_get):
         """
         event_checks
-        ~~~~~~~~~~
+
 
         event_checks for the game
         """
@@ -277,6 +272,7 @@ class App():
             else:
                 self.game.start()
 
+
     def mouse_down(self, **kwargs):
         """mouse_down
         """
@@ -307,6 +303,7 @@ class App():
         Args:
             button ([type]): [description]
         """
+
         num = self.ui_sound_options.get(button[1], 0)
         self.play_ui_sound(num)
 
@@ -317,6 +314,7 @@ class App():
         Args:
             num ([type]): [description]
         """
+
         menu_sound = self.menu_sounds[num]
         menu_sound.set_volume(float(self.game_config["settings"]["sound"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)

@@ -2,10 +2,8 @@
 
 """
     Sound Menu
-    ~~~~~~~~~~
 
     Sound settings menu
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -13,9 +11,7 @@
 
 
 def sound_menu(self):
-    """
-    sound_menu
-    ~~~~~~~~~~
+    """sound_menu
 
     sound_menu does stuff
     """

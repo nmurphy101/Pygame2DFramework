@@ -2,10 +2,8 @@
 
 """
     Pause Menu
-    ~~~~~~~~~~
 
     Pause menu shown when the game is paused
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -15,9 +13,7 @@ import gc
 
 
 def pause_menu(self):
-    """
-    pause_menu
-    ~~~~~~~~~~
+    """pause_menu
 
     pause_menu does stuff
     """
@@ -66,7 +62,7 @@ def pause_menu(self):
 
     # Lines used for testing obj limit
     # print(
-    #   self.game.sprite_group.sprites()[2].ID,
+    #   self.game.sprite_group.sprites()[2].id,
     #   len(self.game.sprite_group.sprites()[2].children),
     # )
 

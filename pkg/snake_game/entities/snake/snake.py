@@ -2,10 +2,8 @@
 
 """
     Snake
-    ~~~~~~~~~~
 
     It's a snake
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -27,9 +25,7 @@ from ..entity import Entity, Line
 
 
 class Snake(Entity):
-    """
-    Snake
-    ~~~~~~~~~~
+    """Snake
 
     obj for the snake
     """
@@ -40,9 +36,6 @@ class Snake(Entity):
 
         # Initilize parent init
         super().__init__(alpha_screen, screen, screen_size, self.name, app)
-
-        # Default set snake to alive
-        self.alive = True
 
         # Is this the player entity
         self.player = player
@@ -91,9 +84,6 @@ class Snake(Entity):
         # Interact sound
         # self.sound_interact = pygame.mixer.Sound("")
 
-        # Dirty rect or not
-        self.dirty_rect = True
-
         # Entity's children/followers in a train of same children objs
         self.child_train = True
 
@@ -108,24 +98,18 @@ class Snake(Entity):
                 self.children.append(TailSegment(alpha_screen, screen, screen_size, app, pos, self, player=self.player))
 
 
-    def draw(self, obj_container, updated_refresh):
+    def draw(self, updated_refresh, *kwargs):
         """
         draw
-        ~~~~~~~~~~
+
 
         draw does stuff
         """
 
-        if self.alive and (updated_refresh[0] or updated_refresh[1]):
-            # Clear previous frame obj's location
-            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
-            # Set current position for hitbox
-            self.rect.topleft = self.position
+        if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
 
             # Render the entity's obj based on it's parameters
             self.screen.blit(self.image, self.position)
-            append_dirty_rects = self.app.game.dirty_rects.append
 
             # Render the entity's sight lines
             for line in self.sight_lines:
@@ -138,16 +122,11 @@ class Snake(Entity):
             if updated_refresh[1]:
                 # Draw each child if there are any
                 for child in self.children:
-                    append_dirty_rects(child)
-                    child.refresh_draw(
-                    )
+                    child.refresh_draw()
 
             elif len(self.children) > 0 and self.child_train:
-                # Add this child to the dirty rects
-                append_dirty_rects(self.children[-1])
-
                 # Only move/render the last child to front of the train
-                self.children[-1].draw(obj_container, updated_refresh)
+                self.children[-1].draw(updated_refresh)
 
                 # Change the new last child's image to the tail
                 self.children[-1].make_end_img()
@@ -156,13 +135,13 @@ class Snake(Entity):
     def grow(self, eaten_obj):
         """
         grow
-        ~~~~~~~~~~
+
 
         grow does stuff
         """
 
         # Add a new tail segment
-        if self.alive:
+        if self.is_alive:
             new_tails = Deque()
 
             for _ in range(eaten_obj.growth):
@@ -175,35 +154,23 @@ class Snake(Entity):
                     parent = self,
                     player=self.player,
                 )
+
                 new_tails.append(tail)
+
                 self.num_tails += 1
 
             self.children = self.children + new_tails
 
 
-    def up_score(self, eaten_obj):
-        """
-        up_score
-        ~~~~~~~~~~
-
-        up_score does stuff
-        """
-
-        # Increase the score
-        if self.alive:
-            # pylint: disable=no-member
-            self.score += eaten_obj.point_value
-            # pylint: enable=no-member
-
-
     def choose_direction(self):
         """
         choose_direction
-        ~~~~~~~~~~
+
 
         choose_direction does stuff
         """
-        if self.alive:
+
+        if self.is_alive:
             # Check if Ai or player controls this entity
             if self.player:
                 key = pygame.key.get_pressed()
@@ -230,13 +197,13 @@ class Snake(Entity):
     def move(self):
         """
         move
-        ~~~~~~~~~~
+
 
         move does stuff
         """
 
         # pylint: disable=access-member-before-definition
-        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.alive:
+        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.is_alive:
             if not self.player:
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target("food")
@@ -272,8 +239,13 @@ class Snake(Entity):
                 self.prev_direction = self.direction
                 self.position = (self.position[0] + self.size, self.position[1])
 
+            # Set current position for hitbox
+            self.rect.topleft = self.position
+
             # Set the new last moved time
             self.time_last_moved = datetime.now()
+
+            # input("enter to continue")
 
             # Entity updated
             return True
@@ -283,9 +255,7 @@ class Snake(Entity):
 
 
 class TailSegment(Entity):
-    """
-    TailSegment
-    ~~~~~~~~~~
+    """TailSegment
 
     Tail Segment for the snake
     """
@@ -298,7 +268,7 @@ class TailSegment(Entity):
         super().__init__(alpha_screen, screen, screen_size, self.name, app)
 
         # Entity is dead or alive
-        self.alive = True
+        self.is_alive = True
 
         # Parent of this child
         self.parent = parent
@@ -335,13 +305,13 @@ class TailSegment(Entity):
     def draw(self, *kwargs):
         """
         draw
-        ~~~~~~~~~~
+
 
         draw does stuff
         """
 
         # render if alive
-        if self.alive:
+        if self.is_alive:
             # Clear previous frame obj's location
             self.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
 
@@ -454,4 +424,4 @@ class TailSegment(Entity):
         """
 
         # Kill interacting_obj
-        interacting_obj.die(f"collided with {self.ID} and died")
+        interacting_obj.die(f"collided with {self.id} and died")

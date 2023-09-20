@@ -20,8 +20,6 @@ Major:
     - Replace "if elif" logic with "dict.get()" where possible as seen here: - DONE
         - https://towardsdatascience.com/dictionary-as-an-alternative-to-if-else-76fe57a1e4af
         - Make sure this is actually faster when the temp dict with lambdas have to constantly be remade...
-    - Impliment "dirty rect animation" for faster rendering seen here: - Maybe
-        - https://www.pygame.org/docs/tut/newbieguide.html
     - Impliment list comprehensions like this: - NO
         - https://www.python.org/dev/peps/pep-0202/
     - Look into integrating OpenGL rendering for hardware acceleration - WIP Maybe...

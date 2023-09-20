@@ -2,10 +2,8 @@
 
 """
     Home Menu
-    ~~~~~~~~~~
 
     Game Home menu
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -13,9 +11,7 @@
 
 
 def home_menu(self):
-    """
-    home_menu
-    ~~~~~~~~~~
+    """home_menu
 
     home_menu does stuff
     """

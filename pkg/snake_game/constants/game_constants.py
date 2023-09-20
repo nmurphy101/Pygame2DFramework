@@ -2,10 +2,9 @@
 
 """
     Game Constants
-    ~~~~~~~~~~
+
 
     All constants for the game file
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -17,7 +16,10 @@ from datetime import datetime, timedelta
 import pygame
 
 GAME_TITLE = "Snake"
+
+# Font
 REGULAR_FONT = "assets/fonts/PressStart2P-Regular.ttf"
+REGULAR_FONT_SIZE = 32
 
 # Music
 MUSIC_INTRO = "assets/music/8bit_Stage1_Intro.wav"

@@ -2,10 +2,8 @@
 
 """
     Teleport Portal
-    ~~~~~~~~~~
 
-    a portal that can connect to another portal elsewhere
-
+    It's a portal that can connect to another portal elsewhere
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -21,9 +19,7 @@ from ..entity import Entity
 
 
 class TelePortal(Entity):
-    """
-    TelePortal
-    ~~~~~~~~~~
+    """TelePortal
 
     Teleport portal that entities can use to go to a connected portal elsewhere
     """
@@ -43,8 +39,12 @@ class TelePortal(Entity):
         # Parent obj (means self is a child of said parent)
         self.parent = parent
 
+        # spawned
+        self.is_spawned = True
+
         # When obj should be spawned
-        self.spawn_timer = datetime.now() #+ timedelta(seconds=random.randint(1, 5))
+        now = datetime.now()
+        self.spawn_timer = now + timedelta(seconds=random.randint(2, 5))
 
         # Where the portal is located
         x_pos = self.screen_size[0] - random.randrange(
@@ -62,8 +62,7 @@ class TelePortal(Entity):
         self.tele_portal_images = self.app.game.tele_portal_images
 
         # Entity's visual representation
-        self.image = pygame.Surface((self.size, self.size))
-        self.image.fill(self.obj_color)
+        self.image = self.tele_portal_images[0]
 
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
@@ -75,7 +74,7 @@ class TelePortal(Entity):
         self.sound_interact_volume = float(effect_volume)/self.sound_mod
 
         # Active trigger
-        self.activated = datetime.now()
+        self.activated = now
 
         # No Sight lines for tail segments
         self.sight_lines = []
@@ -84,44 +83,79 @@ class TelePortal(Entity):
         if not parent:
             self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
 
+        self.spawn()
 
-    def update(self, obj_container):
-        # if datetime.now() >= self.spawn_timer:
+
+    def update(self):
+        # Verify if teleporter should be spawned
+        now = datetime.now()
+        if not self.is_spawned:
+            pass
+        elif now < self.spawn_timer:
+            return False, False
+
+        # teleporter is now spawned
+        self.is_spawned = True
+
+        # Set next spawn time
+        self.spawn_timer = now + timedelta(seconds=random.randint(10, 25))
+
+        # Mark previous position
+        self.prev_position = self.position
+
         # try to spawn if obj can
-        updated = self.spawn(obj_container)
-        # else:
-            # updated = False
-        return updated
+        return self.spawn(), True
 
 
-    def draw(self, obj_container, updated_refresh):
+    def draw(self, updated_refresh, *kwargs):
         """
         draw
-        ~~~~~~~~~~
+
 
         draw does stuff
         """
 
-        # render if alive
-        if self.alive:
-            # place hitbox at position
-            self.rect.topleft = self.position
+        # render if alive and moved
+        if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
+            # print(self.position, self.prev_position, self.is_alive, self.children)
 
-            # Choose the correct image
-            self.image = self.tele_portal_images[0]
-
-            # Render the tail segment based on it's parameters
+            # Render the teleportal based on it's parameters
             self.screen.blit(self.image, self.position)
 
             # Draw each child if there are any
             for child in self.children:
-                child.draw(obj_container, updated_refresh)
+                child.draw(updated_refresh)
+
+
+    def spawn(self):
+        """
+        spawn
+
+
+        spawn does stuff
+        """
+
+        # Clear previous frame obj's location
+        self.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
+
+        self.set_random_spawn()
+
+        self.is_alive = True
+
+        updated_child = False
+
+        if self.children:
+            for child in self.children:
+                child.spawn()
+            updated_child = True
+
+        return True, updated_child
 
 
     def teleport(self, other_obj):
         """
         teleport
-        ~~~~~~~~~~
+
 
         teleport does stuff
         """
@@ -144,7 +178,7 @@ class TelePortal(Entity):
     def interact(self, interacting_obj):
         """
         interact
-        ~~~~~~~~~~
+
 
         interact does stuff
         """

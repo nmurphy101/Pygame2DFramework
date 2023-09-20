@@ -2,10 +2,8 @@
 
 """
     Game Over Menu
-    ~~~~~~~~~~
 
     The menu screen that is shown when the game is over
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -16,9 +14,7 @@ import pygame
 
 
 def game_over(self):
-    """
-    game_over_menu
-    ~~~~~~~~~~
+    """game_over_menu
 
     game_over_menu does stuff
     """
@@ -37,8 +33,8 @@ def game_over(self):
 
     # Get the player score
     score = "NA"
-    for obj in self.game.sprite_group:
-        if obj.player:
+    for entity in self.game.entity_final_scores:
+        if obj["is_player"]:
             score = obj.score
 
     # Render the score

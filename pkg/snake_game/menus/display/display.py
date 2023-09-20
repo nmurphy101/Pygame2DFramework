@@ -2,10 +2,8 @@
 
 """
     Display Menu
-    ~~~~~~~~~~
 
     Display settings menu
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -13,9 +11,7 @@
 
 
 def display_menu(self):
-    """
-    display_menu
-    ~~~~~~~~~~
+    """display_menu
 
     display_menu does stuff
     """

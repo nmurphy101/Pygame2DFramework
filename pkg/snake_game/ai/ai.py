@@ -2,10 +2,9 @@
 
 """
     Simple Pathfinding
-    ~~~~~~~~~~
+
 
     Simple pathfinding ai for controlling entities
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -13,35 +12,33 @@
 
 import math
 from datetime import datetime, timedelta
+from multiprocessing import Pool
 
 import pygame
 
 
 class DecisionBox:
-    """
-    DecisionBox
-    ~~~~~~~~~~
+    """DecisionBox
 
     DecisionBox for the entity
     """
 
-    def __init__(self):
+    def __init__(self, app):
         self.difficulty = None
-        self.obj_container = None
+        self.app = app
         self.time_chase = 0
         self.portal_use_difficulty = 1
         self.farsight_use_difficulty = 1
 
-    def decide_direction(self, entity, target, obj_container, difficulty=0):
+    def decide_direction(self, entity, target, difficulty=0):
         if not target:
             return entity.direction
 
         self.difficulty = difficulty
-        self.obj_container = obj_container
         # Use intent algorithm depending on difficulty
         direction = self.situational_intent(entity, target)
 
-        # print("Got Direction")
+        # print(f"Got Direction: {direction}")
 
         return direction
 
@@ -66,7 +63,7 @@ class DecisionBox:
 
         intent = self.check_intent(entity, intent)
 
-        # print("Got simple intent")
+        # print(f"Got simple intent: {intent}")
 
         return intent
 
@@ -124,7 +121,7 @@ class DecisionBox:
 
         intent = self.check_intent(entity, intent)
 
-        # print("Got situational intent")
+        # print(f"Got situational intent: {intent}")
 
         return intent
 
@@ -133,24 +130,26 @@ class DecisionBox:
         # print("Checking intent: ", intent)
         # Loop to check intent
         self.reset_sight_lines(entity)
-        for obj in self.obj_container:
+        for obj in self.app.game.sprite_group:
             # Ignore the target object
-            if entity.target[0] not in obj.name:
-            # if "food" not in obj.name:
+            if entity.target[0] in obj.name:
+                continue
 
-                # Check if object obstructs entity (and isn't self)
-                if obj != entity:
-                    self.verify_sight_lines(obj, entity, intent)
-                    intent = self.get_intent(intent, entity)
+            # Check if object obstructs entity (and isn't self)
+            if obj != entity:
+                intent = self._obj_check_intent(obj, entity, intent)
 
-                # Check if object's children if any (even if self) obstructs entity
-                if obj.children:
-                    for child in obj.children:
-                        self.verify_sight_lines(child, entity, intent)
-                        intent = self.get_intent(intent, entity)
+            # Check if object's children if any (even if self) obstructs entity
+            if obj.children:
+                for child in obj.children:
+                    intent = self._obj_check_intent(child, entity, intent)
 
-        # print(f"Returning Found Intent: {intent}")
         return intent
+
+
+    def _obj_check_intent(self, obj, entity, intent):
+        self.verify_sight_lines(obj, entity, intent)
+        return self.get_intent(intent, entity)
 
 
     def verify_sight_lines(self, obj, entity, intent):
@@ -176,8 +175,8 @@ class DecisionBox:
         for line in entity.sight_lines:
             # Check the sight lines for a open direction
             if pygame.Rect.colliderect(obj.rect, line.rect):
-                # if not "segment" in obj.ID:
-                # print(f"cardinal line collision {obj.ID} and {line.direction}")
+                # if not "segment" in obj.id:
+                # print(f"cardinal line collision {obj.id} and {line.direction}")
                 # Will Ai see and use portals?
                 if "teleportal" in obj.name and self.difficulty >= self.portal_use_difficulty:
                     line.open = self.decide_portal(obj, entity)

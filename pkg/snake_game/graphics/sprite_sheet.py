@@ -2,14 +2,13 @@
 
 """
     SpriteSheet
-    ~~~~~~~~~~
 
     Handling of sprite sheets for the game
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 """
+
 
 from pygame import (
     image,

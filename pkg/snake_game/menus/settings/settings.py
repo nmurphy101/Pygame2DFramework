@@ -2,10 +2,8 @@
 
 """
     Settings Menu
-    ~~~~~~~~~~
 
     The settings menu with options for different settings menus
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -13,9 +11,8 @@
 
 
 def settings_menu(self):
-    """
-    settings_menu
-    ~~~~~~~~~~
+    """settings_menu
+
     settings_menu does stuff
     """
 

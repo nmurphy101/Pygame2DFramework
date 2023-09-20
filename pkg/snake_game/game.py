@@ -2,10 +2,9 @@
 
 """
     Snake Game
-    ~~~~~~~~~~
+
 
     Defines the game of snake
-
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 """
@@ -37,20 +36,17 @@ from ..app import App
 
 
 class SnakeGame():
-    """
-    SnakeGame
-    ~~~~~~~~~~
+    """SnakeGame
 
     SnakeGame for the snake
     """
 
 
     def __init__(self, alpha_screen: Surface, screen: Surface, app: App):
-        """
-        SnakeGame initilizer
+        """SnakeGame initilizer
 
         Args:
-            alpha_screen (Surface): The screen the game plays on
+            alpha_screen (Surface): [description]
             screen (Surface): [description]
             app (App): The gameplatform
         """
@@ -70,7 +66,7 @@ class SnakeGame():
         self.screen_size = (screen_w, screen_h)
         self.game_font = freetype.Font(
             file=constants.REGULAR_FONT,
-            size=32,
+            size=constants.REGULAR_FONT_SIZE,
         )
 
         # Game settings
@@ -94,7 +90,7 @@ class SnakeGame():
 
         # Game object containers
         self.sprite_group = pygame.sprite.RenderUpdates()
-        self.dirty_rects = Deque()
+        self.entity_final_scores = {}
 
         ## Game sprite Sheets
         # Snake Sprite Images
@@ -137,9 +133,7 @@ class SnakeGame():
 
 
     def play(self, fps_counter_display: callable):
-        """
-        play
-        ~~~~~~~~~~
+        """play
 
         play does stuff
         """
@@ -149,9 +143,20 @@ class SnakeGame():
         # Check if not in a menu
         if self.menu.menu_option is None:
 
+            # clear screen if was in a menu previously
+            if self.menu.prev_menu in [0, 1]:
+                # Clear previous frame render (from menu)
+                self.screen.fill((0, 0, 0, 0))
+
             # Execute game object actions via parallel threads
             thread_group = []
             for obj in self.sprite_group:
+                if not obj.is_alive:
+                    continue
+
+                if self.menu.prev_menu in [0, 1]:
+                    obj.refresh_draw()
+
                 thread = threading.Thread(target=self._object_actions, args=(obj,))
                 thread.start()
                 thread_group.append(thread)
@@ -160,17 +165,18 @@ class SnakeGame():
             for thread in thread_group:
                 thread.join()
 
+            # input("click to continue")
+
             # Only 1 tick to refresh from pause_menu
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
 
             # The game loop FPS counter
             if is_fps_display_shown:
-                self.dirty_rects.append(fps_counter_display())
                 fps_counter_display()
 
             # Return to app
-            return None, self.dirty_rects
+            return None
 
         # In a menu
         # The game loop FPS counter
@@ -179,36 +185,27 @@ class SnakeGame():
 
         # Show which ever menu option that has been chosen:
         #   Main, Pause, Settings, GameOver, Display, Sound
-        return self.menu.menu_options.get(self.menu.menu_option)(), None
+        return self.menu.menu_options.get(self.menu.menu_option)()
 
 
     def _object_actions(self, obj: Entity):
-        # Make sure to refresh coming out of pause_menu
-        if self.menu.prev_menu in [0, 1]:
-            # Clear previous frame render (from menu)
-            self.screen.fill((0, 0, 0, 0))
+        """_object_actions
 
-            # Draw game objects
-            obj.draw(self.sprite_group, (True, True))
+        _object_actions does stuff
+        """
 
         # take obj tick actions
-        # - MEMORY LEAK when leaving from active game to main menu from pause menu
-        # - Possible memory leak as game progresses over time
-        updated = obj.update(self.sprite_group)
+        is_updated, is_child_updated = obj.update()
 
         # Draw game objects
-        # - MEMORY LEAK HERE when leaving from active game to main menu from pause menu
-        # - Possible memory leak as game progresses over time
-        obj.draw(self.sprite_group, (updated, False))
+        obj.draw((is_updated, is_child_updated))
 
         # collision of obj to other objects/children-of-other-objs
-        obj.collision_checks(updated)
+        obj.collision_checks(is_updated)
 
 
     def start(self):
-        """
-        start
-        ~~~~~~~~~~
+        """start
 
         start does stuff
         """
@@ -223,11 +220,15 @@ class SnakeGame():
         self.pause_game_music = False
 
         # AI blackbox
-        self.chosen_ai = DecisionBox()
+        self.chosen_ai = DecisionBox(self.app)
 
         # Initilize game objects - Order of these objects actually matter
         # Food objects
         number_of_food = self.app.game_config["settings"]["gameplay"]["number_of_food"]
+
+        # if number_of_food <= 0:
+        #     raise OSError("1 or more food is required to play")
+
         for _ in range(number_of_food):
             self.sprite_group.add(Food(self.alpha_screen, self.screen, self.screen_size, self.app))
 
@@ -259,9 +260,7 @@ class SnakeGame():
 
 
     def clean_up(self):
-        """
-        clean_up
-        ~~~~~~~~~~
+        """clean_up
 
         clean_up does stuff
         """
@@ -291,9 +290,7 @@ class SnakeGame():
 
 
     def settings_checks(self):
-        """
-        settings_checks
-        ~~~~~~~~~~
+        """settings_checks
 
         settings_checks does stuff
         """
@@ -310,9 +307,7 @@ class SnakeGame():
 
 
     def quit_game(self):
-        """
-        quit_game
-        ~~~~~~~~~~
+        """quit_game
 
         quit_game does stuff
         """
@@ -320,9 +315,8 @@ class SnakeGame():
 
 
     def unpause(self):
-        """
-        unpause
-        ~~~~~~~~~~
+        """unpause
+
 
         unpause does stuff
         """
@@ -331,10 +325,9 @@ class SnakeGame():
         self.pause_game_music = True
 
 
+
 def psudo_func(test):
-    """
-    psudo_func
-    ~~~~~~~~~~
+    """psudo_func
 
     psudo_func does stuff
     """

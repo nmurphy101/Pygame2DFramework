@@ -2,10 +2,9 @@
 
 """
     Constants
-    ~~~~~~~~~~
+
 
     All constants imports
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.

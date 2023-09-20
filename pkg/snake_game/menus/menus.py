@@ -2,10 +2,8 @@
 
 """
     Entities
-    ~~~~~~~~~~
 
     All the entities in the game
-
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
@@ -26,9 +24,7 @@ from .sound import sound_menu
 
 
 class Menu():
-    """
-    Menu
-    ~~~~~~~~~~
+    """Menu
 
     All menus for the game
     """
@@ -172,7 +168,7 @@ class Menu():
     def toggle_game_music(self):
         """
         toggle_game_music
-        ~~~~~~~~~~
+
 
         toggle_game_music does stuff
         """
@@ -185,7 +181,7 @@ class Menu():
     def increase_music_volume(self):
         """
         increase_music_volume
-        ~~~~~~~~~~
+
 
         increase_music_volume does stuff
         """
@@ -199,7 +195,7 @@ class Menu():
     def decrease_music_volume(self):
         """
         decrease_music_volume
-        ~~~~~~~~~~
+
 
         decrease_music_volume does stuff
         """
@@ -213,7 +209,7 @@ class Menu():
     def increase_effect_volume(self):
         """
         increase_effect_volume
-        ~~~~~~~~~~
+
 
         increase_effect_volume does stuff
         """
@@ -228,7 +224,7 @@ class Menu():
     def decrease_effect_volume(self):
         """
         decrease_effect_volume
-        ~~~~~~~~~~
+
 
         decrease_effect_volume does stuff
         """
@@ -243,7 +239,7 @@ class Menu():
     def increase_menu_volume(self):
         """
         increase_menu_volume
-        ~~~~~~~~~~
+
 
         increase_menu_volume does stuff
         """
@@ -258,7 +254,7 @@ class Menu():
     def decrease_menu_volume(self):
         """
         decrease_menu_volume
-        ~~~~~~~~~~
+
 
         decrease_menu_volume does stuff
         """
@@ -273,7 +269,7 @@ class Menu():
     def toggle_fps_display(self):
         """
         toggle_fps_display
-        ~~~~~~~~~~
+
 
         toggle_fps_display does stuff
         """
@@ -287,7 +283,7 @@ class Menu():
     def toggle_fullscreen(self):
         """
         toggle_fullscreen
-        ~~~~~~~~~~
+
 
         toggle_fullscreen does stuff
         """
@@ -301,7 +297,7 @@ class Menu():
     def change_resolution(self, resolution):
         """
         change_resolution
-        ~~~~~~~~~~
+
 
         change_resolution does stuff
         """
