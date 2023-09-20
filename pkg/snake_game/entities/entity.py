@@ -248,7 +248,7 @@ class Entity(Sprite):
             if "snake" in self.name:
                 self.app.game.entity_final_scores[self.id] = {
                     "is_player": self.player,
-                    "name": self.name,
+                    "name": self.name + self.display_name,
                     "score": self.score
                 }
                 self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))

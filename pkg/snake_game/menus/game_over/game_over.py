@@ -33,9 +33,9 @@ def game_over(self):
 
     # Get the player score
     score = "NA"
-    for entity in self.game.entity_final_scores:
-        if obj["is_player"]:
-            score = obj.score
+    for entity, value in self.game.entity_final_scores.items():
+        if value["is_player"]:
+            score = value["score"]
 
     # Render the score
     _ = self.render_button('Score: ' + str(score), 8, (255, 0, 0))
