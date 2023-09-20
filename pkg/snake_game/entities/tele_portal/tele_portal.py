@@ -160,20 +160,31 @@ class TelePortal(Entity):
         teleport does stuff
         """
 
+        side_num_x, side_num_y = self._determine_side(other_obj)
+
         # Is the child portal cuz has a parent
         if self.parent:
             # move other_obj to the parent portal
-            other_obj.position = (self.parent.position[0], self.parent.position[1])
+            other_obj.position = (self.parent.position[0]+side_num_x, self.parent.position[1]+side_num_y)
             self.parent.activated = datetime.now()
 
         # Is the parent portal cuz doesn't have a parent
         else:
             # move other_obj to the child portal
-            other_obj.position = (self.children[0].position[0], self.children[0].position[1])
+            other_obj.position = (self.children[0].position[0]+side_num_x, self.children[0].position[1]+side_num_y)
             self.children[0].activated = datetime.now()
 
         self.activated = datetime.now()
 
+    def _determine_side(self, other_obj):
+        if other_obj.direction == 0:
+            return 0, -16
+        elif other_obj.direction == 1:
+            return 16, 0
+        elif other_obj.direction == 2:
+            return 0, 16
+        elif other_obj.direction == 3:
+            return -16, 0
 
     def interact(self, interacting_obj):
         """
@@ -189,6 +200,7 @@ class TelePortal(Entity):
 
         else:
             # Teleport on cooldown
+            self.refresh_draw()
             return
 
         # Play second interacting_obj's interact sound
@@ -200,3 +212,5 @@ class TelePortal(Entity):
 
         # Teleport the obj to the paired portal
         self.teleport(interacting_obj)
+
+        self.refresh_draw()

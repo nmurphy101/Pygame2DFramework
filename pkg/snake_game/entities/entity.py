@@ -196,7 +196,7 @@ class Entity(Sprite):
         # render if alive
         if self.is_alive:
             # Clear screen where self was
-            self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Render the entity based on it's parameters
             self.screen.blit(self.image, self.position)
 
