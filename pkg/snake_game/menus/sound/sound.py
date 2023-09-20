@@ -26,12 +26,12 @@ def sound_menu(self):
     self.render_button("Sound", 10, (255, 0, 0))
 
     # Render the music button
-    text_str = 'Music: ' + str(self.game.app.game_config["settings"]["sound"]["music"])
+    text_str = 'Music: ' + str(self.game.app.app_config["settings"]["sound"]["music"])
     music_obj = self.render_button(text_str, 8)
 
     # Render the Volume view button
     volume_num = round(
-        100 * float(self.game.app.game_config["settings"]["sound"]["music_volume"]),
+        100 * float(self.game.app.app_config["settings"]["sound"]["music_volume"]),
         2,
     )
     text_str = "Music Volume: " + str(volume_num)
@@ -45,7 +45,7 @@ def sound_menu(self):
 
     # Render the Volume view button
     volume_num = round(
-        100 * float(self.game.app.game_config["settings"]["sound"]["effect_volume"]),
+        100 * float(self.game.app.app_config["settings"]["sound"]["effect_volume"]),
         2,
     )
     text_str = "Effect Volume: " + str(volume_num)
@@ -58,7 +58,7 @@ def sound_menu(self):
     effect_volume_down_obj = self.render_button("Down", 3, h_offset=-100)
 
     # Render the Volume view button
-    volume_num = round(100 * float(self.game.app.game_config["settings"]["sound"]["menu_volume"]))
+    volume_num = round(100 * float(self.game.app.app_config["settings"]["sound"]["menu_volume"]))
     text_str = "Menu Volume: " + str(volume_num)
     _ = self.render_button(text_str, 2)
 

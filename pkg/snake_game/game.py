@@ -10,6 +10,8 @@
 """
 
 
+import os
+import json
 import gc
 import threading
 from datetime import datetime
@@ -54,8 +56,13 @@ class SnakeGame():
         # Calling game platform
         self.app = app
 
+        # Game config file
+        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
+        with open(self.game_config_file_path, encoding="utf8") as json_data_file:
+            self.game_config = json.load(json_data_file)
+
         # Set starting fps from the config file
-        self.app.fps = int(self.app.game_config["settings"]["display"]["fps"])
+        self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
 
         # Window settings
         self.title = app.title + constants.GAME_TITLE
@@ -79,7 +86,7 @@ class SnakeGame():
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
-        pygame.mixer.music.set_volume(float(self.app.game_config["settings"]["sound"]["music_volume"]))
+        pygame.mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
 
         # Game Sounds
         self.sounds = [
@@ -138,7 +145,7 @@ class SnakeGame():
         play does stuff
         """
 
-        is_fps_display_shown = self.app.game_config["settings"]["display"]["fps_display"]
+        is_fps_display_shown = self.app.app_config["settings"]["display"]["fps_display"]
 
         # Check if not in a menu
         if self.menu.menu_option is None:
@@ -224,7 +231,7 @@ class SnakeGame():
 
         # Initilize game objects - Order of these objects actually matter
         # Food objects
-        number_of_food = self.app.game_config["settings"]["gameplay"]["number_of_food"]
+        number_of_food = self.game_config["settings"]["gameplay"]["number_of_food"]
 
         # if number_of_food <= 0:
         #     raise OSError("1 or more food is required to play")
@@ -233,26 +240,26 @@ class SnakeGame():
             self.sprite_group.add(Food(self.alpha_screen, self.screen, self.screen_size, self.app))
 
         # teleporter objects
-        teleporter_mod = self.app.game_config["settings"]["gameplay"]["teleporter_active"]
+        teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter_active"]
         if teleporter_mod:
             self.sprite_group.add(TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app))
 
         # initilize player character
-        is_human_playing = self.app.game_config["settings"]["gameplay"]["human_player"]
+        is_human_playing = self.game_config["settings"]["gameplay"]["human_player"]
         if is_human_playing:
             player_snake = Snake(
                 self.alpha_screen, self.screen, self.screen_size, self.app, player=True
             )
-            player_snake.speed_mod = self.app.game_config["settings"]["gameplay"]["player_speed"]
-            player_snake.killable = not self.app.game_config["settings"]["gameplay"]["invinsible_player"]
+            player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
+            player_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_player"]
             self.sprite_group.add(player_snake)
 
         # initilize ai characters
-        number_of_ai = self.app.game_config["settings"]["gameplay"]["number_of_ai"]
+        number_of_ai = self.game_config["settings"]["gameplay"]["number_of_ai"]
         for _ in range(number_of_ai):
             enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
-            enemy_snake.speed_mod = self.app.game_config["settings"]["gameplay"]["ai_speed"]
-            enemy_snake.killable = not self.app.game_config["settings"]["gameplay"]["invinsible_ai"]
+            enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
+            enemy_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_ai"]
             self.sprite_group.add(enemy_snake)
 
         # Start the game timer
@@ -295,10 +302,10 @@ class SnakeGame():
         settings_checks does stuff
         """
         # Start/Restart the game music
-        if self.app.game_config["settings"]["sound"]["music"]:
+        if self.app.app_config["settings"]["sound"]["music"]:
             pygame.mixer.music.load(self.playlist[self.current_track])
             pygame.mixer.music.set_volume(
-                float(self.app.game_config["settings"]["sound"]["music_volume"])
+                float(self.app.app_config["settings"]["sound"]["music_volume"])
             )
             pygame.mixer.music.play(0, 0, 1)
 

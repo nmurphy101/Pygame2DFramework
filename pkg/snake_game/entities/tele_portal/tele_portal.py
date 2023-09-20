@@ -70,7 +70,7 @@ class TelePortal(Entity):
         # Interact sound
         self.sound_interact = self.app.game.sounds[2]
         self.sound_mod = 2.5
-        effect_volume = app.game_config["settings"]["sound"]["effect_volume"]
+        effect_volume = app.app_config["settings"]["sound"]["effect_volume"]
         self.sound_interact_volume = float(effect_volume)/self.sound_mod
 
         # Active trigger
@@ -193,7 +193,7 @@ class TelePortal(Entity):
 
         # Play second interacting_obj's interact sound
         sound = self.sound_interact
-        effect_volume = self.app.game_config["settings"]["sound"]["effect_volume"]
+        effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
         self.sound_interact_volume = float(effect_volume)/self.sound_mod
         sound.set_volume(self.sound_interact_volume)
         pygame.mixer.Sound.play(sound)

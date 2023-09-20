@@ -42,23 +42,23 @@ class App():
         mixer.quit()
         mixer.init(44100, -16, 2, 2048)
 
-        # Game config file
-        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
-        with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config = json.load(json_data_file)
+        # App config file
+        self.app_config_file_path = os.path.join(os.path.dirname(__file__), 'app_config.json')
+        with open(self.app_config_file_path, encoding="utf8") as json_data_file:
+            self.app_config = json.load(json_data_file)
 
-        resolution = self.game_config["settings"]["display"]["resolution"].split("x")
+        resolution = self.app_config["settings"]["display"]["resolution"].split("x")
         self.screen_width = int(resolution[0])
         self.screen_height = int(resolution[1])
         self.game_pkg = game_pkg
         self.game = None
         self.running = True
-        self.fps = self.game_config["settings"]["display"]["fps"]
+        self.fps = self.app_config["settings"]["display"]["fps"]
         self.fps_list = []
         self.fps_pos = None
         self.fps_rect = None
         self.clock = None
-        self.title = self.game_config["settings"]["display"]["window_title"]
+        self.title = self.app_config["settings"]["display"]["window_title"]
         self.screen = None
         self.debug_screen = None
         self.background_0 = None
@@ -134,7 +134,7 @@ class App():
 
         # Game window settings
         background_colour = (0, 0, 0)
-        if self.game_config["settings"]["display"]["fullscreen"]:
+        if self.app_config["settings"]["display"]["fullscreen"]:
             flags = DOUBLEBUF | FULLSCREEN
         else:
             flags = DOUBLEBUF
@@ -316,5 +316,5 @@ class App():
         """
 
         menu_sound = self.menu_sounds[num]
-        menu_sound.set_volume(float(self.game_config["settings"]["sound"]["menu_volume"])/1.5)
+        menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
         pygame.mixer.Sound.play(menu_sound)
