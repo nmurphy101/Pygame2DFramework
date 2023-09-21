@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import pygame
 
 from ..entity import Entity
+from ....app import App
 
 
 class TelePortal(Entity):
@@ -24,7 +25,7 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     """
 
-    def __init__(self, screen_size, app, parent=None):
+    def __init__(self, screen_size: tuple[int, int], app: App, parent: "TelePortal" = None):
         self.name = "teleportal_"
 
         # Initilize parent init
@@ -86,7 +87,7 @@ class TelePortal(Entity):
         self.spawn()
 
 
-    def update(self):
+    def update(self) -> tuple[bool, bool]:
         # Verify if teleporter should be spawned
         now = datetime.now()
         if not self.is_spawned:
@@ -107,7 +108,7 @@ class TelePortal(Entity):
         return self.spawn(), True
 
 
-    def draw(self, updated_refresh, *kwargs):
+    def draw(self, updated_refresh: tuple[bool, bool], *kwargs) -> None:
         """
         draw
 
@@ -127,7 +128,7 @@ class TelePortal(Entity):
                 child.draw(updated_refresh)
 
 
-    def spawn(self):
+    def spawn(self) -> tuple[bool, bool]:
         """
         spawn
 
@@ -152,7 +153,7 @@ class TelePortal(Entity):
         return True, updated_child
 
 
-    def teleport(self, other_obj):
+    def teleport(self, other_obj: Entity) -> None:
         """
         teleport
 
@@ -176,7 +177,8 @@ class TelePortal(Entity):
 
         self.activated = datetime.now()
 
-    def _determine_side(self, other_obj):
+
+    def _determine_side(self, other_obj: Entity) -> tuple[int, int]:
         if other_obj.direction == 0:
             return 0, -self.app.game.grid_size
         elif other_obj.direction == 1:
@@ -186,7 +188,8 @@ class TelePortal(Entity):
         elif other_obj.direction == 3:
             return -self.app.game.grid_size, 0
 
-    def interact(self, interacting_obj):
+
+    def interact(self, interacting_obj: Entity) -> None:
         """
         interact
 

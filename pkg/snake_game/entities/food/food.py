@@ -17,6 +17,7 @@ from pygame import (
 )
 
 from ..entity import Entity
+from ....app import App
 
 
 class Food(Entity):
@@ -25,7 +26,7 @@ class Food(Entity):
     Food for the snake
     """
 
-    def __init__(self, screen_size: tuple[int, int], app):
+    def __init__(self, screen_size: tuple[int, int], app: App):
         # Name for this type of object
         self.name = "food_"
 

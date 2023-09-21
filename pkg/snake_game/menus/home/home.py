@@ -28,7 +28,7 @@ def home_menu(self):
 
     # Check settings if just left settings page
 
-    if self.prev_menu == game_constants.MENU_PAUSE:
+    if self.prev_menu in [game_constants.MENU_PAUSE, game_constants.MENU_GAME_OVER]:
         # Clear game objects up to free memory
         self.game.clean_up()
 

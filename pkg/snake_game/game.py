@@ -84,6 +84,8 @@ class SnakeGame():
         self.alpha_screen = alpha_screen
         screen_w, screen_h = screen.get_size()
         self.screen_size = (screen_w, screen_h)
+
+        # Game fonts
         self.game_font = freetype.Font(
             file=constants.REGULAR_FONT,
             size=constants.REGULAR_FONT_SIZE,
@@ -298,14 +300,19 @@ class SnakeGame():
         # Game timer
         self.timer = None
 
-        # Game object list
+        # Game objects cleanup
         for obj in self.sprite_group:
             obj.sight_lines_diag = None
+
             obj.sight_lines = None
+
             for child in obj.children:
                 child.kill()
+
             obj.children = None
+
             obj.kill()
+
         self.sprite_group.empty()
 
         # AI blackbox
@@ -352,12 +359,3 @@ class SnakeGame():
         self.menu.prev_menu = self.menu.menu_option
         self.menu.menu_option = None
         self.pause_game_music = True
-
-
-
-def psudo_func(test):
-    """psudo_func
-
-    psudo_func does stuff
-    """
-    print("Psudo_func: ", test)

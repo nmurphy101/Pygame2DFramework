@@ -363,7 +363,6 @@ class Entity(Sprite):
                         self.secondary_target = None
 
                     # print(f"----{self.id} Interacting with child 1 {child.id}-----")
-                    # print(f"child pos: {child.tail_pos}/{len(obj.children)}")
 
                     child.interact(self)
 

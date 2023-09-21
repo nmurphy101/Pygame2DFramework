@@ -22,6 +22,7 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 
 from ..entity import Entity, Line
+from ....app import App
 
 
 class Snake(Entity):
@@ -30,7 +31,7 @@ class Snake(Entity):
     obj for the snake
     """
 
-    def __init__(self, screen_size, app, player=False):
+    def __init__(self, screen_size: tuple[int, int], app: App, player: bool = False):
         # Name for this type of object
         self.name = "snake_"
 
@@ -96,12 +97,12 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(screen_size, app, pos, self, player=self.player))
+                self.children.append(TailSegment(self, app, screen_size, player=self.player))
             else:
-                self.children.append(TailSegment(screen_size, app, pos, self, player=self.player))
+                self.children.append(TailSegment(self, app, screen_size, player=self.player))
 
 
-    def aquire_primary_target(self, target_name):
+    def aquire_primary_target(self, target_name: str) -> None:
         # Set variables pre loop
         primary_target = (None, 10000*100000)
 
@@ -125,7 +126,7 @@ class Snake(Entity):
         self.since_secondary_target = datetime.now()
 
 
-    def draw(self, updated_refresh, *kwargs):
+    def draw(self, updated_refresh: tuple[bool, bool], *kwargs) -> None:
         """
         draw
 
@@ -159,7 +160,7 @@ class Snake(Entity):
                 self.children[-1].make_end_img()
 
 
-    def grow(self, eaten_obj):
+    def grow(self, eaten_obj: Entity) -> None:
         """
         grow
 
@@ -173,10 +174,9 @@ class Snake(Entity):
 
             for _ in range(eaten_obj.growth):
                 tail = TailSegment(
-                    self.screen_size,
+                    self,
                     self.app,
-                    1,
-                    parent = self,
+                    self.screen_size,
                     player=self.player,
                 )
 
@@ -187,7 +187,7 @@ class Snake(Entity):
             self.children = self.children + new_tails
 
 
-    def choose_direction(self):
+    def choose_direction(self) -> None:
         """
         choose_direction
 
@@ -219,7 +219,7 @@ class Snake(Entity):
                 pass
 
 
-    def move(self):
+    def move(self) -> bool:
         """
         move
 
@@ -285,7 +285,7 @@ class TailSegment(Entity):
     Tail Segment for the snake
     """
 
-    def __init__(self, screen_size, app, tail_pos, parent, player=False):
+    def __init__(self, parent: Snake, app: App, screen_size: tuple[int, int], player: bool = False):
         # Name for this type of object
         self.name = "tail-segment_"
 
@@ -304,9 +304,6 @@ class TailSegment(Entity):
 
         # Determines if entity can be killed
         self.killable = False
-
-        # Position in the chain of tails/head
-        self.tail_pos = tail_pos
 
         if self.player:
             # Tail color = white
@@ -327,7 +324,7 @@ class TailSegment(Entity):
         self.rect = self.image.get_rect(topleft=self.position)
 
 
-    def draw(self, *kwargs):
+    def draw(self, *kwargs) -> None:
         """
         draw
 
@@ -357,7 +354,7 @@ class TailSegment(Entity):
             self.parent.children.rotate()
 
 
-    def choose_img(self):
+    def choose_img(self) -> None:
         """choose_img
         """
 
@@ -404,7 +401,7 @@ class TailSegment(Entity):
         self.parent_dir = self.parent.direction
 
 
-    def make_end_img(self):
+    def make_end_img(self) -> None:
         """make_end_img
         """
 
@@ -441,7 +438,7 @@ class TailSegment(Entity):
         self.app.game.screen.blit(self.image, self.position)
 
 
-    def interact(self, interacting_obj):
+    def interact(self, interacting_obj: Entity) -> None:
         """interact
 
         Args:

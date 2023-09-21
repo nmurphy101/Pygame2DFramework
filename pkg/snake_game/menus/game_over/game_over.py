@@ -12,6 +12,8 @@
 
 import pygame
 
+from ...constants import game_constants
+
 
 def game_over(self):
     """game_over_menu
