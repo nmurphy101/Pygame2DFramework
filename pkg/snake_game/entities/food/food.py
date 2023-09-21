@@ -11,6 +11,10 @@
 
 import random
 import pygame
+from pygame import (
+    freetype,
+    Surface,
+)
 
 from ..entity import Entity
 
@@ -21,19 +25,19 @@ class Food(Entity):
     Food for the snake
     """
 
-    def __init__(self, alpha_screen, screen, screen_size, app):
+    def __init__(self, screen_size: tuple[int, int], app):
         # Name for this type of object
         self.name = "food_"
 
         # Initilize parent init
-        super().__init__(alpha_screen, screen, screen_size, self.name, app)
+        super().__init__(screen_size, self.name, app)
 
         # Where the food is located
         x = self.screen_size[0] - random.randrange(
-            16, self.screen_size[0], 16
+            self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
         y = self.screen_size[1] - random.randrange(
-            16, self.screen_size[1], 16
+            self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
         )
         self.position = (x, y)
 
@@ -69,7 +73,7 @@ class Food(Entity):
         self.spawn()
 
 
-    def update(self):
+    def update(self) -> bool:
         """update
 
         update does stuf
@@ -78,7 +82,7 @@ class Food(Entity):
         return self.spawn()
 
 
-    def draw(self, updated_refresh, *kwargs):
+    def draw(self, updated_refresh: tuple[bool, bool], *kwargs) -> None:
         """draw
 
         draw does stuff
@@ -88,14 +92,11 @@ class Food(Entity):
         if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
             # print(self.position, self.prev_position, self.is_alive, self.children, self.is_spawned)
 
-            # Clear previous frame obj's location
-            # self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
             # Render the entity based on it's parameters
-            self.screen.blit(self.image, self.position)
+            self.app.game.screen.blit(self.image, self.position)
 
 
-    def spawn(self):
+    def spawn(self) -> tuple[bool, bool]:
         """spawn
 
         spawn does stuff
@@ -118,7 +119,7 @@ class Food(Entity):
         return False, False
 
 
-    def interact(self, interacting_obj):
+    def interact(self, interacting_obj: Entity) -> None:
         """interact
 
         Args:

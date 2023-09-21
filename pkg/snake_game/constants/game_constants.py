@@ -10,10 +10,6 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import math
-from datetime import datetime, timedelta
-
-import pygame
 
 GAME_TITLE = "Snake"
 
@@ -35,3 +31,11 @@ SPRITE_SHEET_SNAKE_PLAYER = "assets/sprites/snake/snake-sheet.png"
 SPRITE_SHEET_SNAKE_ENEMY = "assets/sprites/snake/snake_enemy-sheet.png"
 SPRITE_SHEET_FOOD = "assets/sprites/food/food-sheet.png"
 SPIRTE_SHEET_TELEPORTAL = "assets/sprites/tele_portal/tele_portal-sheet.png"
+
+# Menu options
+MENU_HOME = 0
+MENU_PAUSE = 1
+MENU_SETTINGS = 2
+MENU_GAME_OVER = 3
+MENU_DISPLAY = 4
+MENU_SOUND = 5

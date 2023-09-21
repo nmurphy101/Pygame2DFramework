@@ -24,11 +24,11 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     """
 
-    def __init__(self, alpha_screen, screen, screen_size, app, parent=None):
+    def __init__(self, screen_size, app, parent=None):
         self.name = "teleportal_"
 
         # Initilize parent init
-        super().__init__(alpha_screen, screen, screen_size, self.name, app)
+        super().__init__(screen_size, self.name, app)
 
         # Determines if entity can be killed
         self.killable = False
@@ -48,10 +48,10 @@ class TelePortal(Entity):
 
         # Where the portal is located
         x_pos = self.screen_size[0] - random.randrange(
-            16, self.screen_size[0], 16
+            self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
         y_pos = self.screen_size[1] - random.randrange(
-            16, self.screen_size[1], 16
+            self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
         )
         self.position = (x_pos, y_pos)
 
@@ -81,7 +81,7 @@ class TelePortal(Entity):
 
         # Initilize starting children if it has no parent (and thus is the parent)
         if not parent:
-            self.children.append(TelePortal(alpha_screen, screen, screen_size, app, parent=self))
+            self.children.append(TelePortal(screen_size, app, parent=self))
 
         self.spawn()
 
@@ -120,7 +120,7 @@ class TelePortal(Entity):
             # print(self.position, self.prev_position, self.is_alive, self.children)
 
             # Render the teleportal based on it's parameters
-            self.screen.blit(self.image, self.position)
+            self.app.game.screen.blit(self.image, self.position)
 
             # Draw each child if there are any
             for child in self.children:
@@ -136,7 +136,7 @@ class TelePortal(Entity):
         """
 
         # Clear previous frame obj's location
-        self.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
+        self.app.game.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
 
         self.set_random_spawn()
 
@@ -178,13 +178,13 @@ class TelePortal(Entity):
 
     def _determine_side(self, other_obj):
         if other_obj.direction == 0:
-            return 0, -16
+            return 0, -self.app.game.grid_size
         elif other_obj.direction == 1:
-            return 16, 0
+            return self.app.game.grid_size, 0
         elif other_obj.direction == 2:
-            return 0, 16
+            return 0, self.app.game.grid_size
         elif other_obj.direction == 3:
-            return -16, 0
+            return -self.app.game.grid_size, 0
 
     def interact(self, interacting_obj):
         """

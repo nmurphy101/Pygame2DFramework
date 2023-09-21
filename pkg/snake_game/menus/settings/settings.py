@@ -10,6 +10,9 @@
 """
 
 
+from ...constants import game_constants
+
+
 def settings_menu(self):
     """settings_menu
 
@@ -20,10 +23,10 @@ def settings_menu(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 2
+    self.menu_option = game_constants.MENU_SETTINGS
 
     # Check settings if just left settings page
-    if self.prev_menu not in (1, 2):
+    if self.prev_menu not in (game_constants.MENU_PAUSE, game_constants.MENU_SETTINGS):
         self.game.settings_checks()
 
     # Render the Settings Menu text

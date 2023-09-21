@@ -10,6 +10,9 @@
 """
 
 
+from ...constants import game_constants
+
+
 def home_menu(self):
     """home_menu
 
@@ -20,20 +23,20 @@ def home_menu(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 0
-    self.root_menu = 0
+    self.menu_option = game_constants.MENU_HOME
+    self.root_menu = game_constants.MENU_HOME
 
     # Check settings if just left settings page
 
-    if self.prev_menu == 1:
+    if self.prev_menu == game_constants.MENU_PAUSE:
         # Clear game objects up to free memory
         self.game.clean_up()
 
-    elif self.prev_menu not in [1, 2]:
+    elif self.prev_menu not in [game_constants.MENU_PAUSE, game_constants.MENU_SETTINGS]:
         # Check the settings
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
-        self.prev_menu = 2
+        self.prev_menu = game_constants.MENU_SETTINGS
 
     # Render the Home Menu text
     _ = self.render_button("Home Menu", 8, (255, 0, 0))

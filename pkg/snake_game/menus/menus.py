@@ -320,7 +320,7 @@ class Menu():
         self.game.screen = pygame.display.set_mode(
             (self.game.app.screen_width, self.game.app.screen_height),
             flags,
-            16,
+            self.app.game.grid_size,
         )
 
         self.game.screen.set_alpha(None)

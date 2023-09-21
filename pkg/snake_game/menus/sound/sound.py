@@ -10,6 +10,9 @@
 """
 
 
+from ...constants import game_constants
+
+
 def sound_menu(self):
     """sound_menu
 
@@ -20,7 +23,7 @@ def sound_menu(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 5
+    self.menu_option = game_constants.MENU_SOUND
 
     # Render the Display text
     self.render_button("Sound", 10, (255, 0, 0))

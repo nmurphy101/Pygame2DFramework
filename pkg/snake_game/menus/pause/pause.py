@@ -9,7 +9,10 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+
 import gc
+
+from ...constants import game_constants
 
 
 def pause_menu(self):
@@ -22,13 +25,13 @@ def pause_menu(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 1
-    self.root_menu = 1
+    self.menu_option = game_constants.MENU_PAUSE
+    self.root_menu = game_constants.MENU_PAUSE
 
     if self.prev_menu is None:
         # Free unreferenced memory
         gc.collect()
-        self.prev_menu = 2
+        self.prev_menu = game_constants.MENU_SETTINGS
 
     # Pause game music
     self.game.pause_game_music = True
@@ -51,7 +54,7 @@ def pause_menu(self):
     # Render the settings button
     settings_obj = self.render_button("Settings", -1)
 
-    # Render the quit button
+    # Render the main menu button
     return_obj = self.render_button("Main Menu", -3)
 
     menu = [
@@ -59,11 +62,5 @@ def pause_menu(self):
         (settings_obj, self.settings_menu, 1),
         (return_obj, self.home_menu, 1),
     ]
-
-    # Lines used for testing obj limit
-    # print(
-    #   self.game.sprite_group.sprites()[2].id,
-    #   len(self.game.sprite_group.sprites()[2].children),
-    # )
 
     return menu

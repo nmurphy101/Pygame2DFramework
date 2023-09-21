@@ -23,7 +23,7 @@ def game_over(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 3
+    self.menu_option = game_constants.MENU_GAME_OVER
 
     # Stop the music
     pygame.mixer.music.stop()

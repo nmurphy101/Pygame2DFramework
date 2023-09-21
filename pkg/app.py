@@ -11,7 +11,7 @@
 
 
 import os
-# import logging
+import logging
 import statistics
 import json
 
@@ -25,8 +25,29 @@ from pygame.constants import (
 )
 from guppy import hpy
 
+from .constants import app_constants as constants
+
 
 NEXT = USEREVENT + 1
+
+
+def _get_log_level(json_config: dict):
+    """_get_log_level
+
+    Base game structure.
+    """
+    match json_config["settings"]["display"]["resolution"]:
+        case "info":
+            return logging.INFO
+
+        case "debug":
+            return logging.DEBUG
+
+        case "warning":
+            return logging.WARNING
+
+        case _:
+            return logging.INFO
 
 
 class App():
@@ -43,10 +64,15 @@ class App():
         mixer.init(44100, -16, 2, 2048)
 
         # App config file
-        self.app_config_file_path = os.path.join(os.path.dirname(__file__), 'app_config.json')
+        self.app_config_file_path = os.path.join(os.path.dirname(__file__), constants.CONFIG_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
             self.app_config = json.load(json_data_file)
 
+        # Setup the app logger for event tracking and debugging
+        logging.basicConfig(level=_get_log_level(self.app_config))
+        logging.basicConfig(filename=constants.LOG_FILE_NAME, filemode="w", format="%(name)s - %(levelname)s - %(message)s")
+
+        # Set initial app settings
         resolution = self.app_config["settings"]["display"]["resolution"].split("x")
         self.screen_width = int(resolution[0])
         self.screen_height = int(resolution[1])
@@ -64,9 +90,9 @@ class App():
         self.background_0 = None
 
         self.menu_sounds = [
-            pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI01.wav"), # hover
-            pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI02.wav"), # forward
-            pygame.mixer.Sound("assets/sounds/8bitsfxpack_windows/UI03.wav"), # backward
+            pygame.mixer.Sound(constants.SOUND_UI_HOVER), # hover
+            pygame.mixer.Sound(constants.SOUND_UI_FORWARD), # forward
+            pygame.mixer.Sound(constants.SOUND_UI_BACKWARD), # backward
         ]
 
         self.ui_sound_options = {}

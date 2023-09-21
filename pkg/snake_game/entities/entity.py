@@ -9,8 +9,8 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+import gc
 import random
-import math
 from datetime import datetime
 from typing import Deque
 import uuid
@@ -30,7 +30,7 @@ class Entity(Sprite):
     base obj for all entities
     """
 
-    def __init__(self, alpha_screen, screen, screen_size, name, app):
+    def __init__(self, screen_size, name, app):
         pygame.sprite.Sprite.__init__(self)
 
         # Base game obj
@@ -57,10 +57,6 @@ class Entity(Sprite):
         # Entity is player
         self.player = False
 
-        # Screen obj
-        self.alpha_screen = alpha_screen
-        self.screen = screen
-
         # Score this entity has accumulated
         self.score = 0
 
@@ -77,7 +73,7 @@ class Entity(Sprite):
         self.prev_position = None
 
         # How big entity is
-        self.size = 16
+        self.size = self.app.game.grid_size
 
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
@@ -95,10 +91,6 @@ class Entity(Sprite):
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight_mod = 2
         self.sight = self.sight_mod * self.size
-
-        # Obj pos/size  = (left, top, width, height)
-        # self.obj = (self.position[0], self.position[1], self.size+8, self.size)
-        self.death_position = (-10000*10000, -10000*10000)
 
         # RGB color = pink default
         self.obj_color = (255,105,180)
@@ -133,7 +125,6 @@ class Entity(Sprite):
         self.target = None
         self.secondary_target = None
         self.since_secondary_target = datetime.now()
-        self.ai_difficulty = 10
 
         # children list
         self.children = Deque()
@@ -170,7 +161,7 @@ class Entity(Sprite):
             self.rect.topleft = self.position
 
             # Render the tail segment based on it's parameters
-            self.screen.blit(self.image, self.position)
+            self.app.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
             draw = Line.draw # eval func only once
@@ -196,9 +187,9 @@ class Entity(Sprite):
         # render if alive
         if self.is_alive:
             # Clear screen where self was
-            # self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # self.app.game.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Render the entity based on it's parameters
-            self.screen.blit(self.image, self.position)
+            self.app.game.screen.blit(self.image, self.position)
 
             # Re-draw each child if there are any
             for child in self.children:
@@ -251,9 +242,20 @@ class Entity(Sprite):
                     "name": self.name + self.display_name,
                     "score": self.score
                 }
-                self.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+                self.app.game.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
                 self.app.game.sprite_group.remove(self)
+
+                self.sight_lines_diag = None
+
+                self.sight_lines = None
+
+                for child in self.children:
+                    self.app.game.screen.fill((0, 0, 0, 0), (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                    child.kill()
+                self.children = None
+
+                self.kill()
 
             # Clear previous frame render (from menu)
             self.app.game.screen.fill((0, 0, 0, 0))
@@ -261,6 +263,9 @@ class Entity(Sprite):
             # draw the object
             for obj in self.app.game.sprite_group:
                 obj.draw((False, True))
+
+            # Free unreferenced memory
+            gc.collect()
 
 
     def collision_checks(self, updated):
@@ -305,7 +310,7 @@ class Entity(Sprite):
         """
 
         # Collision check for edge of screen (Right and Bottom)
-        if (self.position[0] > self.screen_size[0]-self.size) or (
+        if (self.position[0] > self.app.game.screen_size[0]-self.size) or (
                 self.position[1] > self.screen_size[1]-self.size):
             self.die("Edge of screen")
             return True
@@ -420,30 +425,6 @@ class Entity(Sprite):
         self.rect.topleft = self.position
 
 
-    def aquire_primary_target(self, target_name):
-        # Set variables pre loop
-        primary_target = (None, 10000*100000)
-
-        pos = (self.app.game.screen_size[0]/2, self.app.game.screen_size[1]/2)
-
-        for obj in self.app.game.sprite_group.sprites():
-            if target_name in obj.id:
-                dist_self = math.hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
-                if dist_self < primary_target[1]:
-                    pos = (obj.position[0], obj.position[1])
-                    primary_target = (pos, dist_self)
-
-        self.target = (target_name, primary_target[0][0], primary_target[0][1])
-
-        self.direction = self.app.game.chosen_ai.decide_direction(
-            self,
-            self.target,
-            difficulty=self.ai_difficulty,
-        )
-
-        self.since_secondary_target = datetime.now()
-
-
     def spawn(self):
         """
         spawn
@@ -469,14 +450,6 @@ class Entity(Sprite):
         return False
 
 
-    def choose_img(self):
-        pass
-
-
-    def grow(self, eaten_obj):
-        pass
-
-
     def up_score(self, score_obj):
         """
         up_score
@@ -488,18 +461,6 @@ class Entity(Sprite):
         # Increase the score
         if self.is_alive:
             self.score += score_obj.point_value
-
-
-    def choose_direction(self):
-        pass
-
-
-    def move(self):
-        return None
-
-
-    def teleport(self, other_obj):
-        pass
 
 
 class Line(Sprite):
@@ -529,7 +490,7 @@ class Line(Sprite):
         self.line_options.get(self.direction)(entity)
 
         if self.opasity == 0:
-            chosen_screen = entity.alpha_screen
+            chosen_screen = entity.app.game.alpha_screen
 
         else :
             chosen_screen = entity.screen
@@ -553,7 +514,7 @@ class Line(Sprite):
 
         # Choose the screen to draw to
         if self.opasity == 0:
-            chosen_screen = entity.alpha_screen
+            chosen_screen = entity.app.game.alpha_screen
 
         else :
             chosen_screen = entity.screen

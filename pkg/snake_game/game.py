@@ -37,6 +37,19 @@ from .menus.menus import Menu
 from ..app import App
 
 
+def is_multiple_of_4(number):
+    """
+    Verify if a number is a multiple of 4.
+
+    Args:
+        number (int): The number to be checked.
+
+    Returns:
+        bool: True if the number is a multiple of 4, False otherwise.
+    """
+    return number % 4 == 0
+
+
 class SnakeGame():
     """SnakeGame
 
@@ -79,6 +92,10 @@ class SnakeGame():
         # Game settings
         self.pause_game_music = False
         self.timer = None
+        self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
+
+        if not is_multiple_of_4(self.grid_size):
+            raise OSError("grid_size must be a multiple of 4")
 
         # Game music
         self.game_music_intro = constants.MUSIC_INTRO
@@ -153,7 +170,7 @@ class SnakeGame():
             # clear screen if was in a menu previously
             if self.menu.prev_menu in [0, 1]:
                 # Clear previous frame render (from menu)
-                self.screen.fill((0, 0, 0, 0))
+                self.app.game.screen.fill((0, 0, 0, 0))
 
             # Execute game object actions via parallel threads
             thread_group = []
@@ -237,18 +254,18 @@ class SnakeGame():
         #     raise OSError("1 or more food is required to play")
 
         for _ in range(number_of_food):
-            self.sprite_group.add(Food(self.alpha_screen, self.screen, self.screen_size, self.app))
+            self.sprite_group.add(Food(self.screen_size, self.app))
 
         # teleporter objects
         teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter_active"]
         if teleporter_mod:
-            self.sprite_group.add(TelePortal(self.alpha_screen, self.screen, self.screen_size, self.app))
+            self.sprite_group.add(TelePortal(self.screen_size, self.app))
 
         # initilize player character
         is_human_playing = self.game_config["settings"]["gameplay"]["human_player"]
         if is_human_playing:
             player_snake = Snake(
-                self.alpha_screen, self.screen, self.screen_size, self.app, player=True
+                self.screen_size, self.app, player=True
             )
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
             player_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_player"]
@@ -257,7 +274,7 @@ class SnakeGame():
         # initilize ai characters
         number_of_ai = self.game_config["settings"]["gameplay"]["number_of_ai"]
         for _ in range(number_of_ai):
-            enemy_snake = Snake(self.alpha_screen, self.screen, self.screen_size, self.app)
+            enemy_snake = Snake(self.screen_size, self.app)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
             enemy_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_ai"]
             self.sprite_group.add(enemy_snake)
@@ -273,7 +290,7 @@ class SnakeGame():
         """
 
         # Clear previous frame render
-        self.screen.fill((0, 0, 0, 0))
+        self.app.game.screen.fill((0, 0, 0, 0))
 
         # Game settings
         self.pause_game_music = False
@@ -283,6 +300,11 @@ class SnakeGame():
 
         # Game object list
         for obj in self.sprite_group:
+            obj.sight_lines_diag = None
+            obj.sight_lines = None
+            for child in obj.children:
+                child.kill()
+            obj.children = None
             obj.kill()
         self.sprite_group.empty()
 

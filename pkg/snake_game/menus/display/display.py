@@ -10,6 +10,9 @@
 """
 
 
+from ...constants import game_constants
+
+
 def display_menu(self):
     """display_menu
 
@@ -20,7 +23,7 @@ def display_menu(self):
     self.game.screen.fill((0, 0, 0, 0))
 
     # Make sure the right menu option is selected
-    self.menu_option = 4
+    self.menu_option = game_constants.MENU_DISPLAY
 
     # Render the Display text
     _ = self.render_button("Display", 10, (255, 0, 0))
