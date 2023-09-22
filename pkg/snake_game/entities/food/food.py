@@ -9,12 +9,7 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import random
-import pygame
-from pygame import (
-    freetype,
-    Surface,
-)
+from random import randrange
 
 from ..entity import Entity
 from ....app import App
@@ -34,10 +29,10 @@ class Food(Entity):
         super().__init__(screen_size, self.name, app)
 
         # Where the food is located
-        x = self.screen_size[0] - random.randrange(
+        x = self.screen_size[0] - randrange(
             self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
-        y = self.screen_size[1] - random.randrange(
+        y = self.screen_size[1] - randrange(
             self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
         )
         self.position = (x, y)

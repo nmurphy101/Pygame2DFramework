@@ -10,14 +10,22 @@
 """
 
 
-import os
-import logging
-import statistics
-import json
+from os import path
+from logging import (
+    INFO, DEBUG, WARNING, basicConfig, debug as logging_debug
+)
+from statistics import mean
+from json import load as json_load
 
-import pygame
 from pygame import (
-    init, mixer, DOUBLEBUF, FULLSCREEN
+    event as pygame_event,
+    display as pygame_display,
+    init,
+    time as pygame_time,
+    mixer,
+    Surface,
+    DOUBLEBUF,
+    FULLSCREEN,
 )
 from pygame.constants import (
     QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
@@ -38,16 +46,16 @@ def _get_log_level(json_config: dict):
     """
     match (json_config["settings"]["debug"]["log_level"]).lower():
         case "info":
-            return logging.INFO
+            return INFO
 
         case "debug":
-            return logging.DEBUG
+            return DEBUG
 
         case "warning":
-            return logging.WARNING
+            return WARNING
 
         case _:
-            return logging.INFO
+            return INFO
 
 
 class App():
@@ -64,14 +72,14 @@ class App():
         mixer.init(44100, -16, 2, 2048)
 
         # App config file
-        self.app_config_file_path = os.path.join(os.path.dirname(__file__), constants.CONFIG_FILE_NAME)
+        self.app_config_file_path = path.join(path.dirname(__file__), constants.CONFIG_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
-            self.app_config = json.load(json_data_file)
+            self.app_config = json_load(json_data_file)
 
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
-            logging.basicConfig(level=_get_log_level(self.app_config), filename=constants.LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-        logging.debug("App started")
+            basicConfig(level=_get_log_level(self.app_config), filename=constants.LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+        logging_debug("App started")
 
         # Set initial app settings
         resolution = self.app_config["settings"]["display"]["resolution"].split("x")
@@ -89,9 +97,9 @@ class App():
         self.background_0 = None
 
         self.menu_sounds = [
-            pygame.mixer.Sound(constants.SOUND_UI_HOVER), # hover
-            pygame.mixer.Sound(constants.SOUND_UI_FORWARD), # forward
-            pygame.mixer.Sound(constants.SOUND_UI_BACKWARD), # backward
+            mixer.Sound(constants.SOUND_UI_HOVER), # hover
+            mixer.Sound(constants.SOUND_UI_FORWARD), # forward
+            mixer.Sound(constants.SOUND_UI_BACKWARD), # backward
         ]
 
         self.ui_sound_options = {}
@@ -109,7 +117,7 @@ class App():
         events = []
         for event in self.event_options:
             events.append(event)
-        pygame.event.set_allowed(events)
+        pygame_event.set_allowed(events)
 
 
     def run(self):
@@ -126,7 +134,7 @@ class App():
         self.set_window_settings()
 
         # Game loop clock
-        self.clock = pygame.time.Clock()
+        self.clock = pygame_time.Clock()
 
         # Game loop
         while self.running:
@@ -143,10 +151,10 @@ class App():
 
             # System/window events to be checked
             self.event_checks(menu, self.event_options.get)
-            pygame.event.clear()
+            pygame_event.clear()
 
             # Display the game screen
-            pygame.display.flip()
+            pygame_display.flip()
 
             # The game loop clocktarget FPS
             self.clock.tick(self.fps)
@@ -170,27 +178,27 @@ class App():
             flags = DOUBLEBUF
 
         # 'flags = 0' and '#, RESIZABLE)'
-        self.screen = pygame.display.set_mode(
+        self.screen = pygame_display.set_mode(
             (self.screen_width, self.screen_height),
             flags,
             16,
         )
         self.screen.set_alpha(None)
-        self.debug_screen = pygame.Surface((self.screen_width, self.screen_height))
+        self.debug_screen = Surface((self.screen_width, self.screen_height))
         self.debug_screen.set_colorkey((0, 0, 0))
-        self.background_0 = pygame.Surface((self.screen_width, self.screen_height))
+        self.background_0 = Surface((self.screen_width, self.screen_height))
         self.background_0.set_colorkey((0, 0, 0))
 
-        alpha_screen = pygame.Surface(
+        alpha_screen = Surface(
             (self.screen_width, self.screen_height)
         ).convert_alpha()
 
         alpha_screen.fill([0,0,0,0])
-        pygame.display.set_caption(self.title)
+        pygame_display.set_caption(self.title)
         self.screen.fill(background_colour)
 
         # Show game window
-        pygame.display.flip()
+        pygame_display.flip()
 
         # Instantiate the Game Obj
         self.game = self.game_pkg(alpha_screen, self.screen, self)
@@ -215,17 +223,6 @@ class App():
             [type]: [description]
         """
 
-        # _ = self.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, relative_from="top")
-
-        # # Clear previous frame obj's location
-        # fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
-        #                 self.game.screen_size[1]/2 - self.game.game_font.size * 12 + 30,
-        #                 250, 135)
-
-        # self.debug_screen.fill((128, 0, 128), fps_pos)
-
-        # pygame.draw.rect(self.game.screen, (128, 0, 128), fps_pos)
-
         fps = str(int(self.clock.get_fps()))
 
         _ = self.game.menu.render_button(f"now:{fps}", 1.6, 4, relative_from="top")
@@ -237,7 +234,7 @@ class App():
             self.fps_list.pop(0)
 
         # Average FPS
-        avg_fps = str(round(statistics.mean(self.fps_list)))
+        avg_fps = str(round(mean(self.fps_list)))
         _ = self.game.menu.render_button(f"avg:{avg_fps}", 2.6, 4, relative_from="top")
 
         # High and low FPS
@@ -253,7 +250,7 @@ class App():
         event_checks for the game
         """
 
-        for event in pygame.event.get():
+        for event in pygame_event.get():
             # Possible event options:
             #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN
             decision_func = event_get(event.type)
@@ -324,8 +321,8 @@ class App():
         if self.game.menu.menu_option != 3:
             # Get next track (modulo number of tracks)
             self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
-            pygame.mixer.music.load(self.game.playlist[self.game.current_track])
-            pygame.mixer.music.play(0, 0, 1)
+            mixer.music.load(self.game.playlist[self.game.current_track])
+            mixer.music.play(0, 0, 1)
 
 
     def play_menu_sound(self, button):
@@ -348,4 +345,4 @@ class App():
 
         menu_sound = self.menu_sounds[num]
         menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
-        pygame.mixer.Sound.play(menu_sound)
+        mixer.Sound.play(menu_sound)

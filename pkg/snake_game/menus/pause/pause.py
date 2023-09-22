@@ -10,7 +10,7 @@
 """
 
 
-import gc
+from gc import collect as gc_collect
 
 from ...constants.game_constants import (
     COLOR_BLACK,
@@ -35,7 +35,7 @@ def pause_menu(self):
 
     if self.prev_menu is None:
         # Free unreferenced memory
-        gc.collect()
+        gc_collect()
         self.prev_menu = MENU_SETTINGS
 
     # Pause game music

@@ -10,11 +10,11 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import math
+from math import hypot as math_hypot
 from datetime import datetime, timedelta
 from multiprocessing import Pool
 
-import pygame
+from pygame import Rect
 
 from ..entities import Entity, TelePortal
 
@@ -223,7 +223,7 @@ class DecisionBox:
 
         for line in entity.sight_lines_diag:
             # Check the sight lines for a open direction
-            if pygame.Rect.collidepoint(other_object.rect, line.end):
+            if Rect.collidepoint(other_object.rect, line.end):
                 line.open = False
 
             # Edge of screen detection
@@ -246,7 +246,7 @@ class DecisionBox:
         # Verify intention with sight lines
         for line in entity.sight_lines:
             # Check the sight lines for a open direction
-            if pygame.Rect.colliderect(other_object.rect, line.rect):
+            if Rect.colliderect(other_object.rect, line.rect):
                 # if not "segment" in other_object.id:
                 # print(f"cardinal line collision {other_object.id} and {line.direction}")
                 # Will Ai see and use portals?
@@ -401,8 +401,8 @@ class DecisionBox:
         """
 
         if portal.parent:
-            dist_other_portal_to_target = math.hypot(entity.target[1] - portal.parent.position[0], entity.target[2] - portal.parent.position[1])
-            dist_self_to_target = math.hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
+            dist_other_portal_to_target = math_hypot(entity.target[1] - portal.parent.position[0], entity.target[2] - portal.parent.position[1])
+            dist_self_to_target = math_hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
 
             if dist_other_portal_to_target < dist_self_to_target:
                 if entity.secondary_target:
@@ -415,8 +415,8 @@ class DecisionBox:
                 return False
 
         else:
-            dist_other_portal_to_target = math.hypot(entity.target[1] - portal.children[0].position[0], entity.target[2] - portal.children[0].position[1])
-            dist_self_to_target = math.hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
+            dist_other_portal_to_target = math_hypot(entity.target[1] - portal.children[0].position[0], entity.target[2] - portal.children[0].position[1])
+            dist_self_to_target = math_hypot(entity.target[1] - entity.position[0], entity.target[2] - entity.position[1])
 
             if dist_other_portal_to_target < dist_self_to_target:
                 if entity.secondary_target:

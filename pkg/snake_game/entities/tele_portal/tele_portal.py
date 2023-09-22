@@ -10,10 +10,10 @@
 """
 
 
-import random
+from random import randint, randrange
 from datetime import datetime, timedelta
 
-import pygame
+from pygame import mixer
 
 from ..entity import Entity
 from ...constants import COLOR_BLACK
@@ -46,13 +46,13 @@ class TelePortal(Entity):
 
         # When obj should be spawned
         now = datetime.now()
-        self.spawn_timer = now + timedelta(seconds=random.randint(2, 5))
+        self.spawn_timer = now + timedelta(seconds=randint(2, 5))
 
         # Where the portal is located
-        x_pos = self.screen_size[0] - random.randrange(
+        x_pos = self.screen_size[0] - randrange(
             self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
-        y_pos = self.screen_size[1] - random.randrange(
+        y_pos = self.screen_size[1] - randrange(
             self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
         )
         self.position = (x_pos, y_pos)
@@ -100,7 +100,7 @@ class TelePortal(Entity):
         self.is_spawned = True
 
         # Set next spawn time
-        self.spawn_timer = now + timedelta(seconds=random.randint(10, 25))
+        self.spawn_timer = now + timedelta(seconds=randint(10, 25))
 
         # Mark previous position
         self.prev_position = self.position
@@ -212,7 +212,7 @@ class TelePortal(Entity):
         effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
         self.sound_interact_volume = float(effect_volume)/self.sound_mod
         sound.set_volume(self.sound_interact_volume)
-        pygame.mixer.Sound.play(sound)
+        mixer.Sound.play(sound)
 
         # Teleport the obj to the paired portal
         self.teleport(interacting_obj)

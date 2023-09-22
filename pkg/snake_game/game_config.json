@@ -10,6 +10,12 @@
             "number_of_food": 4,
             "teleporter_active": true,
             "grid_size": 16
+        },
+        "keybindings": {
+            "move_up": "W",
+            "move_left": "A",
+            "move_down": "S",
+            "move_right": "D"
         }
     }
 }

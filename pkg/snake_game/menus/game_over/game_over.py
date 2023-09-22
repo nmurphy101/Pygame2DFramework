@@ -10,7 +10,7 @@
 """
 
 
-import pygame
+from pygame import mixer
 
 from ...constants.game_constants import (
     COLOR_BLACK,
@@ -32,7 +32,7 @@ def game_over(self):
     self.menu_option = MENU_GAME_OVER
 
     # Stop the music
-    pygame.mixer.music.stop()
+    mixer.music.stop()
 
     # Render the Game Over text
     _ = self.render_button("Game Over", 10, color=COLOR_RED)

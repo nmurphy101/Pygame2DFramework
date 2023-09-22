@@ -9,8 +9,12 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import json
-import pygame
+from json import dump as json_dump
+from pygame import (
+    mixer,
+    display,
+    Surface,
+)
 from pygame import (
     DOUBLEBUF, FULLSCREEN
 )
@@ -194,10 +198,10 @@ class Menu():
         """
 
         with open(self.game.app.app_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.app.app_config, _file, ensure_ascii=False, indent=4)
+            json_dump(self.game.app.app_config, _file, ensure_ascii=False, indent=4)
 
         with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
-            json.dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+            json_dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
 
 
     def toggle_game_music(self):
@@ -224,7 +228,7 @@ class Menu():
         music_volume = self.game.app.app_config["settings"]["sound"]["music_volume"]
         self.game.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) + .05)
         self.save_settings()
-        pygame.mixer.music.set_volume(float(music_volume))
+        mixer.music.set_volume(float(music_volume))
 
 
     def decrease_music_volume(self):
@@ -238,7 +242,7 @@ class Menu():
         music_volume = self.game.app.app_config["settings"]["sound"]["music_volume"]
         self.game.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) - .05)
         self.save_settings()
-        pygame.mixer.music.set_volume(float(music_volume))
+        mixer.music.set_volume(float(music_volume))
 
 
     def increase_effect_volume(self):
@@ -326,7 +330,7 @@ class Menu():
         full_screen = self.game.app.app_config["settings"]["display"]["fullscreen"]
         self.game.app.app_config["settings"]["display"]["fullscreen"] = not full_screen
         self.save_settings()
-        pygame.display.toggle_fullscreen()
+        display.toggle_fullscreen()
 
 
     def change_resolution(self, resolution):
@@ -349,7 +353,7 @@ class Menu():
             flags = DOUBLEBUF
 
         # Modify all game screens with new resolution    (#, RESIZABLE))
-        self.game.screen = pygame.display.set_mode(
+        self.game.screen = display.set_mode(
             (self.game.app.screen_width, self.game.app.screen_height),
             flags,
             self.game.grid_size,
@@ -357,13 +361,13 @@ class Menu():
 
         self.game.screen.set_alpha(None)
 
-        self.game.app.debug_screen = pygame.Surface(
+        self.game.app.debug_screen = Surface(
             (self.game.app.screen_width, self.game.app.screen_height)
         )
 
         self.game.app.debug_screen.set_colorkey()
 
-        self.game.app.background_0 = pygame.Surface(
+        self.game.app.background_0 = Surface(
             (self.game.app.screen_width, self.game.app.screen_height)
         )
 

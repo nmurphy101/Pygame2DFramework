@@ -10,16 +10,19 @@
 """
 
 
-import os
-import json
-import gc
-import threading
+from os import path
+from json import load
+from gc import collect as gc_collect
+from threading import Thread
 from datetime import datetime
 from typing import Deque
 
-import pygame
 from pygame import (
+    display,
+    draw,
     freetype,
+    mixer,
+    sprite,
     Surface,
 )
 
@@ -88,9 +91,9 @@ class SnakeGame():
         self.app = app
 
         # Game config file
-        self.game_config_file_path = os.path.join(os.path.dirname(__file__), 'game_config.json')
+        self.game_config_file_path = path.join(path.dirname(__file__), 'game_config.json')
         with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config = json.load(json_data_file)
+            self.game_config = load(json_data_file)
 
         # Set starting fps from the config file
         self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
@@ -102,7 +105,7 @@ class SnakeGame():
 
         # Window settings
         self.title = app.title + GAME_TITLE
-        pygame.display.set_caption(self.title)
+        display.set_caption(self.title)
         self.screen = screen
         self.alpha_screen = alpha_screen
         screen_w, screen_h = screen.get_size()
@@ -123,18 +126,18 @@ class SnakeGame():
         self.game_music_loop = MUSIC_LOOP
         self.playlist = [self.game_music_loop]
         self.current_track = 0
-        pygame.mixer.music.load(self.game_music_intro)
-        pygame.mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
+        mixer.music.load(self.game_music_intro)
+        mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
 
         # Game Sounds
         self.sounds = [
-            pygame.mixer.Sound(SOUND_SNAKE_DEATH),
-            pygame.mixer.Sound(SOUND_FOOD_PICKUP),
-            pygame.mixer.Sound(SOUND_PORTAL_ENTER),
+            mixer.Sound(SOUND_SNAKE_DEATH),
+            mixer.Sound(SOUND_FOOD_PICKUP),
+            mixer.Sound(SOUND_PORTAL_ENTER),
         ]
 
         # Game object containers
-        self.sprite_group = pygame.sprite.RenderUpdates()
+        self.sprite_group = sprite.RenderUpdates()
         self.entity_final_scores = {}
 
         ## Game sprite Sheets
@@ -200,7 +203,7 @@ class SnakeGame():
                 if self.menu.prev_menu in [0, 1]:
                     obj.refresh_draw()
 
-                thread = threading.Thread(target=self._object_actions, args=(obj,))
+                thread = Thread(target=self._object_actions, args=(obj,))
                 thread.start()
                 thread_group.append(thread)
 
@@ -336,7 +339,7 @@ class SnakeGame():
         self.menu = Menu(self)
 
         # Free unreferenced memory
-        gc.collect()
+        gc_collect()
 
 
     def settings_checks(self):
@@ -346,14 +349,14 @@ class SnakeGame():
         """
         # Start/Restart the game music
         if self.app.app_config["settings"]["sound"]["music"]:
-            pygame.mixer.music.load(self.playlist[self.current_track])
-            pygame.mixer.music.set_volume(
+            mixer.music.load(self.playlist[self.current_track])
+            mixer.music.set_volume(
                 float(self.app.app_config["settings"]["sound"]["music_volume"])
             )
-            pygame.mixer.music.play(0, 0, 1)
+            mixer.music.play(0, 0, 1)
 
         else:
-            pygame.mixer.music.pause()
+            mixer.music.pause()
 
 
     def quit_game(self):
@@ -384,10 +387,10 @@ class SnakeGame():
 
         # Clear previous frame obj's location with the game bar color
         game_bar_pos = (0, 0, self.screen_size[0], self.game_bar_height)
-        pygame.draw.rect(self.screen, COLOR_GREY_DARK, game_bar_pos)
+        draw.rect(self.screen, COLOR_GREY_DARK, game_bar_pos)
 
         game_bar_pos = (0, self.game_bar_height-2, self.screen_size[0], 2)
-        pygame.draw.rect(self.screen, COLOR_GREY, game_bar_pos)
+        draw.rect(self.screen, COLOR_GREY, game_bar_pos)
 
         score = 0
         for _, value in self.entity_final_scores.items():

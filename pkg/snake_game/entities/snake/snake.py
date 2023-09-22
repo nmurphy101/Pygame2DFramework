@@ -9,20 +9,18 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import math
-import random
+from math import hypot as math_hypot
+from random import randrange
 from typing import Deque
 from datetime import datetime, timedelta
 
-import pygame
-# pylint: disable=no-name-in-module
-from pygame.constants import (
-    K_UP, K_DOWN, K_LEFT, K_RIGHT,
+from pygame import (
+    key as pygame_key,
+    Surface,
 )
-# pylint: enable=no-name-in-module
 
 from ..entity import Entity, Line
-from ...constants import COLOR_BLACK, COLOR_RED
+from ...constants import COLOR_BLACK, COLOR_RED, INPUT_KEY_MAP
 from ....app import App
 
 
@@ -43,11 +41,11 @@ class Snake(Entity):
         self.player = player
 
         # Where the snake is started located
-        x = self.screen_size[0] - random.randrange(
+        x = self.screen_size[0] - randrange(
             self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
 
-        y = self.screen_size[1] - random.randrange(
+        y = self.screen_size[1] - randrange(
             self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
         )
 
@@ -72,7 +70,7 @@ class Snake(Entity):
             self.sprite_images = self.app.game.snake_enemy_images
 
         # Entity's default no sprite visual representation
-        self.image = pygame.Surface((self.size, self.size))
+        self.image = Surface((self.size, self.size))
         self.image.fill(self.obj_color)
 
         # Entity is a rectangle object
@@ -111,7 +109,7 @@ class Snake(Entity):
 
         for obj in self.app.game.sprite_group.sprites():
             if target_name in obj.id:
-                dist_self = math.hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
+                dist_self = math_hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
                 if dist_self < primary_target[1]:
                     pos = (obj.position[0], obj.position[1])
                     primary_target = (pos, dist_self)
@@ -199,20 +197,20 @@ class Snake(Entity):
         if self.is_alive:
             # Check if Ai or player controls this entity
             if self.player:
-                key = pygame.key.get_pressed()
-
+                key = pygame_key.get_pressed()
+                config = self.app.game.game_config["settings"]["keybindings"]
                 # pylint: disable=access-member-before-definition
-                if key[K_UP] and self.direction != 0 and self.prev_direction != 2:
+                if key[INPUT_KEY_MAP[config["move_up"]]] and self.direction != 0 and self.prev_direction != 2:
                     # pylint: disable=access-member-before-definition
                     self.direction = 0
 
-                elif key[K_DOWN] and self.direction != 2 and self.prev_direction != 0:
+                elif key[INPUT_KEY_MAP[config["move_down"]]] and self.direction != 2 and self.prev_direction != 0:
                     self.direction = 2
 
-                elif key[K_LEFT] and self.direction != 3 and self.prev_direction != 1:
+                elif key[INPUT_KEY_MAP[config["move_left"]]] and self.direction != 3 and self.prev_direction != 1:
                     self.direction = 3
 
-                elif key[K_RIGHT] and self.direction != 1 and self.prev_direction != 3:
+                elif key[INPUT_KEY_MAP[config["move_right"]]] and self.direction != 1 and self.prev_direction != 3:
                     self.direction = 1
 
             else:
@@ -317,7 +315,7 @@ class TailSegment(Entity):
         self.sight_lines = []
 
         # Entity's visual representation
-        self.image = pygame.Surface((self.size, self.size))
+        self.image = Surface((self.size, self.size))
         self.image.fill(self.obj_color)
         self.img_index = 2
 

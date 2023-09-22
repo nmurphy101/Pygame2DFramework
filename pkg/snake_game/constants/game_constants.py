@@ -11,6 +11,11 @@
 """
 
 
+from pygame.constants import (
+    K_w, K_a, K_s, K_d, K_UP, K_DOWN, K_LEFT, K_RIGHT,
+)
+
+
 GAME_TITLE = "Snake"
 
 # Font
@@ -47,3 +52,15 @@ COLOR_WHITE = (255, 255, 255)
 COLOR_PURPLE = (128, 0, 128)
 COLOR_GREY = (128,128,128)
 COLOR_GREY_DARK = (50,50,50)
+
+# Event input key map
+INPUT_KEY_MAP = {
+    "W": K_w,
+    "A": K_a,
+    "S": K_s,
+    "D": K_d,
+    "Up": K_UP,
+    "Down": K_DOWN,
+    "Left": K_LEFT,
+    "Right": K_RIGHT,
+}

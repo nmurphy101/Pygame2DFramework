@@ -9,14 +9,19 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-import gc
-import random
+from gc import collect as gc_collect
+from random import randrange
 from datetime import datetime
 from typing import Deque
-import uuid
+from uuid import uuid4
 
 from faker import Faker
-import pygame
+from pygame import (
+    Surface,
+    mixer,
+    Rect,
+    draw as pygame_draw,
+)
 from pygame.sprite import Sprite
 
 from ...app import App
@@ -33,7 +38,7 @@ class Entity(Sprite):
     """
 
     def __init__(self, screen_size: tuple[int, int], name: str, app: App):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
 
         # Base game obj
         self.app = app
@@ -42,7 +47,7 @@ class Entity(Sprite):
         self.display_name = FAKE.first_name()
 
         # Unique identifier
-        self.id = name + str(uuid.uuid4())
+        self.id = name + str(uuid4())
 
         # Entity is dead or alive
         self.is_alive = True
@@ -98,14 +103,14 @@ class Entity(Sprite):
         self.obj_color = (255,105,180)
 
         # Entity's visual representation
-        self.image = pygame.Surface((self.size, self.size))
+        self.image = Surface((self.size, self.size))
         self.image.fill(self.obj_color)
 
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Default death sound
-        self.sound_death = pygame.mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+        self.sound_death = mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
         self.sound_mod = 4.5
         self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
@@ -203,7 +208,7 @@ class Entity(Sprite):
         sound = interacting_obj.sound_death
         interacting_obj.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
         sound.set_volume(interacting_obj.sound_death_volume)
-        pygame.mixer.Sound.play(sound)
+        mixer.Sound.play(sound)
 
         # Loose the game if interacting_obj is the player
         if interacting_obj.player:
@@ -226,7 +231,7 @@ class Entity(Sprite):
             sound = self.sound_death
             self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
             sound.set_volume(self.sound_death_volume)
-            pygame.mixer.Sound.play(sound)
+            mixer.Sound.play(sound)
 
             # Loose the game if self is the player
             if self.player:
@@ -265,7 +270,7 @@ class Entity(Sprite):
                 obj.draw((False, True))
 
             # Free unreferenced memory
-            gc.collect()
+            gc_collect()
 
 
     def collision_checks(self, updated: bool) -> None:
@@ -350,7 +355,7 @@ class Entity(Sprite):
         if obj.children:
             # print(f"{obj.id} has children {obj.children}")
             for child in obj.children:
-                if pygame.Rect.colliderect(self.rect, child.rect):
+                if Rect.colliderect(self.rect, child.rect):
                     if self.secondary_target == child.position:
                         self.secondary_target = None
 
@@ -375,11 +380,11 @@ class Entity(Sprite):
         # pylint: enable=access-member-before-definition
         while not found_spawn:
             # Where the entity is located
-            x = self.screen_size[0] - random.randrange(
+            x = self.screen_size[0] - randrange(
                 self.size*5, self.screen_size[0] - self.size * 5, self.size
             )
 
-            y = self.screen_size[1] - random.randrange(
+            y = self.screen_size[1] - randrange(
                 self.size*5, self.screen_size[1] - self.size * 5, self.size
             )
 
@@ -485,7 +490,7 @@ class Line(Sprite):
         else :
             chosen_screen = entity.screen
 
-        self.rect = pygame.draw.line(
+        self.rect = pygame_draw.line(
             chosen_screen,
             self.color,
             entity.rect.center,
@@ -514,7 +519,7 @@ class Line(Sprite):
         self.line_options.get(self.direction)(entity)
 
         # Draw the line representing the rect
-        self.rect = pygame.draw.line(
+        self.rect = pygame_draw.line(
             chosen_screen,
             self.color,
             entity.rect.center,
