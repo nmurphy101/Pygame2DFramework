@@ -10,7 +10,12 @@
 """
 
 
-from ...constants import game_constants
+from ...constants.game_constants import (
+    COLOR_BLACK,
+    COLOR_RED,
+    COLOR_PURPLE,
+    MENU_SOUND,
+)
 
 
 def sound_menu(self):
@@ -20,17 +25,18 @@ def sound_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill((0, 0, 0, 0))
+    self.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
-    self.menu_option = game_constants.MENU_SOUND
+    self.menu_option = MENU_SOUND
 
     # Render the Display text
-    self.render_button("Sound", 10, (255, 0, 0))
+    self.render_button("Sound", 10, color=COLOR_RED)
 
     # Render the music button
-    text_str = 'Music: ' + str(self.game.app.app_config["settings"]["sound"]["music"])
-    music_obj = self.render_button(text_str, 8)
+    _ = self.render_button('Music:', 7, h_offset=-100)
+    text_str = str(self.game.app.app_config["settings"]["sound"]["music"])
+    music_obj = self.render_button(text_str, 7, color=COLOR_PURPLE, h_offset=100)
 
     # Render the Volume view button
     volume_num = round(
@@ -38,13 +44,13 @@ def sound_menu(self):
         2,
     )
     text_str = "Music Volume: " + str(volume_num)
-    _ = self.render_button(text_str, 6)
+    _ = self.render_button(text_str, 5)
 
     # Render the Volume Up button
-    music_volume_up_obj = self.render_button("Up", 5, h_offset=100)
+    music_volume_up_obj = self.render_button("Up", 4, color=COLOR_PURPLE, w_offset=10, h_offset=100)
 
     # Render the Volume Down button
-    music_volume_down_obj = self.render_button("Down", 5, h_offset=-100)
+    music_volume_down_obj = self.render_button("Down", 4, color=COLOR_PURPLE, w_offset=10, h_offset=-100)
 
     # Render the Volume view button
     volume_num = round(
@@ -52,24 +58,24 @@ def sound_menu(self):
         2,
     )
     text_str = "Effect Volume: " + str(volume_num)
-    _ = self.render_button(text_str, 4)
+    _ = self.render_button(text_str, 2)
 
     # Render the Volume Up button
-    effect_volume_up_obj = self.render_button("Up", 3, h_offset=100)
+    effect_volume_up_obj = self.render_button("Up", 1, color=COLOR_PURPLE, w_offset=10, h_offset=100)
 
     # Render the Volume Down button
-    effect_volume_down_obj = self.render_button("Down", 3, h_offset=-100)
+    effect_volume_down_obj = self.render_button("Down", 1, color=COLOR_PURPLE, w_offset=10, h_offset=-100)
 
     # Render the Volume view button
     volume_num = round(100 * float(self.game.app.app_config["settings"]["sound"]["menu_volume"]))
     text_str = "Menu Volume: " + str(volume_num)
-    _ = self.render_button(text_str, 2)
+    _ = self.render_button(text_str, -1)
 
     # Render the Volume Up button
-    menu_volume_up_obj = self.render_button("Up", 1, h_offset=100)
+    menu_volume_up_obj = self.render_button("Up", -2, color=COLOR_PURPLE, w_offset=10, h_offset=100)
 
     # Render the Volume Down button
-    menu_volume_down_obj = self.render_button("Down", 1, h_offset=-100)
+    menu_volume_down_obj = self.render_button("Down", -2, color=COLOR_PURPLE, w_offset=10, h_offset=-100)
 
     # Render the Return button
     back_obj = self.render_button("Back", -8)

@@ -24,7 +24,25 @@ from pygame import (
 )
 
 from .ai.ai import DecisionBox
-from .constants import game_constants as constants
+from .constants import (
+    COLOR_BLACK,
+    COLOR_GREY,
+    COLOR_GREY_DARK,
+    COLOR_RED,
+    COLOR_PURPLE,
+    GAME_TITLE,
+    REGULAR_FONT,
+    REGULAR_FONT_SIZE,
+    MUSIC_INTRO,
+    MUSIC_LOOP,
+    SOUND_SNAKE_DEATH,
+    SOUND_FOOD_PICKUP,
+    SOUND_PORTAL_ENTER,
+    SPRITE_SHEET_SNAKE_PLAYER,
+    SPRITE_SHEET_SNAKE_ENEMY,
+    SPRITE_SHEET_FOOD,
+    SPIRTE_SHEET_TELEPORTAL,
+)
 from .entities import (
     Entity,
     Food,
@@ -77,31 +95,32 @@ class SnakeGame():
         # Set starting fps from the config file
         self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
 
-        # Window settings
-        self.title = app.title + constants.GAME_TITLE
-        pygame.display.set_caption(self.title)
-        self.screen = screen
-        self.alpha_screen = alpha_screen
-        screen_w, screen_h = screen.get_size()
-        self.screen_size = (screen_w, screen_h)
-
-        # Game fonts
-        self.game_font = freetype.Font(
-            file=constants.REGULAR_FONT,
-            size=constants.REGULAR_FONT_SIZE,
-        )
-
         # Game settings
         self.pause_game_music = False
         self.timer = None
         self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
 
+        # Window settings
+        self.title = app.title + GAME_TITLE
+        pygame.display.set_caption(self.title)
+        self.screen = screen
+        self.alpha_screen = alpha_screen
+        screen_w, screen_h = screen.get_size()
+        self.game_bar_height = self.grid_size * 3
+        self.screen_size = (screen_w, screen_h + self.game_bar_height)
+
+        # Game fonts
+        self.game_font = freetype.Font(
+            file=REGULAR_FONT,
+            size=REGULAR_FONT_SIZE,
+        )
+
         if not is_multiple_of_4(self.grid_size):
             raise OSError("grid_size must be a multiple of 4")
 
         # Game music
-        self.game_music_intro = constants.MUSIC_INTRO
-        self.game_music_loop = constants.MUSIC_LOOP
+        self.game_music_intro = MUSIC_INTRO
+        self.game_music_loop = MUSIC_LOOP
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         pygame.mixer.music.load(self.game_music_intro)
@@ -109,9 +128,9 @@ class SnakeGame():
 
         # Game Sounds
         self.sounds = [
-            pygame.mixer.Sound(constants.SOUND_SNAKE_DEATH),
-            pygame.mixer.Sound(constants.SOUND_FOOD_PICKUP),
-            pygame.mixer.Sound(constants.SOUND_PORTAL_ENTER),
+            pygame.mixer.Sound(SOUND_SNAKE_DEATH),
+            pygame.mixer.Sound(SOUND_FOOD_PICKUP),
+            pygame.mixer.Sound(SOUND_PORTAL_ENTER),
         ]
 
         # Game object containers
@@ -120,7 +139,7 @@ class SnakeGame():
 
         ## Game sprite Sheets
         # Snake Sprite Images
-        self.snake_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_SNAKE_PLAYER)
+        self.snake_sprite_sheet = SpriteSheet(SPRITE_SHEET_SNAKE_PLAYER)
         self.snake_images = self.snake_sprite_sheet.load_grid_images(
             (2, 8),
             (1, 1),
@@ -128,7 +147,7 @@ class SnakeGame():
         )
 
         # Snake Enemy Sprite Images
-        self.snake_enemy_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_SNAKE_ENEMY)
+        self.snake_enemy_sprite_sheet = SpriteSheet(SPRITE_SHEET_SNAKE_ENEMY)
         self.snake_enemy_images = self.snake_enemy_sprite_sheet.load_grid_images(
             (2, 8),
             (1, 1),
@@ -136,7 +155,7 @@ class SnakeGame():
         )
 
         # Food Sprite images
-        self.food_sprite_sheet = SpriteSheet(constants.SPRITE_SHEET_FOOD)
+        self.food_sprite_sheet = SpriteSheet(SPRITE_SHEET_FOOD)
         self.food_images = self.food_sprite_sheet.load_grid_images(
             (1, 1),
             (1, 1),
@@ -144,7 +163,7 @@ class SnakeGame():
         )
 
         # Teleportal Sprite images
-        self.tele_portal_sprite_sheet = SpriteSheet(constants.SPIRTE_SHEET_TELEPORTAL)
+        self.tele_portal_sprite_sheet = SpriteSheet(SPIRTE_SHEET_TELEPORTAL)
         self.tele_portal_images = self.tele_portal_sprite_sheet.load_grid_images(
             (1, 1),
             (1, 1),
@@ -158,13 +177,11 @@ class SnakeGame():
         self.menu = Menu(self)
 
 
-    def play(self, fps_counter_display: callable):
+    def play(self):
         """play
 
         play does stuff
         """
-
-        is_fps_display_shown = self.app.app_config["settings"]["display"]["fps_display"]
 
         # Check if not in a menu
         if self.menu.menu_option is None:
@@ -172,7 +189,7 @@ class SnakeGame():
             # clear screen if was in a menu previously
             if self.menu.prev_menu in [0, 1]:
                 # Clear previous frame render (from menu)
-                self.app.game.screen.fill((0, 0, 0, 0))
+                self.app.game.screen.fill(COLOR_BLACK)
 
             # Execute game object actions via parallel threads
             thread_group = []
@@ -197,17 +214,11 @@ class SnakeGame():
             if self.menu.prev_menu in [0, 1]:
                 self.menu.prev_menu = None
 
-            # The game loop FPS counter
-            if is_fps_display_shown:
-                fps_counter_display()
+            # show the game bar at top of screen
+            self.game_bar_display()
 
             # Return to app
             return None
-
-        # In a menu
-        # The game loop FPS counter
-        if is_fps_display_shown:
-            fps_counter_display()
 
         # Show which ever menu option that has been chosen:
         #   Main, Pause, Settings, GameOver, Display, Sound
@@ -292,13 +303,16 @@ class SnakeGame():
         """
 
         # Clear previous frame render
-        self.app.game.screen.fill((0, 0, 0, 0))
+        self.app.game.screen.fill(COLOR_BLACK)
 
         # Game settings
         self.pause_game_music = False
 
         # Game timer
         self.timer = None
+
+        # Reset the final player score
+        self.entity_final_scores = {}
 
         # Game objects cleanup
         for obj in self.sprite_group:
@@ -359,3 +373,25 @@ class SnakeGame():
         self.menu.prev_menu = self.menu.menu_option
         self.menu.menu_option = None
         self.pause_game_music = True
+
+
+    def game_bar_display(self):
+        """game_bar_display
+
+        Returns:
+            [type]: [description]
+        """
+
+        # Clear previous frame obj's location with the game bar color
+        game_bar_pos = (0, 0, self.screen_size[0], self.game_bar_height)
+        pygame.draw.rect(self.screen, COLOR_GREY_DARK, game_bar_pos)
+
+        game_bar_pos = (0, self.game_bar_height-2, self.screen_size[0], 2)
+        pygame.draw.rect(self.screen, COLOR_GREY, game_bar_pos)
+
+        score = 0
+        for _, value in self.entity_final_scores.items():
+            if value["is_player"]:
+                score = value["score"]
+
+        _ = self.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")

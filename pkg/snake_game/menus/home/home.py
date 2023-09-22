@@ -10,7 +10,15 @@
 """
 
 
-from ...constants import game_constants
+from ...constants.game_constants import (
+    GAME_TITLE,
+    COLOR_BLACK,
+    COLOR_RED,
+    MENU_HOME,
+    MENU_PAUSE,
+    MENU_GAME_OVER,
+    MENU_SETTINGS,
+)
 
 
 def home_menu(self):
@@ -20,26 +28,27 @@ def home_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill((0, 0, 0, 0))
+    self.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
-    self.menu_option = game_constants.MENU_HOME
-    self.root_menu = game_constants.MENU_HOME
+    self.menu_option = MENU_HOME
+    self.root_menu = MENU_HOME
 
     # Check settings if just left settings page
-
-    if self.prev_menu in [game_constants.MENU_PAUSE, game_constants.MENU_GAME_OVER]:
+    if self.prev_menu in [MENU_PAUSE, MENU_GAME_OVER]:
         # Clear game objects up to free memory
         self.game.clean_up()
 
-    elif self.prev_menu not in [game_constants.MENU_PAUSE, game_constants.MENU_SETTINGS]:
+    elif self.prev_menu not in [MENU_PAUSE, MENU_SETTINGS]:
         # Check the settings
         self.game.settings_checks()
         # just to prevent a check settings inf. loop
-        self.prev_menu = game_constants.MENU_SETTINGS
+        self.prev_menu = MENU_SETTINGS
+
+    # self.game.clean_up()
 
     # Render the Home Menu text
-    _ = self.render_button("Home Menu", 8, (255, 0, 0))
+    _ = self.render_button(GAME_TITLE, 8, color=COLOR_RED)
 
     # Render the play button
     play_obj = self.render_button("Play", 1)

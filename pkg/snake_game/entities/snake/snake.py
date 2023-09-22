@@ -22,6 +22,7 @@ from pygame.constants import (
 # pylint: enable=no-name-in-module
 
 from ..entity import Entity, Line
+from ...constants import COLOR_BLACK, COLOR_RED
 from ....app import App
 
 
@@ -62,7 +63,7 @@ class Snake(Entity):
         self.speed_mod = 2
 
         # head color = red
-        self.obj_color = (255, 0, 0)
+        self.obj_color = COLOR_RED
 
         # Snake Sprite images
         if self.player:
@@ -310,7 +311,7 @@ class TailSegment(Entity):
             self.obj_color = (255, 255, 255)
         else:
             # Tail color = Red   (if not a player snake)
-            self.obj_color = (255, 0, 0)
+            self.obj_color = COLOR_RED
 
         # No Sight lines for tail segments
         self.sight_lines = []
@@ -335,7 +336,7 @@ class TailSegment(Entity):
         # render if alive
         if self.is_alive:
             # Clear previous frame obj's location
-            self.app.game.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
+            self.app.game.screen.fill(COLOR_BLACK, (self.position[0], self.position[1], self.rect.width, self.rect.height))
 
             # Save current position as last position
             self.prev_position = self.position

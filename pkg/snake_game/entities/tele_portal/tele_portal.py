@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import pygame
 
 from ..entity import Entity
+from ...constants import COLOR_BLACK
 from ....app import App
 
 
@@ -137,7 +138,7 @@ class TelePortal(Entity):
         """
 
         # Clear previous frame obj's location
-        self.app.game.screen.fill((0, 0, 0, 0), (self.position[0], self.position[1], self.rect.width, self.rect.height))
+        self.app.game.screen.fill(COLOR_BLACK, (self.position[0], self.position[1], self.rect.width, self.rect.height))
 
         self.set_random_spawn()
 

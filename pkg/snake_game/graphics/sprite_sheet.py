@@ -19,7 +19,9 @@ from pygame import (
 
 
 class SpriteSheet:
-    """AI is creating summary for
+    """SpriteSheet
+
+    Definition of the image/surface
     """
 
     def __init__(self, filename, debug=False):
@@ -69,6 +71,7 @@ class SpriteSheet:
 
     def load_grid_images(self, num_rows_columns=(0, 0), margin_x_y=(0, 0), padding_x_y=(0, 0)):
         """Load a grid of images.
+
         x_margin is space between top of sheet and top of first row.
         x_padding is space between rows.
         Assumes symmetrical padding on left and right.

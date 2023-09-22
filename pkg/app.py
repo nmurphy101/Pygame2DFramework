@@ -36,7 +36,7 @@ def _get_log_level(json_config: dict):
 
     Base game structure.
     """
-    match json_config["settings"]["display"]["resolution"]:
+    match (json_config["settings"]["debug"]["log_level"]).lower():
         case "info":
             return logging.INFO
 
@@ -69,8 +69,9 @@ class App():
             self.app_config = json.load(json_data_file)
 
         # Setup the app logger for event tracking and debugging
-        logging.basicConfig(level=_get_log_level(self.app_config))
-        logging.basicConfig(filename=constants.LOG_FILE_NAME, filemode="w", format="%(name)s - %(levelname)s - %(message)s")
+        if self.app_config["settings"]["debug"]["log_level"]:
+            logging.basicConfig(level=_get_log_level(self.app_config), filename=constants.LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+        logging.debug("App started")
 
         # Set initial app settings
         resolution = self.app_config["settings"]["display"]["resolution"].split("x")
@@ -81,8 +82,6 @@ class App():
         self.running = True
         self.fps = self.app_config["settings"]["display"]["fps"]
         self.fps_list = []
-        self.fps_pos = None
-        self.fps_rect = None
         self.clock = None
         self.title = self.app_config["settings"]["display"]["window_title"]
         self.screen = None
@@ -135,7 +134,12 @@ class App():
             mixer.music.set_endevent(NEXT)
 
             # Gameplay logic this turn/tick
-            menu = self.game.play(self.fps_counter_display)
+            menu = self.game.play()
+
+            # The game loop FPS counter
+            is_fps_display_shown = self.app_config["settings"]["display"]["fps_display"]
+            if is_fps_display_shown:
+                self.fps_counter_display()
 
             # System/window events to be checked
             self.event_checks(menu, self.event_options.get)
@@ -202,10 +206,6 @@ class App():
             1: None,
             None: 1,
         }
-        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
-                        self.game.screen_size[1]/2 - self.game.game_font.size * 12,
-                        250, 163)
-        self.fps_rect = pygame.Rect(self.fps_pos)
 
 
     def fps_counter_display(self):
@@ -215,14 +215,21 @@ class App():
             [type]: [description]
         """
 
-        # Clear previous frame obj's location
-        self.debug_screen.fill((0, 0, 0), self.fps_pos)
-        self.fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
-                        self.game.screen_size[1]/2 - self.game.game_font.size * 12,
-                        250, 163)
-        pygame.draw.rect(self.game.screen, (0, 0, 0), self.fps_pos)
+        # _ = self.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, relative_from="top")
+
+        # # Clear previous frame obj's location
+        # fps_pos = (self.game.screen_size[0]/2-(8*self.game.game_font.size)/2 + 535,
+        #                 self.game.screen_size[1]/2 - self.game.game_font.size * 12 + 30,
+        #                 250, 135)
+
+        # self.debug_screen.fill((128, 0, 128), fps_pos)
+
+        # pygame.draw.rect(self.game.screen, (128, 0, 128), fps_pos)
+
         fps = str(int(self.clock.get_fps()))
-        _ = self.game.menu.render_button(f"now:{fps}", 11, h_offset=530)
+
+        _ = self.game.menu.render_button(f"now:{fps}", 1.6, 4, relative_from="top")
+
         self.fps_list.append(int(fps))
 
         # Keep the fps list limited to 100 most recient samples
@@ -231,13 +238,11 @@ class App():
 
         # Average FPS
         avg_fps = str(round(statistics.mean(self.fps_list)))
-        _ = self.game.menu.render_button(f"avg:{avg_fps}", 10, h_offset=530)
+        _ = self.game.menu.render_button(f"avg:{avg_fps}", 2.6, 4, relative_from="top")
 
         # High and low FPS
-        _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 8.8, h_offset=565)
-        _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 7.8, h_offset=565)
-
-        return self.fps_rect
+        _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 6.45, relative_from="top")
+        _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 6.45, relative_from="top")
 
 
     def event_checks(self, menu, event_get):

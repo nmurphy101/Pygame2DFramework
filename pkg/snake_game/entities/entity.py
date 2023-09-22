@@ -19,6 +19,8 @@ from faker import Faker
 import pygame
 from pygame.sprite import Sprite
 
+from ...app import App
+from ..constants import COLOR_BLACK
 
 
 FAKE = Faker()
@@ -30,7 +32,7 @@ class Entity(Sprite):
     base obj for all entities
     """
 
-    def __init__(self, screen_size, name, app):
+    def __init__(self, screen_size: tuple[int, int], name: str, app: App):
         pygame.sprite.Sprite.__init__(self)
 
         # Base game obj
@@ -130,9 +132,8 @@ class Entity(Sprite):
         self.children = Deque()
 
 
-    def update(self):
-        """
-        update
+    def update(self) -> tuple[bool, bool]:
+        """update
 
         update does stuff
         """
@@ -147,10 +148,8 @@ class Entity(Sprite):
         return updated, False
 
 
-    def draw(self, updated_refresh):
-        """
-        draw
-
+    def draw(self, updated_refresh: tuple[bool, bool]) -> None:
+        """draw
 
         draw does stuff
         """
@@ -176,10 +175,8 @@ class Entity(Sprite):
                 child.draw(updated_refresh)
 
 
-    def refresh_draw(self):
-        """
-        refresh_draw
-
+    def refresh_draw(self) -> None:
+        """refresh_draw
 
         refresh_draw does stuff
         """
@@ -187,7 +184,7 @@ class Entity(Sprite):
         # render if alive
         if self.is_alive:
             # Clear screen where self was
-            # self.app.game.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Render the entity based on it's parameters
             self.app.game.screen.blit(self.image, self.position)
 
@@ -196,10 +193,8 @@ class Entity(Sprite):
                 child.refresh_draw()
 
 
-    def interact(self, interacting_obj):
-        """
-        interact
-
+    def interact(self, interacting_obj: "Entity") -> None:
+        """interact
 
         interact does stuff
         """
@@ -218,7 +213,12 @@ class Entity(Sprite):
         interacting_obj.die(f"collided with {self.id} and died")
 
 
-    def die(self, death_reason):
+    def die(self, death_reason: str) -> None:
+        """die
+
+        die does stuff
+        """
+
         if self.killable:
             # print(f"{self.id} {death_reason}")
 
@@ -242,7 +242,7 @@ class Entity(Sprite):
                     "name": self.name + self.display_name,
                     "score": self.score
                 }
-                self.app.game.screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
                 self.app.game.sprite_group.remove(self)
 
@@ -251,14 +251,14 @@ class Entity(Sprite):
                 self.sight_lines = None
 
                 for child in self.children:
-                    self.app.game.screen.fill((0, 0, 0, 0), (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                    self.app.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
                     child.kill()
                 self.children = None
 
                 self.kill()
 
             # Clear previous frame render (from menu)
-            self.app.game.screen.fill((0, 0, 0, 0))
+            self.app.game.screen.fill(COLOR_BLACK)
 
             # draw the object
             for obj in self.app.game.sprite_group:
@@ -268,10 +268,8 @@ class Entity(Sprite):
             gc.collect()
 
 
-    def collision_checks(self, updated):
-        """
-        collision_checks
-
+    def collision_checks(self, updated: bool) -> None:
+        """collision_checks
 
         collision_checks does stuff
         """
@@ -301,32 +299,28 @@ class Entity(Sprite):
                 collision = True
 
 
-    def check_edge_collision(self):
-        """
-        check_edge_collision
-
+    def check_edge_collision(self) -> bool:
+        """check_edge_collision
 
         Check for self collision/interaction to the edge of the screen
         """
 
         # Collision check for edge of screen (Right and Bottom)
         if (self.position[0] > self.app.game.screen_size[0]-self.size) or (
-                self.position[1] > self.screen_size[1]-self.size):
+                self.position[1] > self.screen_size[1]-self.size-self.app.game.game_bar_height):
             self.die("Edge of screen")
             return True
 
         # Collision check for edge of screen (Left and Top)
-        elif self.position[0] < 0 or self.position[1] < 0:
+        elif self.position[0] < 0 or self.position[1] < self.app.game.game_bar_height:
             self.die("Edge of screen")
             return True
 
         return False
 
 
-    def check_obj_collision(self, obj):
-        """
-        check_obj_collision
-
+    def check_obj_collision(self, obj: "Enity") -> bool:
+        """check_obj_collision
 
         Check for self to other obj collision/interaction
         """
@@ -346,10 +340,8 @@ class Entity(Sprite):
         return False
 
 
-    def check_child_collision(self, obj):
-        """
-        check_child_collision
-
+    def check_child_collision(self, obj: "Entity") -> bool:
+        """check_child_collision
 
         Check for self to other obj's child collision/interaction
         """
@@ -371,10 +363,8 @@ class Entity(Sprite):
         return False
 
 
-    def set_random_spawn(self):
-        """
-        set_random_spawn
-
+    def set_random_spawn(self) -> None:
+        """set_random_spawn
 
         Check for a random spawn location and if it's taken already
         """
@@ -424,10 +414,8 @@ class Entity(Sprite):
         self.rect.topleft = self.position
 
 
-    def spawn(self):
-        """
-        spawn
-
+    def spawn(self) -> bool:
+        """spawn
 
         spawn does stuff
         """
@@ -449,10 +437,8 @@ class Entity(Sprite):
         return False
 
 
-    def up_score(self, score_obj):
-        """
-        up_score
-
+    def up_score(self, score_obj: "Entity") -> None:
+        """up_score
 
         up_score does stuff
         """
@@ -460,6 +446,11 @@ class Entity(Sprite):
         # Increase the score
         if self.is_alive:
             self.score += score_obj.point_value
+            self.app.game.entity_final_scores[self.id] = {
+                "is_player": self.player,
+                "name": self.name + self.display_name,
+                "score": self.score
+            }
 
 
 class Line(Sprite):
@@ -468,7 +459,7 @@ class Line(Sprite):
     Sight line for a cardinal direction for an entity
     """
 
-    def __init__(self, direction, entity):
+    def __init__(self, direction: int, entity: Entity):
         self.open = True
         self.opasity = 0 # Change this to 1 if you want to see sightlines
         self.color = (255, 105, 180, (self.opasity))
@@ -503,10 +494,8 @@ class Line(Sprite):
         )
 
 
-    def draw(self, entity):
-        """
-        draw
-
+    def draw(self, entity: Entity) -> None:
+        """draw
 
         draw does stuff
         """
@@ -519,7 +508,7 @@ class Line(Sprite):
             chosen_screen = entity.screen
 
         # Clear previous frame obj's location
-        chosen_screen.fill((0, 0, 0, 0), (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+        chosen_screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
         # determine entity's sightline end point and draw it
         self.line_options.get(self.direction)(entity)
@@ -534,33 +523,33 @@ class Line(Sprite):
         )
 
 
-    def draw_up(self, entity):
+    def draw_up(self, entity: Entity) -> None:
         self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
 
 
-    def draw_up_right(self, entity):
+    def draw_up_right(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5
 
 
-    def draw_right(self, entity):
+    def draw_right(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
 
 
-    def draw_down_right(self, entity):
+    def draw_down_right(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
 
 
-    def draw_down(self, entity):
+    def draw_down(self, entity: Entity) -> None:
         self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
 
 
-    def draw_down_left(self, entity):
+    def draw_down_left(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
 
 
-    def draw_left(self, entity):
+    def draw_left(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
 
 
-    def draw_up_left(self, entity):
+    def draw_up_left(self, entity: Entity) -> None:
         self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5

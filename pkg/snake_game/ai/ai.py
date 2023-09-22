@@ -227,15 +227,19 @@ class DecisionBox:
                 line.open = False
 
             # Edge of screen detection
-            elif line.end[1] <= 0:
+            # top
+            elif line.end[1] <= self.app.game.game_bar_height:
                 line.open = False
 
-            elif line.end[1] >= entity.screen_size[1]:
+            # bottom
+            elif line.end[1] >= entity.screen_size[1]-self.app.game.game_bar_height:
                 line.open = False
 
+            # left
             elif line.end[0] <= 0:
                 line.open = False
 
+            # right
             elif line.end[0] >= entity.screen_size[0]:
                 line.open = False
 
@@ -254,7 +258,7 @@ class DecisionBox:
                     continue
 
             # Edge of screen detection
-            elif line.direction == 0 and line.end[1] <= (0 - entity.size):
+            elif line.direction == 0 and line.end[1] <= (self.app.game.game_bar_height - entity.size):
                 line.open = False
                 continue
 

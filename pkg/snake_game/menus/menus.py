@@ -22,6 +22,11 @@ from .game_over import game_over
 from .display import display_menu
 from .sound import sound_menu
 
+from ..constants.game_constants import (
+    COLOR_BLACK,
+    COLOR_WHITE,
+)
+
 
 class Menu():
     """Menu
@@ -119,13 +124,23 @@ class Menu():
         return sound_menu(self)
 
 
-    def render_button(self, title, position, color=(255, 255, 255), h_offset=0, screen=None):
+    def render_button(self,
+        title,
+        virtical_position=1,
+        horizontal_position=1,
+        color=COLOR_WHITE,
+        relative_from="center",
+        clear_background=True,
+        h_offset=0,
+        w_offset=0,
+        screen=None
+    ):
         """render_button
 
         Args:
             title ([type]): [description]
-            position ([type]): [description]
-            color (tuple, optional): [description]. Defaults to (255, 255, 255).
+            virtical_position ([type]): [description]
+            color (tuple, optional): [description]. Defaults to WHITE.
             h_offset (int, optional): [description]. Defaults to 0.
             screen ([type], optional): [description]. Defaults to None.
 
@@ -142,10 +157,27 @@ class Menu():
         # Render the Display text
         text_str = str(title)
 
-        position = (
-            self.game.screen_size[0]/2-(len(text_str)*self.game.game_font.size)/2 + h_offset,
-            self.game.screen_size[1]/2 - self.game.game_font.size * position
-        )
+        if relative_from == "center":
+            position = (
+                self.game.screen_size[0] / 2 - (len(text_str) * self.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.game.screen_size[1] / 2 - self.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "left":
+            position = (
+                0 + (len(text_str) * self.game.game_font.size) / 2 * horizontal_position + h_offset,
+                0 + self.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "top":
+            position = (
+                self.game.screen_size[0] / 2 + (len(text_str) * self.game.game_font.size) / 2 * horizontal_position + h_offset,
+                0 + self.game.game_font.size * virtical_position + w_offset
+            )
+
+        # clear out first
+        if clear_background:
+            chosen_screen.fill((0, 0, 0), (position[0], position[1], (len(text_str) * self.game.game_font.size), self.game.game_font.size))
 
         obj = self.game.game_font.render_to(
             chosen_screen,
@@ -320,7 +352,7 @@ class Menu():
         self.game.screen = pygame.display.set_mode(
             (self.game.app.screen_width, self.game.app.screen_height),
             flags,
-            self.app.game.grid_size,
+            self.game.grid_size,
         )
 
         self.game.screen.set_alpha(None)
@@ -329,10 +361,10 @@ class Menu():
             (self.game.app.screen_width, self.game.app.screen_height)
         )
 
-        self.game.app.debug_screen.set_colorkey((0, 0, 0))
+        self.game.app.debug_screen.set_colorkey()
 
         self.game.app.background_0 = pygame.Surface(
             (self.game.app.screen_width, self.game.app.screen_height)
         )
 
-        self.game.app.background_0.set_colorkey((0, 0, 0))
+        self.game.app.background_0.set_colorkey(COLOR_BLACK)

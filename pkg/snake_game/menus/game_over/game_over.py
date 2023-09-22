@@ -12,7 +12,11 @@
 
 import pygame
 
-from ...constants import game_constants
+from ...constants.game_constants import (
+    COLOR_BLACK,
+    COLOR_RED,
+    MENU_GAME_OVER,
+)
 
 
 def game_over(self):
@@ -22,25 +26,25 @@ def game_over(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill((0, 0, 0, 0))
+    self.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
-    self.menu_option = game_constants.MENU_GAME_OVER
+    self.menu_option = MENU_GAME_OVER
 
     # Stop the music
     pygame.mixer.music.stop()
 
     # Render the Game Over text
-    _ = self.render_button("Game Over", 10, (255, 0, 0))
+    _ = self.render_button("Game Over", 10, color=COLOR_RED)
 
     # Get the player score
-    score = "NA"
-    for entity, value in self.game.entity_final_scores.items():
+    score = 0
+    for _, value in self.game.entity_final_scores.items():
         if value["is_player"]:
             score = value["score"]
 
     # Render the score
-    _ = self.render_button('Score: ' + str(score), 8, (255, 0, 0))
+    _ = self.render_button('Score: ' + str(score), 8, color=COLOR_RED)
 
     # Render the restart button
     restart_obj = self.render_button("Restart", 1)
