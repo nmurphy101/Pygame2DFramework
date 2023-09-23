@@ -25,6 +25,7 @@ from .settings import settings_menu
 from .game_over import game_over
 from .display import display_menu
 from .sound import sound_menu
+from .keybinding import keybinding_menu
 
 from ..constants.game_constants import (
     COLOR_BLACK,
@@ -53,9 +54,12 @@ class Menu():
         self.menu_option = 0
         self.prev_menu = 0
         self.root_menu = 0
-        self.game_menus = [self.home_menu, self.pause_menu,
-                           self.settings_menu, self.game_over_menu,
-                           self.display_menu, self.sound_menu,]
+        self.game_menus = [
+            self.home_menu, self.pause_menu,
+            self.settings_menu, self.game_over_menu,
+            self.display_menu, self.sound_menu,
+            self.keybinding_menu,
+        ]
 
         # Menu options
         self.menu_options = {
@@ -65,6 +69,7 @@ class Menu():
             3: lambda: self.game_over_menu(),
             4: lambda: self.display_menu(),
             5: lambda: self.sound_menu(),
+            6: lambda: self.keybinding_menu(),
         }
 
 
@@ -126,6 +131,15 @@ class Menu():
         """
 
         return sound_menu(self)
+
+    def keybinding_menu(self):
+        """keybinding_menu
+
+        Returns:
+            [type]: [description]
+        """
+
+        return keybinding_menu(self)
 
 
     def render_button(self,
@@ -208,7 +222,6 @@ class Menu():
         """
         toggle_game_music
 
-
         toggle_game_music does stuff
         """
 
@@ -220,7 +233,6 @@ class Menu():
     def increase_music_volume(self):
         """
         increase_music_volume
-
 
         increase_music_volume does stuff
         """
@@ -235,7 +247,6 @@ class Menu():
         """
         decrease_music_volume
 
-
         decrease_music_volume does stuff
         """
 
@@ -248,7 +259,6 @@ class Menu():
     def increase_effect_volume(self):
         """
         increase_effect_volume
-
 
         increase_effect_volume does stuff
         """
@@ -264,7 +274,6 @@ class Menu():
         """
         decrease_effect_volume
 
-
         decrease_effect_volume does stuff
         """
 
@@ -278,7 +287,6 @@ class Menu():
     def increase_menu_volume(self):
         """
         increase_menu_volume
-
 
         increase_menu_volume does stuff
         """
@@ -294,7 +302,6 @@ class Menu():
         """
         decrease_menu_volume
 
-
         decrease_menu_volume does stuff
         """
 
@@ -309,20 +316,17 @@ class Menu():
         """
         toggle_fps_display
 
-
         toggle_fps_display does stuff
         """
 
         fps_display = self.game.app.app_config["settings"]["display"]["fps_display"]
         self.game.app.app_config["settings"]["display"]["fps_display"] = not fps_display
         self.save_settings()
-        fps_display = self.game.app.app_config["settings"]["display"]["fps_display"]
 
 
     def toggle_fullscreen(self):
         """
         toggle_fullscreen
-
 
         toggle_fullscreen does stuff
         """
@@ -333,10 +337,20 @@ class Menu():
         display.toggle_fullscreen()
 
 
+    def change_keybinding(self, action):
+        """
+        toggle_fullscreen
+
+        toggle_fullscreen does stuff
+        """
+
+        self.game.app.keybinding_switch = (True, action)
+        self.game.game_config["settings"]["keybindings"][action] = "Select"
+
+
     def change_resolution(self, resolution):
         """
         change_resolution
-
 
         change_resolution does stuff
         """

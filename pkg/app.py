@@ -20,6 +20,7 @@ from json import load as json_load
 from pygame import (
     event as pygame_event,
     display as pygame_display,
+    freetype,
     init,
     time as pygame_time,
     mixer,
@@ -33,7 +34,17 @@ from pygame.constants import (
 )
 from guppy import hpy
 
-from .constants import app_constants as constants
+from .constants.app_constants import (
+    COLOR_RED,
+    COLOR_PURPLE,
+    CONFIG_FILE_NAME,
+    LOG_FILE_NAME,
+    REGULAR_FONT,
+    REGULAR_FONT_SIZE,
+    SOUND_UI_HOVER,
+    SOUND_UI_FORWARD,
+    SOUND_UI_BACKWARD,
+)
 
 
 NEXT = USEREVENT + 1
@@ -64,7 +75,7 @@ class App():
     Base game structure.
     """
 
-    def __init__(self, game_pkg):
+    def __init__(self, game_list):
         # setup mixer to avoid sound lag
         mixer.pre_init(44100, -16, 2, 2048)
         init()
@@ -72,20 +83,21 @@ class App():
         mixer.init(44100, -16, 2, 2048)
 
         # App config file
-        self.app_config_file_path = path.join(path.dirname(__file__), constants.CONFIG_FILE_NAME)
+        self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
             self.app_config = json_load(json_data_file)
 
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
-            basicConfig(level=_get_log_level(self.app_config), filename=constants.LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+            basicConfig(level=_get_log_level(self.app_config), filename=LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
         logging_debug("App started")
 
         # Set initial app settings
         resolution = self.app_config["settings"]["display"]["resolution"].split("x")
         self.screen_width = int(resolution[0])
         self.screen_height = int(resolution[1])
-        self.game_pkg = game_pkg
+        self.game_list = game_list
+        self.game_pkg = None
         self.game = None
         self.running = True
         self.fps = self.app_config["settings"]["display"]["fps"]
@@ -95,11 +107,19 @@ class App():
         self.screen = None
         self.debug_screen = None
         self.background_0 = None
+        self.keybinding_switch = (False, None)
+        self.focus_pause = False
+
+        # App fonts
+        self.app_font = freetype.Font(
+            file=REGULAR_FONT,
+            size=REGULAR_FONT_SIZE,
+        )
 
         self.menu_sounds = [
-            mixer.Sound(constants.SOUND_UI_HOVER), # hover
-            mixer.Sound(constants.SOUND_UI_FORWARD), # forward
-            mixer.Sound(constants.SOUND_UI_BACKWARD), # backward
+            mixer.Sound(SOUND_UI_HOVER), # hover
+            mixer.Sound(SOUND_UI_FORWARD), # forward
+            mixer.Sound(SOUND_UI_BACKWARD), # backward
         ]
 
         self.ui_sound_options = {}
@@ -130,11 +150,14 @@ class App():
 
         # h=hpy()
 
-        # Game window settings
-        self.set_window_settings()
-
         # Game loop clock
         self.clock = pygame_time.Clock()
+
+        # Game window settings
+        alpha_screen = self.set_window_settings()
+
+        # Choose game to play
+        self.choose_game_loop(alpha_screen)
 
         # Game loop
         while self.running:
@@ -200,6 +223,10 @@ class App():
         # Show game window
         pygame_display.flip()
 
+        return alpha_screen
+
+
+    def set_game_settings(self, alpha_screen):
         # Instantiate the Game Obj
         self.game = self.game_pkg(alpha_screen, self.screen, self)
 
@@ -272,7 +299,7 @@ class App():
             focus ([type]): [description]
         """
 
-        self.game.focus_pause = focus
+        self.focus_pause = focus
 
 
     def window_resize(self, **kwargs):
@@ -282,12 +309,24 @@ class App():
         pass
 
 
+    def change_keybinding(self, action, new_key):
+        """
+        change_keybinding
+
+        change_keybinding does stuff
+        """
+
+        # print("changing keybinding for/new_key", action, new_key)
+        self.game.game_config["settings"]["keybindings"][action] = new_key.upper()
+        self.game.menu.save_settings()
+
+
     def key_down(self, **kwargs):
         """key_down
         """
 
         # Pressed escape to pause/unpause/back
-        if kwargs["event"].key == K_ESCAPE:
+        if kwargs["event"].key == K_ESCAPE and self.game:
             # If not game over
             if self.game.menu.menu_option != 3:
                 self.play_ui_sound(1)
@@ -300,6 +339,10 @@ class App():
             else:
                 self.game.start()
 
+        elif self.keybinding_switch[0]:
+            self.change_keybinding(self.keybinding_switch[1], kwargs["event"].unicode)
+            self.keybinding_switch = (False, None)
+
 
     def mouse_down(self, **kwargs):
         """mouse_down
@@ -307,10 +350,15 @@ class App():
 
         if kwargs["menu"]:
             for button in kwargs["menu"]:
+                # print("testing buttons: ", button, kwargs["event"].pos, kwargs["event"])
                 if button[0].collidepoint(kwargs["event"].pos):
+                    # print("chosen button: ", button)
                     self.play_menu_sound(button)
-                    self.game.menu.prev_menu = button[2]
-                    button[1]()
+
+                    if self.game:
+                        self.game.menu.prev_menu = button[2]
+
+                    button[1](button[3]) if len(button) == 4 else button[1]()
 
 
     def next_music(self, **_):
@@ -346,3 +394,90 @@ class App():
         menu_sound = self.menu_sounds[num]
         menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
         mixer.Sound.play(menu_sound)
+
+
+    def choose_game_loop(self, alpha_screen):
+        """
+        run
+
+        run does stuff
+        """
+
+        # Take the game to be initalized
+        # snake_game = SnakeGame
+
+        # Choose Game loop
+        while not self.game_pkg and self.running:
+            # Send event NEXT every time music tracks ends
+            mixer.music.set_endevent(NEXT)
+
+            # Gameplay logic this turn/tick
+            menu = self._choose_game()
+
+            # System/window events to be checked
+            self.event_checks(menu, self.event_options.get)
+            pygame_event.clear()
+
+            # Display the game screen
+            pygame_display.flip()
+
+            # The game loop clocktarget FPS
+            self.clock.tick(self.fps)
+
+        # Complete final game settings
+        self.set_game_settings(alpha_screen)
+
+
+    def _choose_game(self):
+        """
+        play
+
+        play does stuff
+        """
+
+        menu = []
+
+        # render the choose game title
+        text_str = "Choose Game"
+        horizontal_position = -1
+        h_offset = 0
+        w_offset = 0
+        position = (
+            self.screen_width / 2 + (len(text_str) * self.app_font.size) / 2 * horizontal_position + h_offset,
+            0 + self.app_font.size * 2 + w_offset
+        )
+        _ = self.app_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            COLOR_RED
+        )
+
+        index = 6
+        # render the game options
+        for game in self.game_list:
+            text_str = game.TITLE
+            horizontal_position = -1
+            h_offset = 0
+            w_offset = 20
+            position = (
+                self.screen_width / 2 + (len(text_str) * self.app_font.size) / 2 * horizontal_position + h_offset,
+                0 + self.app_font.size * (index*2) + w_offset
+            )
+            button = self.app_font.render_to(
+                self.screen,
+                position,
+                text_str,
+                COLOR_PURPLE
+            )
+
+            # print("game added: ", game)
+            menu.append((button, self._load_game, 0, game))
+            index += 1
+
+        return menu
+
+
+    def _load_game(self, game_pkg):
+        # print("Game Chosen: ", game_pkg)
+        self.game_pkg = game_pkg

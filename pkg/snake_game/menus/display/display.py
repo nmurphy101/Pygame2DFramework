@@ -56,6 +56,9 @@ def display_menu(self):
     # Render the 1080p resolution choice button
     resolution_obj_2 = self.render_button("1920x1080", 3, color=COLOR_PURPLE, h_offset=300, w_offset=10)
 
+    # Render the 1440p resolution choice button
+    resolution_obj_3 = self.render_button("2560x1440", 2, color=COLOR_PURPLE, h_offset=0, w_offset=20)
+
     # Render the Return button
     back_obj = self.render_button("Back", -8)
 
@@ -65,6 +68,7 @@ def display_menu(self):
         (resolution_obj_0, lambda: self.change_resolution("1280x720"), self.prev_menu),
         (resolution_obj_1, lambda: self.change_resolution("1366x768"), self.prev_menu),
         (resolution_obj_2, lambda: self.change_resolution("1920x1080"), self.prev_menu),
+        (resolution_obj_3, lambda: self.change_resolution("2560x1440"), self.prev_menu),
         (back_obj, self.settings_menu, 4),
     ]
 

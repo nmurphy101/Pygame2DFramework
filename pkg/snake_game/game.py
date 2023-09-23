@@ -32,7 +32,6 @@ from .constants import (
     COLOR_GREY,
     COLOR_GREY_DARK,
     COLOR_RED,
-    COLOR_PURPLE,
     GAME_TITLE,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
@@ -77,6 +76,8 @@ class SnakeGame():
     SnakeGame for the snake
     """
 
+    TITLE = GAME_TITLE
+
 
     def __init__(self, alpha_screen: Surface, screen: Surface, app: App):
         """SnakeGame initilizer
@@ -104,7 +105,7 @@ class SnakeGame():
         self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
 
         # Window settings
-        self.title = app.title + GAME_TITLE
+        self.title = app.title + self.TITLE
         display.set_caption(self.title)
         self.screen = screen
         self.alpha_screen = alpha_screen

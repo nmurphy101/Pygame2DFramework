@@ -12,7 +12,10 @@
 
 
 from pygame.constants import (
-    K_w, K_a, K_s, K_d, K_UP, K_DOWN, K_LEFT, K_RIGHT,
+    K_q, K_w, K_e, K_r, K_t, K_y, K_u, K_i, K_o, K_p,
+    K_a, K_s, K_d, K_f, K_g, K_h, K_j, K_k, K_l,
+    K_z, K_x, K_c, K_v, K_b, K_n, K_m,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT,
 )
 
 
@@ -44,6 +47,7 @@ MENU_SETTINGS = 2
 MENU_GAME_OVER = 3
 MENU_DISPLAY = 4
 MENU_SOUND = 5
+MENU_KEYBINDING = 6
 
 # Colors
 COLOR_BLACK = (0, 0, 0, 0)
@@ -55,10 +59,32 @@ COLOR_GREY_DARK = (50,50,50)
 
 # Event input key map
 INPUT_KEY_MAP = {
+    "Q": K_q,
     "W": K_w,
+    "E": K_e,
+    "R": K_r,
+    "T": K_t,
+    "Y": K_y,
+    "U": K_u,
+    "I": K_i,
+    "O": K_o,
+    "P": K_p,
     "A": K_a,
     "S": K_s,
     "D": K_d,
+    "F": K_f,
+    "G": K_g,
+    "H": K_h,
+    "J": K_j,
+    "K": K_k,
+    "L": K_l,
+    "Z": K_z,
+    "X": K_x,
+    "C": K_c,
+    "V": K_v,
+    "B": K_b,
+    "N": K_n,
+    "M": K_m,
     "Up": K_UP,
     "Down": K_DOWN,
     "Left": K_LEFT,

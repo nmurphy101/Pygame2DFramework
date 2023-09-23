@@ -9,10 +9,4 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-from .display import *
-from .game_over import *
-from .home import *
-from .pause import *
-from .settings import *
-from .sound import *
 from .keybinding import *
