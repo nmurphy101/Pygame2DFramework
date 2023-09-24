@@ -453,7 +453,7 @@ class App():
             COLOR_RED
         )
 
-        index = 6
+        index = 3
         # render the game options
         for game in self.game_list:
             text_str = game.TITLE

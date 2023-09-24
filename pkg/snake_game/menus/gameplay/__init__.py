@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 """
-    Keybinding
+    Gameplay
 
-    The menu to change keybindings for the game
+    The gameplay menu for the game
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 """
 
-from .keybinding import *
+from .gameplay import *

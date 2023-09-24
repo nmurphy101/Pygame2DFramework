@@ -265,16 +265,16 @@ class SnakeGame():
 
         # Initilize game objects - Order of these objects actually matter
         # Food objects
-        number_of_food = self.game_config["settings"]["gameplay"]["number_of_food"]
+        num_of_food = self.game_config["settings"]["gameplay"]["num_of_food"]
 
-        # if number_of_food <= 0:
+        # if num_of_food <= 0:
         #     raise OSError("1 or more food is required to play")
 
-        for _ in range(number_of_food):
+        for _ in range(num_of_food):
             self.sprite_group.add(Food(self.screen_size, self.app))
 
         # teleporter objects
-        teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter_active"]
+        teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter"]
         if teleporter_mod:
             self.sprite_group.add(TelePortal(self.screen_size, self.app))
 
@@ -285,15 +285,15 @@ class SnakeGame():
                 self.screen_size, self.app, player=True
             )
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
-            player_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_player"]
+            player_snake.killable = not self.game_config["settings"]["gameplay"]["inv_player"]
             self.sprite_group.add(player_snake)
 
         # initilize ai characters
-        number_of_ai = self.game_config["settings"]["gameplay"]["number_of_ai"]
-        for _ in range(number_of_ai):
+        num_ai = self.game_config["settings"]["gameplay"]["num_ai"]
+        for _ in range(num_ai):
             enemy_snake = Snake(self.screen_size, self.app)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
-            enemy_snake.killable = not self.game_config["settings"]["gameplay"]["invinsible_ai"]
+            enemy_snake.killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
             self.sprite_group.add(enemy_snake)
 
         # Start the game timer

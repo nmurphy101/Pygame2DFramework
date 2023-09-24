@@ -379,13 +379,14 @@ class Entity(Sprite):
 
         # pylint: enable=access-member-before-definition
         while not found_spawn:
+            # print(self.screen_size[0], self.app.game.game_bar_height)
             # Where the entity is located
             x = self.screen_size[0] - randrange(
-                self.size*5, self.screen_size[0] - self.size * 5, self.size
+                self.size * 5, self.screen_size[0] - self.size * 5, self.size
             )
 
             y = self.screen_size[1] - randrange(
-                self.size*5, self.screen_size[1] - self.size * 5, self.size
+                self.size * 5, self.screen_size[1] - self.app.game.game_bar_height - self.size * 5, self.size
             )
 
             # Check if the chosen random spawn location is taken

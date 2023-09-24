@@ -53,7 +53,7 @@ class TelePortal(Entity):
             self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
         )
         y_pos = self.screen_size[1] - randrange(
-            self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
+            self.app.game.grid_size, self.screen_size[1] - self.app.game.game_bar_height, self.app.game.grid_size
         )
         self.position = (x_pos, y_pos)
 

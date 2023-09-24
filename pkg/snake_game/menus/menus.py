@@ -25,6 +25,7 @@ from .settings import settings_menu
 from .game_over import game_over
 from .display import display_menu
 from .sound import sound_menu
+from .gameplay import gameplay_menu
 from .keybinding import keybinding_menu
 
 from ..constants.game_constants import (
@@ -58,18 +59,19 @@ class Menu():
             self.home_menu, self.pause_menu,
             self.settings_menu, self.game_over_menu,
             self.display_menu, self.sound_menu,
-            self.keybinding_menu,
+            self.keybinding_menu, self.gameplay_menu
         ]
 
         # Menu options
         self.menu_options = {
-            0: lambda: self.home_menu(),
-            1: lambda: self.pause_menu(),
-            2: lambda: self.settings_menu(),
-            3: lambda: self.game_over_menu(),
-            4: lambda: self.display_menu(),
-            5: lambda: self.sound_menu(),
-            6: lambda: self.keybinding_menu(),
+            0: self.home_menu,
+            1: self.pause_menu,
+            2: self.settings_menu,
+            3: self.game_over_menu,
+            4: self.display_menu,
+            5: self.sound_menu,
+            6: self.keybinding_menu,
+            7: self.gameplay_menu,
         }
 
 
@@ -132,6 +134,7 @@ class Menu():
 
         return sound_menu(self)
 
+
     def keybinding_menu(self):
         """keybinding_menu
 
@@ -140,6 +143,16 @@ class Menu():
         """
 
         return keybinding_menu(self)
+
+
+    def gameplay_menu(self):
+        """gameplay_menu
+
+        Returns:
+            [type]: [description]
+        """
+
+        return gameplay_menu(self)
 
 
     def render_button(self,
@@ -219,8 +232,7 @@ class Menu():
 
 
     def toggle_game_music(self):
-        """
-        toggle_game_music
+        """ toggle_game_music
 
         toggle_game_music does stuff
         """
@@ -231,8 +243,7 @@ class Menu():
 
 
     def increase_music_volume(self):
-        """
-        increase_music_volume
+        """ increase_music_volume
 
         increase_music_volume does stuff
         """
@@ -244,8 +255,7 @@ class Menu():
 
 
     def decrease_music_volume(self):
-        """
-        decrease_music_volume
+        """ decrease_music_volume
 
         decrease_music_volume does stuff
         """
@@ -257,8 +267,7 @@ class Menu():
 
 
     def increase_effect_volume(self):
-        """
-        increase_effect_volume
+        """ increase_effect_volume
 
         increase_effect_volume does stuff
         """
@@ -271,8 +280,7 @@ class Menu():
 
 
     def decrease_effect_volume(self):
-        """
-        decrease_effect_volume
+        """ decrease_effect_volume
 
         decrease_effect_volume does stuff
         """
@@ -285,8 +293,7 @@ class Menu():
 
 
     def increase_menu_volume(self):
-        """
-        increase_menu_volume
+        """ increase_menu_volume
 
         increase_menu_volume does stuff
         """
@@ -299,8 +306,7 @@ class Menu():
 
 
     def decrease_menu_volume(self):
-        """
-        decrease_menu_volume
+        """ decrease_menu_volume
 
         decrease_menu_volume does stuff
         """
@@ -312,9 +318,56 @@ class Menu():
         self.save_settings()
 
 
-    def toggle_fps_display(self):
+    def increase_gameplay_setting(self, setting):
+        """ increase_gameplay_setting
+
+        increase_gameplay_setting does stuff
         """
-        toggle_fps_display
+
+        if "speed" in setting.lower():
+            change_mod = 0.1
+        else:
+            change_mod = 1
+
+        setting_value = self.game.game_config["settings"]["gameplay"][setting]
+        self.game.game_config["settings"]["gameplay"][setting] = (
+            round(setting_value + change_mod, 1)
+        )
+        self.save_settings()
+
+
+    def decrease_gameplay_setting(self, setting):
+        """ decrease_gameplay_setting
+
+        decrease_gameplay_setting does stuff
+        """
+
+        if "speed" in setting.lower():
+            change_mod = 0.1
+        else:
+            change_mod = 1
+
+        setting_value = self.game.game_config["settings"]["gameplay"][setting]
+        self.game.game_config["settings"]["gameplay"][setting] = (
+            round(setting_value - change_mod, 1)
+        )
+        self.save_settings()
+
+
+    def toggle_gameplay_setting(self, setting):
+        """ toggle_gameplay_setting
+
+        toggle_gameplay_setting does stuff
+        """
+
+        # print("toggling setting: {setting}")
+        setting_value = self.game.game_config["settings"]["gameplay"][setting]
+        self.game.game_config["settings"]["gameplay"][setting] = not setting_value
+        self.save_settings()
+
+
+    def toggle_fps_display(self):
+        """ toggle_fps_display
 
         toggle_fps_display does stuff
         """
@@ -325,8 +378,7 @@ class Menu():
 
 
     def toggle_fullscreen(self):
-        """
-        toggle_fullscreen
+        """ toggle_fullscreen
 
         toggle_fullscreen does stuff
         """
@@ -338,8 +390,17 @@ class Menu():
 
 
     def change_keybinding(self, action):
+        """ toggle_fullscreen
+
+        toggle_fullscreen does stuff
         """
-        toggle_fullscreen
+
+        self.game.app.keybinding_switch = (True, action)
+        self.game.game_config["settings"]["keybindings"][action] = "Select"
+
+
+    def change_gameplay_setting(self, action):
+        """ toggle_fullscreen
 
         toggle_fullscreen does stuff
         """
@@ -349,8 +410,7 @@ class Menu():
 
 
     def change_resolution(self, resolution):
-        """
-        change_resolution
+        """ change_resolution
 
         change_resolution does stuff
         """

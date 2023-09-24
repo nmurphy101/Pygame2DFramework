@@ -33,30 +33,21 @@ def keybinding_menu(self):
     # Render the Display text
     self.render_button("Keybindings", 10, color=COLOR_RED)
 
+    # initilize menu
+    menu = []
+
     # Render the Return button
     back_obj = self.render_button("Back", -8)
+    menu.append((back_obj, self.settings_menu, 6))
 
     # Render all the keybinding buttons
     keybindings = self.game.game_config["settings"]["keybindings"]
 
-    _ = self.render_button("Move Up:", 4, h_offset=-110, w_offset=20)
-    move_up_button = self.render_button(keybindings["move_up"], 4, color=COLOR_PURPLE, h_offset=135, w_offset=20)
-
-    _ = self.render_button("Move Left:", 2.5, h_offset=-110, w_offset=20)
-    move_left_button = self.render_button(keybindings["move_left"], 2.5, color=COLOR_PURPLE, h_offset=135, w_offset=20)
-
-    _ = self.render_button("Move Down:", 1, h_offset=-110, w_offset=20)
-    move_down_button = self.render_button(keybindings["move_down"], 1, color=COLOR_PURPLE, h_offset=135, w_offset=20)
-
-    _ = self.render_button("Move Right:", -.5, h_offset=-110, w_offset=20)
-    move_right_button = self.render_button(keybindings["move_right"], -.5, color=COLOR_PURPLE, h_offset=135, w_offset=20)
-
-    menu = [
-        (move_up_button, lambda: self.change_keybinding("move_up"), self.prev_menu),
-        (move_left_button, lambda: self.change_keybinding("move_left"), self.prev_menu),
-        (move_down_button, lambda: self.change_keybinding("move_down"), self.prev_menu),
-        (move_right_button, lambda: self.change_keybinding("move_right"), self.prev_menu),
-        (back_obj, self.settings_menu, 6),
-    ]
+    index = 4
+    for action, key in keybindings.items():
+        _ = self.render_button(f"{action.replace('_', ' ')}:", index, h_offset=-110, w_offset=20)
+        button = self.render_button(key, index, color=COLOR_PURPLE, h_offset=145, w_offset=20)
+        menu.append((button, self.change_keybinding, self.prev_menu, action))
+        index -= 1.5
 
     return menu

@@ -15,4 +15,5 @@ from .home import *
 from .pause import *
 from .settings import *
 from .sound import *
+from .gameplay import *
 from .keybinding import *

@@ -38,13 +38,16 @@ def settings_menu(self):
     _ = self.render_button("Settings", 10, color=COLOR_RED)
 
     # Render the display button
-    display_obj = self.render_button("Display", 1)
+    display_obj = self.render_button("Display", 5)
 
     # Render the Sound button
-    sound_obj = self.render_button("Sound", -1)
+    sound_obj = self.render_button("Sound", 3)
 
     # Render the Sound button
-    keybinding_obj = self.render_button("Keybinding", -3)
+    gameplay_obj = self.render_button("Gameplay", 1)
+
+    # Render the Sound button
+    keybinding_obj = self.render_button("Keybinding", -1)
 
     # Render the Return button
     back_obj = self.render_button("Back", -8)
@@ -52,6 +55,7 @@ def settings_menu(self):
     menu = [
         (display_obj, self.display_menu, 2),
         (sound_obj, self.sound_menu, 2),
+        (gameplay_obj, self.gameplay_menu, 2),
         (keybinding_obj, self.keybinding_menu, 2),
         (back_obj, self.game_menus[self.root_menu], 2),
     ]

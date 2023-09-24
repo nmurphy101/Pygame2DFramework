@@ -46,7 +46,7 @@ class Snake(Entity):
         )
 
         y = self.screen_size[1] - randrange(
-            self.app.game.grid_size, self.screen_size[1], self.app.game.grid_size
+            self.app.game.grid_size, self.screen_size[1] - self.app.game.game_bar_height - self.app.game.game_bar_height, self.app.game.grid_size
         )
 
         self.position = (x, y)
