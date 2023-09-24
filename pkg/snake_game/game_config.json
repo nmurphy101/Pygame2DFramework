@@ -1,13 +1,13 @@
 {
     "settings": {
         "gameplay": {
-            "human_player": false,
+            "human_player": true,
             "teleporter": true,
             "inv_player": false,
             "inv_ai": false,
-            "num_ai": 5,
-            "ai_speed": 8.0,
-            "player_speed": 1.0,
+            "num_ai": 1,
+            "ai_speed": 0.6,
+            "player_speed": 0.8,
             "num_of_food": 4,
             "grid_size": 16
         },
