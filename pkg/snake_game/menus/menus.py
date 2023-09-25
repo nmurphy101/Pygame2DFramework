@@ -224,11 +224,19 @@ class Menu():
         """save_settings
         """
 
-        with open(self.game.app.app_config_file_path, 'w', encoding='utf-8') as _file:
+        with open(self.game.app.app_config_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.game.app.app_config, _file, ensure_ascii=False, indent=4)
 
-        with open(self.game.game_config_file_path, 'w', encoding='utf-8') as _file:
+        with open(self.game.game_config_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.game.game_config, _file, ensure_ascii=False, indent=4)
+
+
+    def save_leaderboard(self):
+        """save_leaderboard
+        """
+
+        with open(self.game.leaderboard_file_path, "w", encoding="utf-8") as _file:
+            json_dump(self.game.leaderboard, _file, ensure_ascii=False, indent=4)
 
 
     def toggle_game_music(self):
@@ -251,7 +259,8 @@ class Menu():
         music_volume = self.game.app.app_config["settings"]["sound"]["music_volume"]
         self.game.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) + .05)
         self.save_settings()
-        mixer.music.set_volume(float(music_volume))
+        if self.game.app.is_audio:
+            mixer.music.set_volume(float(music_volume))
 
 
     def decrease_music_volume(self):
@@ -263,7 +272,8 @@ class Menu():
         music_volume = self.game.app.app_config["settings"]["sound"]["music_volume"]
         self.game.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) - .05)
         self.save_settings()
-        mixer.music.set_volume(float(music_volume))
+        if self.game.app.is_audio:
+            mixer.music.set_volume(float(music_volume))
 
 
     def increase_effect_volume(self):

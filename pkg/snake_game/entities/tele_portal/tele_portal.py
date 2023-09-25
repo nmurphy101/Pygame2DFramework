@@ -57,9 +57,6 @@ class TelePortal(Entity):
         )
         self.position = (x_pos, y_pos)
 
-        # TelePortal color = blue
-        self.obj_color = (0, 0, 255)
-
         # teleportation portal Sprite images
         self.tele_portal_images = self.app.game.tele_portal_images
 
@@ -70,10 +67,11 @@ class TelePortal(Entity):
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Interact sound
-        self.sound_interact = self.app.game.sounds[2]
-        self.sound_mod = 2.5
-        effect_volume = app.app_config["settings"]["sound"]["effect_volume"]
-        self.sound_interact_volume = float(effect_volume)/self.sound_mod
+        if self.app.is_audio:
+            self.sound_interact = self.app.game.sounds[2]
+            self.sound_mod = 2.5
+            effect_volume = app.app_config["settings"]["sound"]["effect_volume"]
+            self.sound_interact_volume = float(effect_volume)/self.sound_mod
 
         # Active trigger
         self.activated = now
@@ -208,11 +206,12 @@ class TelePortal(Entity):
             return
 
         # Play second interacting_obj's interact sound
-        sound = self.sound_interact
-        effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
-        self.sound_interact_volume = float(effect_volume)/self.sound_mod
-        sound.set_volume(self.sound_interact_volume)
-        mixer.Sound.play(sound)
+        if self.app.is_audio:
+            sound = self.sound_interact
+            effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
+            self.sound_interact_volume = float(effect_volume)/self.sound_mod
+            sound.set_volume(self.sound_interact_volume)
+            mixer.Sound.play(sound)
 
         # Teleport the obj to the paired portal
         self.teleport(interacting_obj)

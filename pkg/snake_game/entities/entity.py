@@ -10,14 +10,20 @@
 """
 
 from gc import collect as gc_collect
-from random import randrange
+from random import randrange, choices as random_choices
 from datetime import datetime
 from typing import Deque
 from uuid import uuid4
 
 from faker import Faker
+import pygame
 from pygame import (
+    BLEND_ADD,
+    BLEND_RGBA_MULT,
+    BLEND_RGBA_ADD,
+    Color as pygame_Color,
     Surface,
+    SRCALPHA,
     mixer,
     Rect,
     draw as pygame_draw,
@@ -110,9 +116,10 @@ class Entity(Sprite):
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Default death sound
-        self.sound_death = mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
-        self.sound_mod = 4.5
-        self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        if self.app.is_audio:
+            self.sound_death = mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+            self.sound_mod = 4.5
+            self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         # Sight lines
         self.sight_lines = [
@@ -205,10 +212,11 @@ class Entity(Sprite):
         """
 
         # Play interacting_obj death sound
-        sound = interacting_obj.sound_death
-        interacting_obj.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-        sound.set_volume(interacting_obj.sound_death_volume)
-        mixer.Sound.play(sound)
+        if self.app.is_audio:
+            sound = interacting_obj.sound_death
+            interacting_obj.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            sound.set_volume(interacting_obj.sound_death_volume)
+            mixer.Sound.play(sound)
 
         # Loose the game if interacting_obj is the player
         if interacting_obj.player:
@@ -228,10 +236,11 @@ class Entity(Sprite):
             # print(f"{self.id} {death_reason}")
 
             # Play death sound
-            sound = self.sound_death
-            self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-            sound.set_volume(self.sound_death_volume)
-            mixer.Sound.play(sound)
+            if self.app.is_audio:
+                sound = self.sound_death
+                self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+                sound.set_volume(self.sound_death_volume)
+                mixer.Sound.play(sound)
 
             # Loose the game if self is the player
             if self.player:
@@ -255,10 +264,11 @@ class Entity(Sprite):
 
                 self.sight_lines = None
 
-                for child in self.children:
-                    self.app.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
-                    child.kill()
-                self.children = None
+                if self.children:
+                    for child in self.children:
+                        self.app.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                        child.kill()
+                    self.children = None
 
                 self.kill()
 
@@ -457,6 +467,15 @@ class Entity(Sprite):
                 "name": self.name + self.display_name,
                 "score": self.score
             }
+
+
+    def tint(self, tint_color):
+        """ adds tint_color onto surf.
+        """
+
+        surf = self.image.copy()
+        surf.fill(tint_color[0:3], None, pygame.BLEND_RGBA_MULT )
+        self.image = surf
 
 
 class Line(Sprite):

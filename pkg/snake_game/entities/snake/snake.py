@@ -10,7 +10,7 @@
 """
 
 from math import hypot as math_hypot
-from random import randrange
+from random import randrange, randint
 from typing import Deque
 from datetime import datetime, timedelta
 
@@ -60,29 +60,32 @@ class Snake(Entity):
         # How many moves the snake can make per second
         self.speed_mod = 2
 
-        # head color = red
-        self.obj_color = COLOR_RED
-
         # Snake Sprite images
         if self.player:
             self.sprite_images = self.app.game.snake_images
+            self.obj_color = (0, randint(100, 175), 0, 1000)
         else:
             self.sprite_images = self.app.game.snake_enemy_images
+            self.obj_color = (randint(100, 175), 0, 0, 1000)
 
-        # Entity's default no sprite visual representation
-        self.image = Surface((self.size, self.size))
-        self.image.fill(self.obj_color)
+        # Entity's visual representation
+        self.image = self.sprite_images[0]
+
+        # Tint the sprite with a color
+        # self.tint(self.obj_color)
 
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Snake death sound
-        self.sound_death = self.app.game.sounds[0]
-        self.sound_mod = 4.5
-        self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        if self.app.is_audio:
+            self.sound_death = self.app.game.sounds[0]
+            self.sound_mod = 4.5
+            self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         # Interact sound
-        # self.sound_interact = pygame.mixer.Sound("")
+        # if self.app.is_audio:
+            # self.sound_interact = pygame.mixer.Sound("")
 
         # AI difficulty setting (higher is more difficult/smarter)
         self.ai_difficulty = 10
@@ -134,6 +137,9 @@ class Snake(Entity):
         """
 
         if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
+
+            # Tint the sprite with a color
+            # self.tint(self.obj_color)
 
             # Render the entity's obj based on it's parameters
             self.app.game.screen.blit(self.image, self.position)
@@ -304,23 +310,17 @@ class TailSegment(Entity):
         # Determines if entity can be killed
         self.killable = False
 
-        if self.player:
-            # Tail color = white
-            self.obj_color = (255, 255, 255)
-        else:
-            # Tail color = Red   (if not a player snake)
-            self.obj_color = COLOR_RED
-
         # No Sight lines for tail segments
         self.sight_lines = []
 
         # Entity's visual representation
-        self.image = Surface((self.size, self.size))
-        self.image.fill(self.obj_color)
         self.img_index = 2
+        self.image = self.parent.sprite_images[self.img_index]
 
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
+
+        self.obj_color = self.parent.obj_color
 
 
     def draw(self, *kwargs) -> None:
@@ -345,6 +345,9 @@ class TailSegment(Entity):
 
             # Choose the right image for this segment
             self.choose_img()
+
+            # Tint the sprite with a color
+            # self.tint(self.obj_color)
 
             # Render the tail segment based on it's parameters
             self.app.game.screen.blit(self.image, self.position)
@@ -397,6 +400,7 @@ class TailSegment(Entity):
             self.img_index = self.img_index
 
         self.image = self.parent.sprite_images[self.img_index]
+
         self.parent_dir = self.parent.direction
 
 
@@ -432,6 +436,9 @@ class TailSegment(Entity):
                 self.img_index = 9
 
         self.image = self.parent.sprite_images[self.img_index]
+
+        # Tint the sprite with a color
+        # self.tint(self.obj_color)
 
         # Render the tail segment based on it's parameters
         self.app.game.screen.blit(self.image, self.position)

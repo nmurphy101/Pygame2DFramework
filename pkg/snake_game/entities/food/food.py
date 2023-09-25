@@ -37,9 +37,6 @@ class Food(Entity):
         )
         self.position = (x, y)
 
-        # Food color green
-        self.obj_color = (0, 255, 0)
-
         # Food Sprite images
         self.food_images = self.app.game.food_images
 
@@ -62,9 +59,10 @@ class Food(Entity):
         self.sight_lines = []
 
         # Death sound
-        self.sound_death = self.app.game.sounds[1]
-        self.sound_mod = 1.5
-        self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+        if self.app.is_audio:
+            self.sound_death = self.app.game.sounds[1]
+            self.sound_mod = 1.5
+            self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         self.spawn()
 

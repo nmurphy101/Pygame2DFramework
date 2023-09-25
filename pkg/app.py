@@ -10,7 +10,7 @@
 """
 
 
-from os import path
+from os import path, getcwd
 from logging import (
     INFO, DEBUG, WARNING, basicConfig, debug as logging_debug
 )
@@ -19,6 +19,7 @@ from json import load as json_load
 
 from pygame import (
     event as pygame_event,
+    error as pygame_error,
     display as pygame_display,
     freetype,
     init,
@@ -39,6 +40,7 @@ from .constants.app_constants import (
     COLOR_PURPLE,
     CONFIG_FILE_NAME,
     LOG_FILE_NAME,
+    MOUSE_DOWN_MAP,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
     SOUND_UI_HOVER,
@@ -68,6 +70,10 @@ def _get_log_level(json_config: dict):
         case _:
             return INFO
 
+class FakeMixer():
+    def Sound(self, sound):
+        pass
+
 
 class App():
     """Game
@@ -80,7 +86,12 @@ class App():
         mixer.pre_init(44100, -16, 2, 2048)
         init()
         mixer.quit()
-        mixer.init(44100, -16, 2, 2048)
+        self.is_audio = False
+        try:
+            mixer.init(44100, -16, 2, 2048)
+            self.is_audio = True
+        except pygame_error:
+            pass
 
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_FILE_NAME)
@@ -89,7 +100,9 @@ class App():
 
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
-            basicConfig(level=_get_log_level(self.app_config), filename=LOG_FILE_NAME, filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+            print(f"{getcwd()}/{LOG_FILE_NAME}")
+            basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+
         logging_debug("App started")
 
         # Set initial app settings
@@ -116,11 +129,14 @@ class App():
             size=REGULAR_FONT_SIZE,
         )
 
-        self.menu_sounds = [
-            mixer.Sound(SOUND_UI_HOVER), # hover
-            mixer.Sound(SOUND_UI_FORWARD), # forward
-            mixer.Sound(SOUND_UI_BACKWARD), # backward
-        ]
+        if self.is_audio:
+            self.menu_sounds = [
+                mixer.Sound(SOUND_UI_HOVER), # hover
+                mixer.Sound(SOUND_UI_FORWARD), # forward
+                mixer.Sound(SOUND_UI_BACKWARD), # backward
+            ]
+        else :
+            self.menu_sounds = [None, None, None]
 
         self.ui_sound_options = {}
         self.pause_menu_options = {}
@@ -162,7 +178,8 @@ class App():
         # Game loop
         while self.running:
             # Send event NEXT every time music tracks ends
-            mixer.music.set_endevent(NEXT)
+            if self.is_audio:
+                mixer.music.set_endevent(NEXT)
 
             # Gameplay logic this turn/tick
             menu = self.game.play()
@@ -348,7 +365,8 @@ class App():
         """mouse_down
         """
 
-        if kwargs["menu"]:
+
+        if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
             for button in kwargs["menu"]:
                 # print("testing buttons: ", button, kwargs["event"].pos, kwargs["event"])
                 if button[0].collidepoint(kwargs["event"].pos):
@@ -369,8 +387,9 @@ class App():
         if self.game.menu.menu_option != 3:
             # Get next track (modulo number of tracks)
             self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
-            mixer.music.load(self.game.playlist[self.game.current_track])
-            mixer.music.play(0, 0, 1)
+            if self.is_audio:
+                mixer.music.load(self.game.playlist[self.game.current_track])
+                mixer.music.play(0, 0, 1)
 
 
     def play_menu_sound(self, button):
@@ -392,8 +411,9 @@ class App():
         """
 
         menu_sound = self.menu_sounds[num]
-        menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
-        mixer.Sound.play(menu_sound)
+        if self.is_audio:
+            menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
+            mixer.Sound.play(menu_sound)
 
 
     def choose_game_loop(self, alpha_screen):
@@ -409,7 +429,8 @@ class App():
         # Choose Game loop
         while not self.game_pkg and self.running:
             # Send event NEXT every time music tracks ends
-            mixer.music.set_endevent(NEXT)
+            if self.is_audio:
+                mixer.music.set_endevent(NEXT)
 
             # Gameplay logic this turn/tick
             menu = self._choose_game()

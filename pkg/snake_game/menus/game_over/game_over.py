@@ -32,7 +32,8 @@ def game_over(self):
     self.menu_option = MENU_GAME_OVER
 
     # Stop the music
-    mixer.music.stop()
+    if self.game.app.is_audio:
+        mixer.music.stop()
 
     # Render the Game Over text
     _ = self.render_button("Game Over", 10, color=COLOR_RED)
@@ -42,6 +43,23 @@ def game_over(self):
     for _, value in self.game.entity_final_scores.items():
         if value["is_player"]:
             score = value["score"]
+            new_score = False
+            # Save the score
+            if self.game.leaderboard["highscore"] < score:
+                self.game.leaderboard["highscore"] = score
+                new_score = True
+
+            index = 0
+            for top_ten_score in self.game.leaderboard["top_ten"]:
+                if not top_ten_score:
+                    self.game.leaderboard["top_ten"] = [score]
+                if top_ten_score < score:
+                    self.game.leaderboard["top_ten"][index] = score
+                    new_score = True
+                    break
+
+            if new_score:
+                self.save_leaderboard()
 
     # Render the score
     _ = self.render_button('Score: ' + str(score), 8, color=COLOR_RED)

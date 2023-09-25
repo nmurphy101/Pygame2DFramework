@@ -92,9 +92,14 @@ class SnakeGame():
         self.app = app
 
         # Game config file
-        self.game_config_file_path = path.join(path.dirname(__file__), 'game_config.json')
+        self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
         with open(self.game_config_file_path, encoding="utf8") as json_data_file:
             self.game_config = load(json_data_file)
+
+        # Game leaderboard file
+        self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
+        with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
+            self.leaderboard = load(json_data_file)
 
         # Set starting fps from the config file
         self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
@@ -127,15 +132,16 @@ class SnakeGame():
         self.game_music_loop = MUSIC_LOOP
         self.playlist = [self.game_music_loop]
         self.current_track = 0
-        mixer.music.load(self.game_music_intro)
-        mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
+        if self.app.is_audio:
+            mixer.music.load(self.game_music_intro)
+            mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
 
-        # Game Sounds
-        self.sounds = [
-            mixer.Sound(SOUND_SNAKE_DEATH),
-            mixer.Sound(SOUND_FOOD_PICKUP),
-            mixer.Sound(SOUND_PORTAL_ENTER),
-        ]
+            # Game Sounds
+            self.sounds = [
+                mixer.Sound(SOUND_SNAKE_DEATH),
+                mixer.Sound(SOUND_FOOD_PICKUP),
+                mixer.Sound(SOUND_PORTAL_ENTER),
+            ]
 
         # Game object containers
         self.sprite_group = sprite.RenderUpdates()
@@ -349,15 +355,16 @@ class SnakeGame():
         settings_checks does stuff
         """
         # Start/Restart the game music
-        if self.app.app_config["settings"]["sound"]["music"]:
-            mixer.music.load(self.playlist[self.current_track])
-            mixer.music.set_volume(
-                float(self.app.app_config["settings"]["sound"]["music_volume"])
-            )
-            mixer.music.play(0, 0, 1)
+        if self.app.is_audio:
+            if self.app.app_config["settings"]["sound"]["music"]:
+                mixer.music.load(self.playlist[self.current_track])
+                mixer.music.set_volume(
+                    float(self.app.app_config["settings"]["sound"]["music_volume"])
+                )
+                mixer.music.play(0, 0, 1)
 
-        else:
-            mixer.music.pause()
+            else:
+                mixer.music.pause()
 
 
     def quit_game(self):

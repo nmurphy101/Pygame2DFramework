@@ -5,7 +5,7 @@
             "teleporter": true,
             "inv_player": false,
             "inv_ai": false,
-            "num_ai": 1,
+            "num_ai": 8,
             "ai_speed": 0.6,
             "player_speed": 0.8,
             "num_of_food": 4,

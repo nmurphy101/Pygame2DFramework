@@ -31,3 +31,12 @@ COLOR_WHITE = (255, 255, 255)
 COLOR_PURPLE = (128, 0, 128)
 COLOR_GREY = (128,128,128)
 COLOR_GREY_DARK = (50,50,50)
+
+# Mouse down event map
+MOUSE_DOWN_MAP = {
+    1: "left",
+    2: "middle",
+    3: "right",
+    4: "scroll_up",
+    5: "scroll_down",
+}
