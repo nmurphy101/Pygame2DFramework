@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-    Simple Pathfinding
+    Decision Box
 
 
     Simple pathfinding ai for controlling entities
@@ -10,8 +10,11 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+
 from math import hypot as math_hypot
 from datetime import datetime, timedelta
+from inspect import currentframe, getframeinfo
+from logging import warning as logging_warning
 from multiprocessing import Pool
 
 from pygame import Rect
@@ -27,9 +30,9 @@ class DecisionBox:
 
 
     def __init__(self, app):
-        self.ai_difficulty = 10
         self.app = app
-        self.time_chase = 0
+        self.ai_difficulty = 10
+        self.time_to_chase_target = 0
         self.portal_use_difficulty = 1
         self.farsight_use_difficulty = 1
 
@@ -125,7 +128,7 @@ class DecisionBox:
 
         else:
             # Go for secondary target within timeframe
-            if datetime.now() <= entity.since_secondary_target + timedelta(seconds=self.time_chase):
+            if datetime.now() <= entity.since_secondary_target + timedelta(seconds=self.time_to_chase_target):
                 # Equal, down, or up  Intent
                 if entity.position[1] < entity.secondary_target[1]:
                     intent = 2
@@ -187,8 +190,12 @@ class DecisionBox:
 
             # Check if object's children if any (even if self) obstructs entity
             if obj.children:
-                for child in obj.children:
-                    intent = self._obj_check_intent(child, entity, intent)
+                try:
+                    for child in obj.children:
+                        intent = self._obj_check_intent(child, entity, intent)
+                except RuntimeError as e:
+                    frameinfo = getframeinfo(currentframe())
+                    logging_warning(f"location: {frameinfo.filename}::{frameinfo.lineno}: ERROR: {e}")
 
         return intent
 

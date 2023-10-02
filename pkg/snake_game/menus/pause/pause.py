@@ -15,6 +15,7 @@ from gc import collect as gc_collect
 from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
+    MENU_HOME,
     MENU_PAUSE,
     MENU_SETTINGS,
 )
@@ -27,7 +28,7 @@ def pause_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_PAUSE
@@ -39,15 +40,15 @@ def pause_menu(self):
         self.prev_menu = MENU_SETTINGS
 
     # Pause game music
-    self.game.pause_game_music = True
+    self.app.pause_game_music = True
 
     # Render the paused text
     _ = self.render_button("-Paused-", 10, color=COLOR_RED)
 
     # Get the player score
-    score = "NA"
-    for obj in self.game.sprite_group.sprites():
-        if obj.player:
+    score = 0
+    for obj in self.app.game.sprite_group.sprites():
+        if obj.is_player:
             score = obj.score
 
     # Render the score
@@ -63,9 +64,9 @@ def pause_menu(self):
     return_obj = self.render_button("Main Menu", -3)
 
     menu = [
-        (resume_obj, self.game.unpause, 1),
-        (settings_obj, self.settings_menu, 1),
-        (return_obj, self.home_menu, 1),
+        (resume_obj, self.app.game.unpause, 1),
+        (settings_obj, self.menu_options[MENU_SETTINGS], 1),
+        (return_obj, self.menu_options[MENU_HOME], 1),
     ]
 
     return menu

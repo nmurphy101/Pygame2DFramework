@@ -30,15 +30,15 @@ class Snake(Entity):
     obj for the snake
     """
 
-    def __init__(self, screen_size: tuple[int, int], app: App, player: bool = False):
+    def __init__(self, screen_size: tuple[int, int], app: App, is_player: bool = False):
         # Name for this type of object
         self.name = "snake_"
 
         # Initilize parent init
         super().__init__(screen_size, self.name, app)
 
-        # Is this the player entity
-        self.player = player
+        # player indicator
+        self.is_player = is_player
 
         # Where the snake is started located
         x = self.screen_size[0] - randrange(
@@ -61,7 +61,7 @@ class Snake(Entity):
         self.speed_mod = 2
 
         # Snake Sprite images
-        if self.player:
+        if self.is_player:
             self.sprite_images = self.app.game.snake_images
             self.obj_color = (0, randint(100, 175), 0, 1000)
         else:
@@ -99,9 +99,9 @@ class Snake(Entity):
         # Initilize starting tails
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(self, app, screen_size, player=self.player))
+                self.children.append(TailSegment(self, app, screen_size, player=self.is_player))
             else:
-                self.children.append(TailSegment(self, app, screen_size, player=self.player))
+                self.children.append(TailSegment(self, app, screen_size, player=self.is_player))
 
 
     def aquire_primary_target(self, target_name: str) -> None:
@@ -182,7 +182,7 @@ class Snake(Entity):
                     self,
                     self.app,
                     self.screen_size,
-                    player=self.player,
+                    player=self.is_player,
                 )
 
                 new_tails.append(tail)
@@ -202,7 +202,7 @@ class Snake(Entity):
 
         if self.is_alive:
             # Check if Ai or player controls this entity
-            if self.player:
+            if self.is_player:
                 key = pygame_key.get_pressed()
                 config = self.app.game.game_config["settings"]["keybindings"]
                 # pylint: disable=access-member-before-definition
@@ -234,7 +234,7 @@ class Snake(Entity):
 
         # pylint: disable=access-member-before-definition
         if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.is_alive:
-            if not self.player:
+            if not self.is_player:
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target("food")
 
@@ -305,7 +305,7 @@ class TailSegment(Entity):
         self.parent_dir = parent.direction
 
         # Is this a entity part of the player obj?
-        self.player = player
+        self.is_player = player
 
         # Determines if entity can be killed
         self.killable = False

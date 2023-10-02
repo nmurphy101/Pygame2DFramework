@@ -10,10 +10,11 @@
 """
 
 
-from ...constants.game_constants import (
+from ...constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
+    MENU_SETTINGS,
     MENU_SOUND,
 )
 
@@ -25,7 +26,7 @@ def sound_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_SOUND
@@ -35,12 +36,12 @@ def sound_menu(self):
 
     # Render the music button
     _ = self.render_button('Music:', 7, h_offset=-100)
-    text_str = str(self.game.app.app_config["settings"]["sound"]["music"])
+    text_str = str(self.app.app_config["settings"]["sound"]["music"])
     music_obj = self.render_button(text_str, 7, color=COLOR_PURPLE, h_offset=100)
 
     # Render the Volume view button
     volume_num = round(
-        100 * float(self.game.app.app_config["settings"]["sound"]["music_volume"]),
+        100 * float(self.app.app_config["settings"]["sound"]["music_volume"]),
         2,
     )
     text_str = "Music Volume: " + str(volume_num)
@@ -54,7 +55,7 @@ def sound_menu(self):
 
     # Render the Volume view button
     volume_num = round(
-        100 * float(self.game.app.app_config["settings"]["sound"]["effect_volume"]),
+        100 * float(self.app.app_config["settings"]["sound"]["effect_volume"]),
         2,
     )
     text_str = "Effect Volume: " + str(volume_num)
@@ -67,7 +68,7 @@ def sound_menu(self):
     effect_volume_down_obj = self.render_button("Down", 1, color=COLOR_PURPLE, w_offset=10, h_offset=-100)
 
     # Render the Volume view button
-    volume_num = round(100 * float(self.game.app.app_config["settings"]["sound"]["menu_volume"]))
+    volume_num = round(100 * float(self.app.app_config["settings"]["sound"]["menu_volume"]))
     text_str = "Menu Volume: " + str(volume_num)
     _ = self.render_button(text_str, -1)
 
@@ -77,8 +78,15 @@ def sound_menu(self):
     # Render the Volume Down button
     menu_volume_down_obj = self.render_button("Down", -2, color=COLOR_PURPLE, w_offset=10, h_offset=-100)
 
+    # Render the Save button
+    save_obj = self.render_button("Save", -8, h_offset=125)
+
     # Render the Return button
-    back_obj = self.render_button("Back", -8)
+    back_obj = self.render_button("Back", -8, h_offset=-125)
+
+    def sound_save():
+        self.save_settings()
+        self.app.settings_checks()
 
     menu = [
         (music_obj, self.toggle_game_music, self.prev_menu),
@@ -88,7 +96,8 @@ def sound_menu(self):
         (effect_volume_down_obj, self.decrease_effect_volume, self.prev_menu),
         (menu_volume_up_obj, self.increase_menu_volume, self.prev_menu),
         (menu_volume_down_obj, self.decrease_menu_volume, self.prev_menu),
-        (back_obj, self.settings_menu, 5),
+        ((save_obj, sound_save, self.prev_menu)),
+        (back_obj, self.menu_options[MENU_SETTINGS], 5),
     ]
 
     return menu

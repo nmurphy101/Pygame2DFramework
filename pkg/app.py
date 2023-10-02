@@ -22,7 +22,8 @@ from pygame import (
     error as pygame_error,
     display as pygame_display,
     freetype,
-    init,
+    init as pygame_init,
+    get_init as pygame_get_init,
     time as pygame_time,
     mixer,
     Surface,
@@ -36,10 +37,17 @@ from pygame.constants import (
 from guppy import hpy
 
 from .constants.app_constants import (
+    COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
     CONFIG_FILE_NAME,
     LOG_FILE_NAME,
+    MENU_HOME,
+    MENU_PAUSE,
+    MENU_SETTINGS,
+    MENU_GAME_OVER,
+    MENU_KEYBINDING,
+    MENU_GAMEPLAY,
     MOUSE_DOWN_MAP,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
@@ -47,6 +55,8 @@ from .constants.app_constants import (
     SOUND_UI_FORWARD,
     SOUND_UI_BACKWARD,
 )
+
+from .menus.menus import Menu
 
 
 NEXT = USEREVENT + 1
@@ -70,10 +80,6 @@ def _get_log_level(json_config: dict):
         case _:
             return INFO
 
-class FakeMixer():
-    def Sound(self, sound):
-        pass
-
 
 class App():
     """Game
@@ -83,15 +89,7 @@ class App():
 
     def __init__(self, game_list):
         # setup mixer to avoid sound lag
-        mixer.pre_init(44100, -16, 2, 2048)
-        init()
-        mixer.quit()
-        self.is_audio = False
-        try:
-            mixer.init(44100, -16, 2, 2048)
-            self.is_audio = True
-        except pygame_error:
-            pass
+        self.set_up_audio_mixer()
 
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_FILE_NAME)
@@ -129,6 +127,7 @@ class App():
             size=REGULAR_FONT_SIZE,
         )
 
+        # Sound settings
         if self.is_audio:
             self.menu_sounds = [
                 mixer.Sound(SOUND_UI_HOVER), # hover
@@ -139,7 +138,13 @@ class App():
             self.menu_sounds = [None, None, None]
 
         self.ui_sound_options = {}
+        self.pause_game_music = False
+
+        # Menu settings
+        self.menu = Menu(self)
         self.pause_menu_options = {}
+
+        # Event settings
         self.event_options = {
             QUIT: lambda **kwargs: self.quit(**kwargs),
             NEXT: lambda **kwargs: self.next_music(**kwargs),
@@ -160,7 +165,6 @@ class App():
         """
         run
 
-
         run does stuff
         """
 
@@ -175,14 +179,28 @@ class App():
         # Choose game to play
         self.choose_game_loop(alpha_screen)
 
-        # Game loop
+        # App loop
         while self.running:
             # Send event NEXT every time music tracks ends
             if self.is_audio:
                 mixer.music.set_endevent(NEXT)
 
-            # Gameplay logic this turn/tick
-            menu = self.game.play()
+            chosen_menu = None
+            # Go into gameplay loop if not in a menu
+            if self.menu.menu_option is None:
+
+                # clear screen if was in a menu previously
+                # if self.menu.prev_menu in [0, 1]:
+                #     # Clear previous frame render (from menu)
+                #     self.app.game.screen.fill(COLOR_BLACK)
+
+                # Gameplay logic/drawing this turn/tick
+                self.game.play_loop()
+
+            else:
+                # Show which ever menu option that has been chosen:
+                #   Main, Pause, Settings, GameOver, Display, Sound
+                chosen_menu = self.menu.menu_options.get(self.menu.menu_option)()
 
             # The game loop FPS counter
             is_fps_display_shown = self.app_config["settings"]["display"]["fps_display"]
@@ -190,7 +208,7 @@ class App():
                 self.fps_counter_display()
 
             # System/window events to be checked
-            self.event_checks(menu, self.event_options.get)
+            self.event_checks(chosen_menu)
             pygame_event.clear()
 
             # Display the game screen
@@ -200,6 +218,38 @@ class App():
             self.clock.tick(self.fps)
 
         # print(h.heap())
+
+
+    def set_up_audio_mixer(self):
+        """
+        set_up_audio_mixer
+
+
+        set_up_audio_mixer does stuff
+        """
+
+        if not pygame_get_init():
+            # setup mixer to avoid sound lag
+            mixer.pre_init(44100, -16, 2, 2048)
+            pygame_init()
+            mixer.quit()
+            self.is_audio = False
+            try:
+                mixer.init(44100, -16, 2, 2048)
+                self.is_audio = True
+            except pygame_error:
+                pass
+
+        else:
+            # setup mixer to avoid sound lag
+            mixer.pre_init(44100, -16, 2, 2048)
+            mixer.quit()
+            self.is_audio = False
+            try:
+                mixer.init(44100, -16, 2, 2048)
+                self.is_audio = True
+            except pygame_error:
+                pass
 
 
     def set_window_settings(self):
@@ -254,7 +304,7 @@ class App():
             self.game.unpause: 1,
         }
         self.pause_menu_options = {
-            0: self.game.menu.menu_option,
+            0: self.menu.menu_option,
             1: None,
             None: 1,
         }
@@ -269,7 +319,7 @@ class App():
 
         fps = str(int(self.clock.get_fps()))
 
-        _ = self.game.menu.render_button(f"now:{fps}", 1.6, 4, relative_from="top")
+        _ = self.menu.render_button(f"now:{fps}", 1.6, 4, relative_from="top")
 
         self.fps_list.append(int(fps))
 
@@ -279,14 +329,14 @@ class App():
 
         # Average FPS
         avg_fps = str(round(mean(self.fps_list)))
-        _ = self.game.menu.render_button(f"avg:{avg_fps}", 2.6, 4, relative_from="top")
+        _ = self.menu.render_button(f"avg:{avg_fps}", 2.6, 4, relative_from="top")
 
         # High and low FPS
-        _ = self.game.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 6.45, relative_from="top")
-        _ = self.game.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 6.45, relative_from="top")
+        _ = self.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 6.45, relative_from="top")
+        _ = self.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 6.45, relative_from="top")
 
 
-    def event_checks(self, menu, event_get):
+    def event_checks(self, current_menu):
         """
         event_checks
 
@@ -297,9 +347,29 @@ class App():
         for event in pygame_event.get():
             # Possible event options:
             #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN
-            decision_func = event_get(event.type)
+            decision_func = self.event_options.get(event.type)
             if decision_func:
-                decision_func(event=event, menu=menu)
+                decision_func(event=event, menu=current_menu)
+
+
+    def settings_checks(self):
+        """settings_checks
+
+        settings_checks does stuff
+        """
+        # Start/Restart the game music
+        if self.is_audio:
+            self.set_up_audio_mixer()
+            is_playing = mixer.music.get_busy()
+            if self.app_config["settings"]["sound"]["music"] and not is_playing:
+                mixer.music.load(self.game.playlist[self.game.current_track])
+                mixer.music.set_volume(
+                    float(self.app_config["settings"]["sound"]["music_volume"])
+                )
+                mixer.music.play(0, 0, 1)
+
+            elif not self.app_config["settings"]["sound"]["music"] and is_playing:
+                mixer.music.pause()
 
 
     def quit(self, **_):
@@ -316,6 +386,7 @@ class App():
             focus ([type]): [description]
         """
 
+        # self.set_up_audio_mixer()
         self.focus_pause = focus
 
 
@@ -335,7 +406,7 @@ class App():
 
         # print("changing keybinding for/new_key", action, new_key)
         self.game.game_config["settings"]["keybindings"][action] = new_key.upper()
-        self.game.menu.save_settings()
+        self.menu.save_settings()
 
 
     def key_down(self, **kwargs):
@@ -345,12 +416,15 @@ class App():
         # Pressed escape to pause/unpause/back
         if kwargs["event"].key == K_ESCAPE and self.game:
             # If not game over
-            if self.game.menu.menu_option != 3:
+            if self.menu.menu_option != 3:
                 self.play_ui_sound(1)
 
+                # Clear previous frame render
+                self.screen.fill(COLOR_BLACK)
+
                 # Either unpause or pause the game
-                self.game.menu.prev_menu = self.game.menu.menu_option
-                self.game.menu.menu_option = self.pause_menu_options.get(self.game.menu.menu_option, self.game.menu.prev_menu)
+                self.menu.prev_menu = self.menu.menu_option
+                self.menu.menu_option = self.pause_menu_options.get(self.menu.menu_option, self.menu.prev_menu)
 
             # If game over
             else:
@@ -374,7 +448,7 @@ class App():
                     self.play_menu_sound(button)
 
                     if self.game:
-                        self.game.menu.prev_menu = button[2]
+                        self.menu.prev_menu = button[2]
 
                     button[1](button[3]) if len(button) == 4 else button[1]()
 
@@ -384,7 +458,7 @@ class App():
         """
 
         # If not game over
-        if self.game.menu.menu_option != 3:
+        if self.menu.menu_option != 3:
             # Get next track (modulo number of tracks)
             self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
             if self.is_audio:
@@ -436,7 +510,7 @@ class App():
             menu = self._choose_game()
 
             # System/window events to be checked
-            self.event_checks(menu, self.event_options.get)
+            self.event_checks(menu)
             pygame_event.clear()
 
             # Display the game screen

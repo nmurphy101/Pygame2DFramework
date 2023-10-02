@@ -19,20 +19,20 @@ from ...constants.game_constants import (
 )
 
 
-def game_over(self):
+def game_over_menu(self):
     """game_over_menu
 
     game_over_menu does stuff
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_GAME_OVER
 
     # Stop the music
-    if self.game.app.is_audio:
+    if self.app.is_audio:
         mixer.music.stop()
 
     # Render the Game Over text
@@ -40,21 +40,21 @@ def game_over(self):
 
     # Get the player score
     score = 0
-    for _, value in self.game.entity_final_scores.items():
+    for _, value in self.app.game.entity_final_scores.items():
         if value["is_player"]:
             score = value["score"]
             new_score = False
             # Save the score
-            if self.game.leaderboard["highscore"] < score:
-                self.game.leaderboard["highscore"] = score
+            if self.app.game.leaderboard["highscore"] < score:
+                self.app.game.leaderboard["highscore"] = score
                 new_score = True
 
             index = 0
-            for top_ten_score in self.game.leaderboard["top_ten"]:
+            for top_ten_score in self.app.game.leaderboard["top_ten"]:
                 if not top_ten_score:
-                    self.game.leaderboard["top_ten"] = [score]
+                    self.app.game.leaderboard["top_ten"] = [score]
                 if top_ten_score < score:
-                    self.game.leaderboard["top_ten"][index] = score
+                    self.app.game.leaderboard["top_ten"][index] = score
                     new_score = True
                     break
 
@@ -71,7 +71,7 @@ def game_over(self):
     return_obj = self.render_button("Quit", -2)
 
     menu = [
-        (restart_obj, self.game.start, 3),
+        (restart_obj, self.app.game.start, 3),
         (return_obj, self.home_menu, 3),
     ]
 

@@ -46,7 +46,7 @@ Minor:
     c. die if hit in the head
 12. consumable-items/pick-ups in level - WIP
     a. food/score-increasing item - DONE
-    b. ????
+    b. larger food items that are worth less points but easier to get
 13. Level design
     a. Win condition to get to next level (probably reach a certain score)
     b. window shifts towards the direction of the edge of the window the player

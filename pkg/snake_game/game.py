@@ -11,7 +11,7 @@
 
 
 from os import path
-from json import load
+from json import load as json_load
 from gc import collect as gc_collect
 from threading import Thread
 from datetime import datetime
@@ -35,6 +35,12 @@ from .constants import (
     GAME_TITLE,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
+    MENU_HOME,
+    MENU_PAUSE,
+    MENU_SETTINGS,
+    MENU_GAME_OVER,
+    MENU_KEYBINDING,
+    MENU_GAMEPLAY,
     MUSIC_INTRO,
     MUSIC_LOOP,
     SOUND_SNAKE_DEATH,
@@ -52,7 +58,14 @@ from .entities import (
     TelePortal,
 )
 from .graphics.sprite_sheet import SpriteSheet
-from .menus.menus import Menu
+from .menus import (
+    home_menu,
+    pause_menu,
+    settings_menu,
+    game_over_menu,
+    keybinding_menu,
+    gameplay_menu,
+)
 
 from ..app import App
 
@@ -94,19 +107,17 @@ class SnakeGame():
         # Game config file
         self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
         with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config = load(json_data_file)
+            self.game_config = json_load(json_data_file)
 
         # Game leaderboard file
         self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
         with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
-            self.leaderboard = load(json_data_file)
+            self.leaderboard = json_load(json_data_file)
 
         # Set starting fps from the config file
         self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
 
         # Game settings
-        self.pause_game_music = False
-        self.timer = None
         self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
 
         # Window settings
@@ -183,56 +194,46 @@ class SnakeGame():
         # AI blackbox
         self.chosen_ai = None
 
-        # Menu Obj
-        self.menu = Menu(self)
+        # Set the game menus to the app menu object
+        self.app.menu.menu_options[MENU_HOME] = lambda: home_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_PAUSE] = lambda: pause_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_SETTINGS] = lambda: settings_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_GAME_OVER] = lambda: game_over_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_KEYBINDING] = lambda: keybinding_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_GAMEPLAY] = lambda: gameplay_menu(self.app.menu)
 
 
-    def play(self):
+    def play_loop(self):
         """play
 
         play does stuff
         """
 
-        # Check if not in a menu
-        if self.menu.menu_option is None:
+        # Execute game object actions via parallel threads
+        thread_group = []
+        for obj in self.sprite_group:
+            if not obj.is_alive:
+                continue
 
-            # clear screen if was in a menu previously
-            if self.menu.prev_menu in [0, 1]:
-                # Clear previous frame render (from menu)
-                self.app.game.screen.fill(COLOR_BLACK)
+            if self.app.menu.prev_menu in [0, 1]:
+                obj.refresh_draw()
 
-            # Execute game object actions via parallel threads
-            thread_group = []
-            for obj in self.sprite_group:
-                if not obj.is_alive:
-                    continue
+            thread = Thread(target=self._object_actions, args=(obj,))
+            thread.start()
+            thread_group.append(thread)
 
-                if self.menu.prev_menu in [0, 1]:
-                    obj.refresh_draw()
+        # Wait for threads to finish
+        for thread in thread_group:
+            thread.join()
 
-                thread = Thread(target=self._object_actions, args=(obj,))
-                thread.start()
-                thread_group.append(thread)
+        # input("click to continue")
 
-            # Wait for threads to finish
-            for thread in thread_group:
-                thread.join()
+        # Only 1 tick to refresh from pause_menu
+        if self.app.menu.prev_menu in [0, 1]:
+            self.app.menu.prev_menu = None
 
-            # input("click to continue")
-
-            # Only 1 tick to refresh from pause_menu
-            if self.menu.prev_menu in [0, 1]:
-                self.menu.prev_menu = None
-
-            # show the game bar at top of screen
-            self.game_bar_display()
-
-            # Return to app
-            return None
-
-        # Show which ever menu option that has been chosen:
-        #   Main, Pause, Settings, GameOver, Display, Sound
-        return self.menu.menu_options.get(self.menu.menu_option)()
+        # show the game bar at top of screen
+        self.game_bar_display()
 
 
     def _object_actions(self, obj: Entity):
@@ -256,15 +257,18 @@ class SnakeGame():
 
         start does stuff
         """
+        # Clear previous frame render
+        self.app.game.screen.fill(COLOR_BLACK)
+
         # Start on a clean slate
         self.clean_up()
 
         # Check settings
-        self.settings_checks()
+        self.app.settings_checks()
 
         # Starting variables
-        self.menu.menu_option = None
-        self.pause_game_music = False
+        self.app.menu.menu_option = None
+        self.app.pause_game_music = False
 
         # AI blackbox
         self.chosen_ai = DecisionBox(self.app)
@@ -287,9 +291,7 @@ class SnakeGame():
         # initilize player character
         is_human_playing = self.game_config["settings"]["gameplay"]["human_player"]
         if is_human_playing:
-            player_snake = Snake(
-                self.screen_size, self.app, player=True
-            )
+            player_snake = Snake(self.screen_size, self.app, is_player=True)
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
             player_snake.killable = not self.game_config["settings"]["gameplay"]["inv_player"]
             self.sprite_group.add(player_snake)
@@ -297,13 +299,10 @@ class SnakeGame():
         # initilize ai characters
         num_ai = self.game_config["settings"]["gameplay"]["num_ai"]
         for _ in range(num_ai):
-            enemy_snake = Snake(self.screen_size, self.app)
+            enemy_snake = Snake(self.screen_size, self.app, is_player=False)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
             enemy_snake.killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
             self.sprite_group.add(enemy_snake)
-
-        # Start the game timer
-        self.timer = datetime.now()
 
 
     def clean_up(self):
@@ -313,13 +312,10 @@ class SnakeGame():
         """
 
         # Clear previous frame render
-        self.app.game.screen.fill(COLOR_BLACK)
+        # self.app.game.screen.fill(COLOR_BLACK)
 
         # Game settings
-        self.pause_game_music = False
-
-        # Game timer
-        self.timer = None
+        self.app.pause_game_music = False
 
         # Reset the final player score
         self.entity_final_scores = {}
@@ -342,29 +338,8 @@ class SnakeGame():
         # AI blackbox
         self.chosen_ai = None
 
-        # Menu Obj
-        self.menu = Menu(self)
-
         # Free unreferenced memory
         gc_collect()
-
-
-    def settings_checks(self):
-        """settings_checks
-
-        settings_checks does stuff
-        """
-        # Start/Restart the game music
-        if self.app.is_audio:
-            if self.app.app_config["settings"]["sound"]["music"]:
-                mixer.music.load(self.playlist[self.current_track])
-                mixer.music.set_volume(
-                    float(self.app.app_config["settings"]["sound"]["music_volume"])
-                )
-                mixer.music.play(0, 0, 1)
-
-            else:
-                mixer.music.pause()
 
 
     def quit_game(self):
@@ -381,9 +356,13 @@ class SnakeGame():
 
         unpause does stuff
         """
-        self.menu.prev_menu = self.menu.menu_option
-        self.menu.menu_option = None
-        self.pause_game_music = True
+
+        # Clear previous frame render
+        self.screen.fill(COLOR_BLACK)
+
+        self.app.menu.prev_menu = self.app.menu.menu_option
+        self.app.menu.menu_option = None
+        self.app.pause_game_music = True
 
 
     def game_bar_display(self):
@@ -405,4 +384,4 @@ class SnakeGame():
             if value["is_player"]:
                 score = value["score"]
 
-        _ = self.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")
+        _ = self.app.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")

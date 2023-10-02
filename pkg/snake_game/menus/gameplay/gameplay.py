@@ -14,6 +14,7 @@ from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
+    MENU_SETTINGS,
     MENU_GAMEPLAY,
 )
 
@@ -25,7 +26,7 @@ def gameplay_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_GAMEPLAY
@@ -36,15 +37,19 @@ def gameplay_menu(self):
     # initilize menu
     menu = []
 
+    # Render the Save button
+    save_obj = self.render_button("Save", -8, h_offset=125)
+    menu.append((save_obj, self.save_settings, self.prev_menu))
+
     # Render the Return button
-    back_obj = self.render_button("Back", -8)
-    menu.append((back_obj, self.settings_menu, 6))
+    back_obj = self.render_button("Back", -8, h_offset=-125)
+    menu.append((back_obj, self.menu_options[MENU_SETTINGS], self.prev_menu))
 
     # Render all the gameplay buttons
-    gameplay_config = self.game.game_config["settings"]["gameplay"]
+    gameplay_config = self.app.game.game_config["settings"]["gameplay"]
 
     index = 8
-    row_mod = -330
+    row_mod = -300
     count = 0
     largest_setting_len = len(max(gameplay_config.keys(), key = len))
     for setting, value in gameplay_config.items():

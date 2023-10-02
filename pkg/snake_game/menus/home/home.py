@@ -28,7 +28,7 @@ def home_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.game.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_HOME
@@ -37,15 +37,15 @@ def home_menu(self):
     # Check settings if just left settings page
     if self.prev_menu in [MENU_PAUSE, MENU_GAME_OVER]:
         # Clear game objects up to free memory
-        self.game.clean_up()
+        self.app.game.clean_up()
 
     elif self.prev_menu not in [MENU_PAUSE, MENU_SETTINGS]:
         # Check the settings
-        self.game.settings_checks()
+        self.app.settings_checks()
         # just to prevent a check settings inf. loop
         self.prev_menu = MENU_SETTINGS
 
-    # self.game.clean_up()
+    # self.app.game.clean_up()
 
     # Render the Home Menu text
     _ = self.render_button(GAME_TITLE, 8, color=COLOR_RED)
@@ -60,9 +60,9 @@ def home_menu(self):
     quit_obj = self.render_button("Quit", -3)
 
     menu = [
-        (play_obj, self.game.start, 0),
-        (settings_obj, self.settings_menu, 0),
-        (quit_obj, self.game.quit_game, 0),
+        (play_obj, self.app.game.start, 0),
+        (settings_obj, self.menu_options[MENU_SETTINGS], 0),
+        (quit_obj, self.app.game.quit_game, 0),
     ]
 
     return menu

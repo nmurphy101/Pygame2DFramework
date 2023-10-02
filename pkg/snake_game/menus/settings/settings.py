@@ -13,7 +13,11 @@
 from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
+    MENU_DISPLAY,
+    MENU_GAMEPLAY,
+    MENU_KEYBINDING,
     MENU_PAUSE,
+    MENU_SOUND,
     MENU_SETTINGS,
 )
 
@@ -25,14 +29,10 @@ def settings_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_SETTINGS
-
-    # Check settings if just left settings page
-    if self.prev_menu not in (MENU_PAUSE, MENU_SETTINGS):
-        self.game.settings_checks()
 
     # Render the Settings Menu text
     _ = self.render_button("Settings", 10, color=COLOR_RED)
@@ -53,11 +53,11 @@ def settings_menu(self):
     back_obj = self.render_button("Back", -8)
 
     menu = [
-        (display_obj, self.display_menu, 2),
-        (sound_obj, self.sound_menu, 2),
-        (gameplay_obj, self.gameplay_menu, 2),
-        (keybinding_obj, self.keybinding_menu, 2),
-        (back_obj, self.game_menus[self.root_menu], 2),
+        (display_obj, self.menu_options[MENU_DISPLAY], 2),
+        (sound_obj, self.menu_options[MENU_SOUND], 2),
+        (gameplay_obj, self.menu_options[MENU_GAMEPLAY], 2),
+        (keybinding_obj, self.menu_options[MENU_KEYBINDING], 2),
+        (back_obj, self.menu_options[self.root_menu], 2),
     ]
 
     self.prev_menu = 2

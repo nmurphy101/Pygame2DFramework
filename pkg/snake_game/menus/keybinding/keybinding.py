@@ -15,6 +15,7 @@ from ...constants.game_constants import (
     COLOR_RED,
     COLOR_PURPLE,
     MENU_KEYBINDING,
+    MENU_SETTINGS,
 )
 
 
@@ -25,7 +26,7 @@ def keybinding_menu(self):
     """
 
     # Clear previous frame render
-    self.game.screen.fill(COLOR_BLACK)
+    self.app.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_KEYBINDING
@@ -36,12 +37,16 @@ def keybinding_menu(self):
     # initilize menu
     menu = []
 
+    # Render the Save button
+    save_obj = self.render_button("Save", -8, h_offset=125)
+    menu.append((save_obj, self.save_settings, self.prev_menu))
+
     # Render the Return button
-    back_obj = self.render_button("Back", -8)
-    menu.append((back_obj, self.settings_menu, 6))
+    back_obj = self.render_button("Back", -8, h_offset=-125)
+    menu.append((back_obj, self.menu_options[MENU_SETTINGS], self.prev_menu))
 
     # Render all the keybinding buttons
-    keybindings = self.game.game_config["settings"]["keybindings"]
+    keybindings = self.app.game.game_config["settings"]["keybindings"]
 
     index = 4
     for action, key in keybindings.items():

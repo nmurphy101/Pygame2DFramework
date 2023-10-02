@@ -9,9 +9,11 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-from gc import collect as gc_collect
-from random import randrange, choices as random_choices
+
 from datetime import datetime
+from gc import collect as gc_collect
+from logging import warning as logging_warning
+from random import randrange, choices as random_choices
 from typing import Deque
 from uuid import uuid4
 
@@ -68,7 +70,7 @@ class Entity(Sprite):
         self.abilty_cooldown = 1
 
         # Entity is player
-        self.player = False
+        self.is_player = False
 
         # Score this entity has accumulated
         self.score = 0
@@ -156,7 +158,6 @@ class Entity(Sprite):
         # Try to move if entity can
         updated = self.move()
 
-        # Return if this entity updated since last tick
         return updated, False
 
 
@@ -171,7 +172,7 @@ class Entity(Sprite):
             # place hitbox at position
             self.rect.topleft = self.position
 
-            # Render the tail segment based on it's parameters
+            # Render the entity based on it's image and position
             self.app.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
@@ -243,7 +244,7 @@ class Entity(Sprite):
                 mixer.Sound.play(sound)
 
             # Loose the game if self is the player
-            if self.player:
+            if self.is_player:
                 self.app.game.menu.menu_option = 3
 
             # Kill self
@@ -252,7 +253,7 @@ class Entity(Sprite):
             # "remove" the entity from the game
             if "snake" in self.name:
                 self.app.game.entity_final_scores[self.id] = {
-                    "is_player": self.player,
+                    "is_player": self.is_player,
                     "name": self.name + self.display_name,
                     "score": self.score
                 }
@@ -273,7 +274,7 @@ class Entity(Sprite):
                 self.kill()
 
             # Clear previous frame render (from menu)
-            self.app.game.screen.fill(COLOR_BLACK)
+            # self.app.game.screen.fill(COLOR_BLACK)
 
             # draw the object
             for obj in self.app.game.sprite_group:
@@ -320,15 +321,63 @@ class Entity(Sprite):
         Check for self collision/interaction to the edge of the screen
         """
 
-        # Collision check for edge of screen (Right and Bottom)
-        if (self.position[0] > self.app.game.screen_size[0]-self.size) or (
-                self.position[1] > self.screen_size[1]-self.size-self.app.game.game_bar_height):
-            self.die("Edge of screen")
+        is_player_invincible = self.app.game.game_config["settings"]["gameplay"]["inv_player"]
+        is_ai_invincible = self.app.game.game_config["settings"]["gameplay"]["inv_ai"]
+
+        # Collision check for edge of screen (Right)
+        if self.position[0] > self.screen_size[0] - self.size:
+            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
+                # Clear previous frame obj's location
+                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+
+                # Set new location
+                self.position = (0, self.position[1])
+
+            else:
+                self.die("Right edge of screen")
+
             return True
 
-        # Collision check for edge of screen (Left and Top)
-        elif self.position[0] < 0 or self.position[1] < self.app.game.game_bar_height:
-            self.die("Edge of screen")
+        # Collision check for edge of screen (Bottom)
+        elif self.position[1] > self.screen_size[1] - self.size - self.app.game.game_bar_height:
+            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
+                # Clear previous frame obj's location
+                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+
+                # Set new location
+                self.position = (self.position[0], self.app.game.game_bar_height)
+
+            else:
+                self.die("Bottom edge of screen")
+
+            return True
+
+        # Collision check for edge of screen (Left)
+        elif self.position[0] < 0 + self.size:
+            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
+                # Clear previous frame obj's location
+                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+
+                # Set new location
+                self.position = (self.screen_size[0], self.position[1])
+
+            else:
+                self.die("Left edge of screen")
+
+            return True
+
+        # Collision check for edge of screen (Top)
+        elif self.position[1] < self.app.game.game_bar_height + self.size:
+            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
+                # Clear previous frame obj's location
+                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+
+                # Set new location
+                self.position = (self.position[0], self.screen_size[1] - self.app.game.game_bar_height)
+
+            else:
+                self.die("Top edge of screen")
+
             return True
 
         return False
@@ -365,16 +414,18 @@ class Entity(Sprite):
         if obj.children:
             # print(f"{obj.id} has children {obj.children}")
             for child in obj.children:
-                if Rect.colliderect(self.rect, child.rect):
-                    if self.secondary_target == child.position:
-                        self.secondary_target = None
+                try:
+                    if Rect.colliderect(self.rect, child.rect):
+                        if self.secondary_target == child.position:
+                            self.secondary_target = None
 
-                    # print(f"----{self.id} Interacting with child 1 {child.id}-----")
+                        # print(f"----{self.id} Interacting with child 1 {child.id}-----")
 
-                    child.interact(self)
+                        child.interact(self)
 
-                    return True
-
+                        return True
+                except RunTimeError as e:
+                    logging_warning(f"Error: {e}")
         return False
 
 
@@ -463,7 +514,7 @@ class Entity(Sprite):
         if self.is_alive:
             self.score += score_obj.point_value
             self.app.game.entity_final_scores[self.id] = {
-                "is_player": self.player,
+                "is_player": self.is_player,
                 "name": self.name + self.display_name,
                 "score": self.score
             }
