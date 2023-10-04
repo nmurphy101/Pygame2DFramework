@@ -13,3 +13,4 @@ from .ai import *
 from .entities import *
 from .graphics import *
 from .menus import *
+from .game import Game

@@ -193,9 +193,12 @@ class DecisionBox:
                 try:
                     for child in obj.children:
                         intent = self._obj_check_intent(child, entity, intent)
-                except RuntimeError as e:
-                    frameinfo = getframeinfo(currentframe())
-                    logging_warning(f"location: {frameinfo.filename}::{frameinfo.lineno}: ERROR: {e}")
+                except RuntimeError as error:
+                    if error == "deque mutated during iteration":
+                        pass
+                    else:
+                        frameinfo = getframeinfo(currentframe())
+                        logging_warning(f"{frameinfo.filename}::{frameinfo.lineno}: ERROR: {error}")
 
         return intent
 

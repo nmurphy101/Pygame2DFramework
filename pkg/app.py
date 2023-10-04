@@ -9,13 +9,18 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-
-from os import path, getcwd
-from logging import (
-    INFO, DEBUG, WARNING, basicConfig, debug as logging_debug
-)
-from statistics import mean
+from inspect import currentframe, getframeinfo
 from json import load as json_load
+from logging import (
+    INFO,
+    DEBUG,
+    WARNING,
+    basicConfig,
+    debug as logging_debug,
+    info as logging_info,
+)
+from os import path, getcwd
+from statistics import mean
 
 from pygame import (
     event as pygame_event,
@@ -55,7 +60,6 @@ from .constants.app_constants import (
     SOUND_UI_FORWARD,
     SOUND_UI_BACKWARD,
 )
-
 from .menus.menus import Menu
 
 
@@ -101,7 +105,7 @@ class App():
             print(f"{getcwd()}/{LOG_FILE_NAME}")
             basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
-        logging_debug("App started")
+        logging_info("App started")
 
         # Set initial app settings
         resolution = self.app_config["settings"]["display"]["resolution"].split("x")
@@ -189,17 +193,11 @@ class App():
             # Go into gameplay loop if not in a menu
             if self.menu.menu_option is None:
 
-                # clear screen if was in a menu previously
-                # if self.menu.prev_menu in [0, 1]:
-                #     # Clear previous frame render (from menu)
-                #     self.app.game.screen.fill(COLOR_BLACK)
-
                 # Gameplay logic/drawing this turn/tick
                 self.game.play_loop()
 
             else:
-                # Show which ever menu option that has been chosen:
-                #   Main, Pause, Settings, GameOver, Display, Sound
+                # Show which ever menu option that has been chosen
                 chosen_menu = self.menu.menu_options.get(self.menu.menu_option)()
 
             # The game loop FPS counter
@@ -261,7 +259,7 @@ class App():
         """
 
         # Game window settings
-        background_colour = (0, 0, 0)
+        background_colour = COLOR_BLACK
         if self.app_config["settings"]["display"]["fullscreen"]:
             flags = DOUBLEBUF | FULLSCREEN
         else:
@@ -275,9 +273,9 @@ class App():
         )
         self.screen.set_alpha(None)
         self.debug_screen = Surface((self.screen_width, self.screen_height))
-        self.debug_screen.set_colorkey((0, 0, 0))
+        self.debug_screen.set_colorkey(COLOR_BLACK)
         self.background_0 = Surface((self.screen_width, self.screen_height))
-        self.background_0.set_colorkey((0, 0, 0))
+        self.background_0.set_colorkey(COLOR_BLACK)
 
         alpha_screen = Surface(
             (self.screen_width, self.screen_height)
@@ -386,7 +384,6 @@ class App():
             focus ([type]): [description]
         """
 
-        # self.set_up_audio_mixer()
         self.focus_pause = focus
 
 
@@ -426,10 +423,6 @@ class App():
                 self.menu.prev_menu = self.menu.menu_option
                 self.menu.menu_option = self.pause_menu_options.get(self.menu.menu_option, self.menu.prev_menu)
 
-            # If game over
-            else:
-                self.game.start()
-
         elif self.keybinding_switch[0]:
             self.change_keybinding(self.keybinding_switch[1], kwargs["event"].unicode)
             self.keybinding_switch = (False, None)
@@ -439,12 +432,12 @@ class App():
         """mouse_down
         """
 
-
         if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
             for button in kwargs["menu"]:
-                # print("testing buttons: ", button, kwargs["event"].pos, kwargs["event"])
+                frameinfo = getframeinfo(currentframe())
+                logging_debug(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: INFO: Testing buttons: {button}, {kwargs['event'].pos}, {kwargs['event']}")
                 if button[0].collidepoint(kwargs["event"].pos):
-                    # print("chosen button: ", button)
+                    logging_debug(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: DEBUG: Chosen button: {button}")
                     self.play_menu_sound(button)
 
                     if self.game:
@@ -496,9 +489,6 @@ class App():
 
         run does stuff
         """
-
-        # Take the game to be initalized
-        # snake_game = SnakeGame
 
         # Choose Game loop
         while not self.game_pkg and self.running:
@@ -574,5 +564,6 @@ class App():
 
 
     def _load_game(self, game_pkg):
-        # print("Game Chosen: ", game_pkg)
+        frameinfo = getframeinfo(currentframe())
+        logging_info(f"INFO: Game Chosen: {game_pkg}")
         self.game_pkg = game_pkg

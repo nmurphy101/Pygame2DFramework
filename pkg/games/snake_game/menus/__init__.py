@@ -15,3 +15,4 @@ from .pause import *
 from .settings import *
 from .gameplay import *
 from .keybinding import *
+from .leaderboard import *

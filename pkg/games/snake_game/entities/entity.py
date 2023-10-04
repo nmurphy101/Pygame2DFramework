@@ -32,7 +32,7 @@ from pygame import (
 )
 from pygame.sprite import Sprite
 
-from ...app import App
+from ....app import App
 from ..constants import COLOR_BLACK
 
 
@@ -61,7 +61,7 @@ class Entity(Sprite):
         self.is_alive = True
 
         # Determines if entity can be killed
-        self.killable = True
+        self.is_killable = True
 
         # Entity is a child/follower in a train of same children
         self.child_train = None
@@ -220,7 +220,7 @@ class Entity(Sprite):
             mixer.Sound.play(sound)
 
         # Loose the game if interacting_obj is the player
-        if interacting_obj.player:
+        if interacting_obj.is_player:
             self.app.game.menu.menu_option = 3
 
         # Kill interacting_obj
@@ -233,7 +233,7 @@ class Entity(Sprite):
         die does stuff
         """
 
-        if self.killable:
+        if self.is_killable:
             # print(f"{self.id} {death_reason}")
 
             # Play death sound
@@ -245,18 +245,13 @@ class Entity(Sprite):
 
             # Loose the game if self is the player
             if self.is_player:
-                self.app.game.menu.menu_option = 3
+                self.app.menu.menu_option = 3
 
             # Kill self
             self.is_alive = False
 
             # "remove" the entity from the game
             if "snake" in self.name:
-                self.app.game.entity_final_scores[self.id] = {
-                    "is_player": self.is_player,
-                    "name": self.name + self.display_name,
-                    "score": self.score
-                }
                 self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
                 self.app.game.sprite_group.remove(self)
@@ -321,62 +316,47 @@ class Entity(Sprite):
         Check for self collision/interaction to the edge of the screen
         """
 
-        is_player_invincible = self.app.game.game_config["settings"]["gameplay"]["inv_player"]
-        is_ai_invincible = self.app.game.game_config["settings"]["gameplay"]["inv_ai"]
-
         # Collision check for edge of screen (Right)
-        if self.position[0] > self.screen_size[0] - self.size:
-            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
-                # Clear previous frame obj's location
-                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
-                # Set new location
-                self.position = (0, self.position[1])
+        if self.position[0] > self.screen_size[0]:
+            if self.is_killable:
+                self.die("Right edge of screen")
 
             else:
-                self.die("Right edge of screen")
+                # Set new location
+                self.position = (0, self.position[1])
 
             return True
 
         # Collision check for edge of screen (Bottom)
-        elif self.position[1] > self.screen_size[1] - self.size - self.app.game.game_bar_height:
-            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
-                # Clear previous frame obj's location
-                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
-                # Set new location
-                self.position = (self.position[0], self.app.game.game_bar_height)
+        elif self.position[1] > self.screen_size[1]:
+            if self.is_killable:
+                self.die("Bottom edge of screen")
 
             else:
-                self.die("Bottom edge of screen")
+                # Set new location
+                self.position = (self.position[0], self.app.game.game_bar_height)
 
             return True
 
         # Collision check for edge of screen (Left)
-        elif self.position[0] < 0 + self.size:
-            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
-                # Clear previous frame obj's location
-                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
-                # Set new location
-                self.position = (self.screen_size[0], self.position[1])
+        elif self.position[0] < 0:
+            if self.is_killable:
+                self.die("Left edge of screen")
 
             else:
-                self.die("Left edge of screen")
+                # Set new location
+                self.position = (self.screen_size[0] - self.size, self.position[1])
 
             return True
 
         # Collision check for edge of screen (Top)
-        elif self.position[1] < self.app.game.game_bar_height + self.size:
-            if (self.is_player and is_player_invincible) or (not self.is_player and is_ai_invincible):
-                # Clear previous frame obj's location
-                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-
-                # Set new location
-                self.position = (self.position[0], self.screen_size[1] - self.app.game.game_bar_height)
+        elif self.position[1] < self.app.game.game_bar_height:
+            if self.is_killable:
+                self.die("Top edge of screen")
 
             else:
-                self.die("Top edge of screen")
+                # Set new location
+                self.position = (self.position[0], self.screen_size[1])
 
             return True
 
@@ -424,7 +404,7 @@ class Entity(Sprite):
                         child.interact(self)
 
                         return True
-                except RunTimeError as e:
+                except RuntimeError as e:
                     logging_warning(f"Error: {e}")
         return False
 

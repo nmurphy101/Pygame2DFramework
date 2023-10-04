@@ -59,6 +59,7 @@ class Menu():
             5: lambda: sound_menu(self),
             6: None, # keybinding_menu from chosen_game
             7: None, # gameplay_menu from chosen_game
+            8: None, # leaderboard_menu from chosen_game
         }
 
 
@@ -313,7 +314,9 @@ class Menu():
         self.app.app_config["settings"]["display"]["resolution"] = resolution
         self.app.screen_width = int(resolution.split("x")[0])
         self.app.screen_height = int(resolution.split("x")[1])
-        self.app.game.screen_size = (self.app.screen_width, self.app.screen_height)
+        game_width = self.app.screen_width - (self.app.screen_width % self.app.game.grid_size)
+        game_height = self.app.screen_height - (self.app.screen_height % self.app.game.grid_size)
+        self.app.game.screen_size = (game_width, game_height)
 
         if self.app.app_config["settings"]["display"]["fullscreen"]:
             flags = DOUBLEBUF | FULLSCREEN

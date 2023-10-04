@@ -3,8 +3,8 @@
         "sound": {
             "music": false,
             "music_volume": "0.10000000000000002",
-            "effect_volume": "0.05",
-            "menu_volume": "0.05000000000000002"
+            "effect_volume": "0.1",
+            "menu_volume": "0.2"
         },
         "display": {
             "fps": 3000,
@@ -14,7 +14,7 @@
             "window_title": "Game Platform - "
         },
         "debug": {
-            "log_level": "info"
+            "log_level": "debug"
         }
     }
 }

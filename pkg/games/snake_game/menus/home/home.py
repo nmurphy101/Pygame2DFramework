@@ -17,6 +17,7 @@ from ...constants.game_constants import (
     MENU_HOME,
     MENU_PAUSE,
     MENU_GAME_OVER,
+    MENU_LEADERBOARD,
     MENU_SETTINGS,
 )
 
@@ -45,22 +46,24 @@ def home_menu(self):
         # just to prevent a check settings inf. loop
         self.prev_menu = MENU_SETTINGS
 
-    # self.app.game.clean_up()
-
     # Render the Home Menu text
     _ = self.render_button(GAME_TITLE, 8, color=COLOR_RED)
 
     # Render the play button
     play_obj = self.render_button("Play", 1)
 
+    # Render the leaderboard button
+    leaderboard_obj = self.render_button("Leaderboard", -1)
+
     # Render the settings button
-    settings_obj = self.render_button("Settings", -1)
+    settings_obj = self.render_button("Settings", -3)
 
     # Render the quit button
-    quit_obj = self.render_button("Quit", -3)
+    quit_obj = self.render_button("Quit", -5)
 
     menu = [
         (play_obj, self.app.game.start, 0),
+        (leaderboard_obj, self.menu_options[MENU_LEADERBOARD], 0),
         (settings_obj, self.menu_options[MENU_SETTINGS], 0),
         (quit_obj, self.app.game.quit_game, 0),
     ]

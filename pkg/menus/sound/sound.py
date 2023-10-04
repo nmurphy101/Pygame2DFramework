@@ -96,7 +96,7 @@ def sound_menu(self):
         (effect_volume_down_obj, self.decrease_effect_volume, self.prev_menu),
         (menu_volume_up_obj, self.increase_menu_volume, self.prev_menu),
         (menu_volume_down_obj, self.decrease_menu_volume, self.prev_menu),
-        ((save_obj, sound_save, self.prev_menu)),
+        (save_obj, sound_save, self.prev_menu),
         (back_obj, self.menu_options[MENU_SETTINGS], 5),
     ]
 

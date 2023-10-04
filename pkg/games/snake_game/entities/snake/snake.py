@@ -21,7 +21,7 @@ from pygame import (
 
 from ..entity import Entity, Line
 from ...constants import COLOR_BLACK, COLOR_RED, INPUT_KEY_MAP
-from ....app import App
+from .....app import App
 
 
 class Snake(Entity):
@@ -308,7 +308,7 @@ class TailSegment(Entity):
         self.is_player = player
 
         # Determines if entity can be killed
-        self.killable = False
+        self.is_killable = False
 
         # No Sight lines for tail segments
         self.sight_lines = []

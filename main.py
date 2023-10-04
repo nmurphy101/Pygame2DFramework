@@ -14,9 +14,12 @@ __author__ = "Nicholas Murphy"
 __version__ = '1.0.0-alpha'
 
 
+from os import path, listdir
 from io import StringIO
+from json import load as json_load
 from sys import exit as sys_exit
 from functools import wraps
+from importlib import import_module
 
 from cProfile import Profile
 from pstats import Stats
@@ -25,8 +28,6 @@ from pygame import (
     quit as pygame_quit,
 )
 
-from pkg.snake_game.game import SnakeGame
-# from pkg.snake_game_2.game import SnakeGame2
 from pkg.app import App
 
 
@@ -54,7 +55,7 @@ def profiling():
             # skip strip_dirs() if you want to see full path's
             profile_stats.print_stats()
 
-            with open('profile.txt', 'w+', encoding="utf8") as output_file:
+            with open("logs/profile.txt", "w+", encoding="utf8") as output_file:
                 output_file.write(string_io.getvalue())
 
             return result
@@ -71,11 +72,17 @@ def main():
     The main app startup
     """
 
+    # Get the name of all the game packages
+    game_list = listdir("./pkg/games")
+    game_list.pop()
+
+    # Import the game object from the package name
+    game_module_list = []
+    for game_name in game_list:
+        game_module_list.append(import_module(f"pkg.games.{game_name}").Game)
+
     # Initilize the base game with the game options
-    app = App([
-        SnakeGame,
-        # SnakeGame2
-    ])
+    app = App(game_module_list)
 
     # Run the loaded game from the app platform
     app.run()

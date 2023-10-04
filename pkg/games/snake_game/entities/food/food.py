@@ -12,7 +12,7 @@
 from random import randrange
 
 from ..entity import Entity
-from ....app import App
+from .....app import App
 
 
 class Food(Entity):

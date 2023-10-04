@@ -17,7 +17,7 @@ from pygame import mixer
 
 from ..entity import Entity
 from ...constants import COLOR_BLACK
-from ....app import App
+from .....app import App
 
 
 class TelePortal(Entity):
@@ -33,7 +33,7 @@ class TelePortal(Entity):
         super().__init__(screen_size, self.name, app)
 
         # Determines if entity can be killed
-        self.killable = False
+        self.is_killable = False
 
         # Ability cooldown timer
         self.abilty_cooldown = 1

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-    Snake Game
+    Game
 
 
     Defines the game of snake
@@ -41,6 +41,7 @@ from .constants import (
     MENU_GAME_OVER,
     MENU_KEYBINDING,
     MENU_GAMEPLAY,
+    MENU_LEADERBOARD,
     MUSIC_INTRO,
     MUSIC_LOOP,
     SOUND_SNAKE_DEATH,
@@ -65,9 +66,10 @@ from .menus import (
     game_over_menu,
     keybinding_menu,
     gameplay_menu,
+    leaderboard_menu,
 )
 
-from ..app import App
+from ...app import App
 
 
 def is_multiple_of_4(number):
@@ -83,10 +85,10 @@ def is_multiple_of_4(number):
     return number % 4 == 0
 
 
-class SnakeGame():
-    """SnakeGame
+class Game():
+    """Game
 
-    SnakeGame for the snake
+    The main object for playing the game of snake
     """
 
     TITLE = GAME_TITLE
@@ -127,7 +129,9 @@ class SnakeGame():
         self.alpha_screen = alpha_screen
         screen_w, screen_h = screen.get_size()
         self.game_bar_height = self.grid_size * 3
-        self.screen_size = (screen_w, screen_h + self.game_bar_height)
+        game_width = self.app.screen_width - (self.app.screen_width % self.grid_size)
+        game_height = self.app.screen_height - (self.app.screen_height % self.grid_size)
+        self.screen_size = (game_width, game_height)
 
         # Game fonts
         self.game_font = freetype.Font(
@@ -201,6 +205,7 @@ class SnakeGame():
         self.app.menu.menu_options[MENU_GAME_OVER] = lambda: game_over_menu(self.app.menu)
         self.app.menu.menu_options[MENU_KEYBINDING] = lambda: keybinding_menu(self.app.menu)
         self.app.menu.menu_options[MENU_GAMEPLAY] = lambda: gameplay_menu(self.app.menu)
+        self.app.menu.menu_options[MENU_LEADERBOARD] = lambda: leaderboard_menu(self.app.menu)
 
 
     def play_loop(self):
@@ -215,7 +220,7 @@ class SnakeGame():
             if not obj.is_alive:
                 continue
 
-            if self.app.menu.prev_menu in [0, 1]:
+            if self.app.menu.prev_menu in [MENU_HOME, MENU_PAUSE, MENU_GAME_OVER]:
                 obj.refresh_draw()
 
             thread = Thread(target=self._object_actions, args=(obj,))
@@ -226,10 +231,8 @@ class SnakeGame():
         for thread in thread_group:
             thread.join()
 
-        # input("click to continue")
-
         # Only 1 tick to refresh from pause_menu
-        if self.app.menu.prev_menu in [0, 1]:
+        if self.app.menu.prev_menu in [MENU_HOME, MENU_PAUSE]:
             self.app.menu.prev_menu = None
 
         # show the game bar at top of screen
@@ -293,7 +296,7 @@ class SnakeGame():
         if is_human_playing:
             player_snake = Snake(self.screen_size, self.app, is_player=True)
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
-            player_snake.killable = not self.game_config["settings"]["gameplay"]["inv_player"]
+            player_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_player"]
             self.sprite_group.add(player_snake)
 
         # initilize ai characters
@@ -301,7 +304,7 @@ class SnakeGame():
         for _ in range(num_ai):
             enemy_snake = Snake(self.screen_size, self.app, is_player=False)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
-            enemy_snake.killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
+            enemy_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
             self.sprite_group.add(enemy_snake)
 
 
