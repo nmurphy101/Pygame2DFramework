@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-    Menus
+    Display
 
-    All the menus in the game
+    The display menu for the app
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.

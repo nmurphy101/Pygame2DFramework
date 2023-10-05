@@ -4,7 +4,7 @@
     App Constants
 
 
-    All constants for the game file
+    All constants for the app
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.

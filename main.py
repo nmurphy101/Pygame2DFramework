@@ -14,12 +14,12 @@ __author__ = "Nicholas Murphy"
 __version__ = '1.0.0-alpha'
 
 
-from os import path, listdir
-from io import StringIO
-from json import load as json_load
-from sys import exit as sys_exit
 from functools import wraps
 from importlib import import_module
+from io import StringIO
+from json import load as json_load
+from os import path, listdir
+from sys import exit as sys_exit
 
 from cProfile import Profile
 from pstats import Stats
@@ -76,7 +76,7 @@ def main():
     game_list = listdir("./pkg/games")
     game_list.pop()
 
-    # Import the game object from the package name
+    # Import all the game objects from the package names
     game_module_list = []
     for game_name in game_list:
         game_module_list.append(import_module(f"pkg.games.{game_name}").Game)

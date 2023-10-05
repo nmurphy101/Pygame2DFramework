@@ -38,8 +38,12 @@ def gameplay_menu(self):
     menu = []
 
     # Render the Save button
+    def save():
+        self.app.game.transform_all_entity_images()
+        self.save_settings()
+
     save_obj = self.render_button("Save", -8, h_offset=125)
-    menu.append((save_obj, self.save_settings, self.prev_menu))
+    menu.append((save_obj, save, self.prev_menu))
 
     # Render the Return button
     back_obj = self.render_button("Back", -8, h_offset=-125)

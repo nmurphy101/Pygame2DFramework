@@ -10,11 +10,11 @@
 """
 
 
-from os import path
-from json import load as json_load
-from gc import collect as gc_collect
-from threading import Thread
 from datetime import datetime
+from gc import collect as gc_collect
+from json import load as json_load
+from os import path
+from threading import Thread
 from typing import Deque
 
 from pygame import (
@@ -24,6 +24,7 @@ from pygame import (
     mixer,
     sprite,
     Surface,
+    transform,
 )
 
 from .ai.ai import DecisionBox
@@ -88,7 +89,8 @@ def is_multiple_of_4(number):
 class Game():
     """Game
 
-    The main object for playing the game of snake
+    The main object for playing the game of snake.
+    Required to be the called `Game` for the app loader to load the game
     """
 
     TITLE = GAME_TITLE
@@ -194,6 +196,9 @@ class Game():
             (1, 1),
             (1, 1),
         )
+
+        # Transform the sprite images relative to grid size
+        self.transform_all_entity_images()
 
         # AI blackbox
         self.chosen_ai = None
@@ -388,3 +393,30 @@ class Game():
                 score = value["score"]
 
         _ = self.app.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")
+
+
+    def transform_all_entity_images(self):
+
+        # Transform the snake's size
+        index = 0
+        for image in self.snake_images:
+            self.snake_images[index] = transform.scale(image, (self.grid_size, self.grid_size))
+            index += 1
+
+        # Transform the enemy snake's size
+        index = 0
+        for image in self.snake_enemy_images:
+            self.snake_enemy_images[index] = transform.scale(image, (self.grid_size, self.grid_size))
+            index += 1
+
+        # Transform the food's size
+        index = 0
+        for image in self.food_images:
+            self.food_images[index] = transform.scale(image, (self.grid_size, self.grid_size))
+            index += 1
+
+        # Transform the teleporters's size
+        index = 0
+        for image in self.tele_portal_images:
+            self.tele_portal_images[index] = transform.scale(image, (self.grid_size, self.grid_size))
+            index += 1

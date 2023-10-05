@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-    Menus
+    Sound
 
-    All the menus in the game
+    The sound menu for the app
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.

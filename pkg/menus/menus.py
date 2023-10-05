@@ -14,6 +14,7 @@ from pygame import (
     mixer,
     display,
     Surface,
+    transform,
 )
 from pygame import (
     DOUBLEBUF, FULLSCREEN
@@ -132,9 +133,11 @@ class Menu():
         """save_settings
         """
 
+        # Save the app settings config
         with open(self.app.app_config_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.app.app_config, _file, ensure_ascii=False, indent=4)
 
+        # Save the game settings config
         with open(self.app.game.game_config_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.app.game.game_config, _file, ensure_ascii=False, indent=4)
 
@@ -167,7 +170,7 @@ class Menu():
         """
 
         music_volume = self.app.app_config["settings"]["sound"]["music_volume"]
-        self.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) + .05)
+        self.app.app_config["settings"]["sound"]["music_volume"] = round(str(float(music_volume) + .05), 2)
         if self.app.is_audio:
             mixer.music.set_volume(float(music_volume))
 
@@ -179,7 +182,7 @@ class Menu():
         """
 
         music_volume = self.app.app_config["settings"]["sound"]["music_volume"]
-        self.app.app_config["settings"]["sound"]["music_volume"] = str(float(music_volume) - .05)
+        self.app.app_config["settings"]["sound"]["music_volume"] = round(str(float(music_volume) - .05), 2)
         if self.app.is_audio:
             mixer.music.set_volume(float(music_volume))
 
@@ -191,9 +194,7 @@ class Menu():
         """
 
         effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
-        self.app.app_config["settings"]["sound"]["effect_volume"] = (
-            str(float(effect_volume) + .05)
-        )
+        self.app.app_config["settings"]["sound"]["effect_volume"] = round(str(float(effect_volume) + .05), 2)
 
 
     def decrease_effect_volume(self):
@@ -203,9 +204,7 @@ class Menu():
         """
 
         effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
-        self.app.app_config["settings"]["sound"]["effect_volume"] = (
-            str(float(effect_volume) - .05)
-        )
+        self.app.app_config["settings"]["sound"]["effect_volume"] = round(str(float(effect_volume) - .05), 2)
 
 
     def increase_menu_volume(self):

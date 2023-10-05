@@ -63,10 +63,10 @@ class Snake(Entity):
         # Snake Sprite images
         if self.is_player:
             self.sprite_images = self.app.game.snake_images
-            self.obj_color = (0, randint(100, 175), 0, 1000)
+            # self.obj_color = (0, randint(100, 175), 0, 1000)
         else:
             self.sprite_images = self.app.game.snake_enemy_images
-            self.obj_color = (randint(100, 175), 0, 0, 1000)
+            # self.obj_color = (randint(100, 175), 0, 0, 1000)
 
         # Entity's visual representation
         self.image = self.sprite_images[0]
@@ -320,7 +320,7 @@ class TailSegment(Entity):
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
-        self.obj_color = self.parent.obj_color
+        # self.obj_color = self.parent.obj_color
 
 
     def draw(self, *kwargs) -> None:

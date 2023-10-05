@@ -22,6 +22,7 @@ from logging import (
 from os import path, getcwd
 from statistics import mean
 
+from guppy import hpy
 from pygame import (
     event as pygame_event,
     error as pygame_error,
@@ -39,7 +40,6 @@ from pygame.constants import (
     QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
     WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
 )
-from guppy import hpy
 
 from .constants.app_constants import (
     COLOR_BLACK,
@@ -91,7 +91,7 @@ class App():
     Base game structure.
     """
 
-    def __init__(self, game_list):
+    def __init__(self, game_list: list):
         # setup mixer to avoid sound lag
         self.set_up_audio_mixer()
 
@@ -121,6 +121,7 @@ class App():
         self.title = self.app_config["settings"]["display"]["window_title"]
         self.screen = None
         self.debug_screen = None
+        self.alpha_screen = None
         self.background_0 = None
         self.keybinding_switch = (False, None)
         self.focus_pause = False
@@ -178,10 +179,10 @@ class App():
         self.clock = pygame_time.Clock()
 
         # Game window settings
-        alpha_screen = self.set_window_settings()
+        self.set_window_settings()
 
         # Choose game to play
-        self.choose_game_loop(alpha_screen)
+        self.choose_game_loop()
 
         # App loop
         while self.running:
@@ -250,7 +251,7 @@ class App():
                 pass
 
 
-    def set_window_settings(self):
+    def set_window_settings(self) -> None:
         """
         set_window_settings
 
@@ -277,23 +278,21 @@ class App():
         self.background_0 = Surface((self.screen_width, self.screen_height))
         self.background_0.set_colorkey(COLOR_BLACK)
 
-        alpha_screen = Surface(
+        self.alpha_screen = Surface(
             (self.screen_width, self.screen_height)
         ).convert_alpha()
 
-        alpha_screen.fill([0,0,0,0])
+        self.alpha_screen.fill([0,0,0,0])
         pygame_display.set_caption(self.title)
         self.screen.fill(background_colour)
 
         # Show game window
         pygame_display.flip()
 
-        return alpha_screen
 
-
-    def set_game_settings(self, alpha_screen):
+    def set_game_settings(self) -> None:
         # Instantiate the Game Obj
-        self.game = self.game_pkg(alpha_screen, self.screen, self)
+        self.game = self.game_pkg(self.alpha_screen, self.screen, self)
 
         # Instatiate options dict's
         self.ui_sound_options = {
@@ -308,11 +307,10 @@ class App():
         }
 
 
-    def fps_counter_display(self):
+    def fps_counter_display(self) -> None:
         """fps_counter_display
 
-        Returns:
-            [type]: [description]
+        fps_counter_display for the game
         """
 
         fps = str(int(self.clock.get_fps()))
@@ -334,12 +332,12 @@ class App():
         _ = self.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 6.45, relative_from="top")
 
 
-    def event_checks(self, current_menu):
+    def event_checks(self, current_menu: int) -> None:
         """
         event_checks
 
-
-        event_checks for the game
+        Args:
+            current_menu ([type]): [description]
         """
 
         for event in pygame_event.get():
@@ -350,7 +348,7 @@ class App():
                 decision_func(event=event, menu=current_menu)
 
 
-    def settings_checks(self):
+    def settings_checks(self) -> None:
         """settings_checks
 
         settings_checks does stuff
@@ -370,14 +368,16 @@ class App():
                 mixer.music.pause()
 
 
-    def quit(self, **_):
+    def quit(self, **_) -> None:
         """quit
+
+        quit does stuff
         """
 
         self.running = False
 
 
-    def window_focus(self, focus, **_):
+    def window_focus(self, focus, **_) -> None:
         """window_focus
 
         Args:
@@ -387,18 +387,23 @@ class App():
         self.focus_pause = focus
 
 
-    def window_resize(self, **kwargs):
+    def window_resize(self, **kwargs) -> None:
         """window_resize
+
+        Args:
+            kwargs ([args]): [description]
         """
 
         pass
 
 
-    def change_keybinding(self, action, new_key):
+    def change_keybinding(self, action: str, new_key: str) -> None:
         """
         change_keybinding
 
-        change_keybinding does stuff
+        Args:
+            action ([str]): [description]
+            new_key ([str]): [description]
         """
 
         # print("changing keybinding for/new_key", action, new_key)
@@ -406,8 +411,11 @@ class App():
         self.menu.save_settings()
 
 
-    def key_down(self, **kwargs):
+    def key_down(self, **kwargs) -> None:
         """key_down
+
+        Args:
+            kwargs ([args]): [description]
         """
 
         # Pressed escape to pause/unpause/back
@@ -428,8 +436,11 @@ class App():
             self.keybinding_switch = (False, None)
 
 
-    def mouse_down(self, **kwargs):
+    def mouse_down(self, **kwargs) -> None:
         """mouse_down
+
+        Args:
+            kwargs ([args]): [description]
         """
 
         if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
@@ -446,8 +457,10 @@ class App():
                     button[1](button[3]) if len(button) == 4 else button[1]()
 
 
-    def next_music(self, **_):
+    def next_music(self, **_) -> None:
         """next_music
+
+        next_music does stuff
         """
 
         # If not game over
@@ -459,22 +472,22 @@ class App():
                 mixer.music.play(0, 0, 1)
 
 
-    def play_menu_sound(self, button):
+    def play_menu_sound(self, button) -> None:
         """play_menu_sound
 
         Args:
-            button ([type]): [description]
+            button ([list]): [description]
         """
 
         num = self.ui_sound_options.get(button[1], 0)
         self.play_ui_sound(num)
 
 
-    def play_ui_sound(self, num):
+    def play_ui_sound(self, num: int) -> None:
         """play_ui_sound
 
         Args:
-            num ([type]): [description]
+            num ([int]): [description]
         """
 
         menu_sound = self.menu_sounds[num]
@@ -483,11 +496,11 @@ class App():
             mixer.Sound.play(menu_sound)
 
 
-    def choose_game_loop(self, alpha_screen):
+    def choose_game_loop(self) -> None:
         """
-        run
+        choose_game_loop
 
-        run does stuff
+        choose_game_loop does stuff
         """
 
         # Choose Game loop
@@ -510,14 +523,14 @@ class App():
             self.clock.tick(self.fps)
 
         # Complete final game settings
-        self.set_game_settings(alpha_screen)
+        self.set_game_settings()
 
 
-    def _choose_game(self):
+    def _choose_game(self) -> list:
         """
-        play
+        _choose_game
 
-        play does stuff
+        _choose_game does stuff
         """
 
         menu = []
@@ -563,7 +576,16 @@ class App():
         return menu
 
 
-    def _load_game(self, game_pkg):
+    def _load_game(self, game_pkg: type) -> None:
+        """
+        _load_game
+
+        Args:
+            game_pkg ([type]): [description]
+        """
+
         frameinfo = getframeinfo(currentframe())
-        logging_info(f"INFO: Game Chosen: {game_pkg}")
+
+        logging_info(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: INFO: Game Chosen: {game_pkg}")
+
         self.game_pkg = game_pkg
