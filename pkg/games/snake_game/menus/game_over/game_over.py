@@ -12,6 +12,8 @@
 
 from pygame import mixer
 
+from .....menus import Menu
+
 from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
@@ -20,7 +22,7 @@ from ...constants.game_constants import (
 )
 
 
-def game_over_menu(self):
+def game_over_menu(self: Menu):
     """game_over_menu
 
     game_over_menu does stuff

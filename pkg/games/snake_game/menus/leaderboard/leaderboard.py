@@ -9,6 +9,7 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+from .....menus import Menu
 
 from ...constants.game_constants import (
     COLOR_BLACK,
@@ -18,7 +19,7 @@ from ...constants.game_constants import (
 )
 
 
-def leaderboard_menu(self):
+def leaderboard_menu(self: Menu):
     """leaderboard_menu
 
     leaderboard_menu does stuff

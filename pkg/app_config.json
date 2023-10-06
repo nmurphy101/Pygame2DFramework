@@ -10,7 +10,7 @@
             "fps": 3000,
             "fps_display": false,
             "fullscreen": false,
-            "resolution": "1920x1080",
+            "resolution": "1280x720",
             "window_title": "Game Platform - "
         },
         "debug": {

@@ -11,3 +11,4 @@
 
 from .display import *
 from .sound import *
+from .menus import *

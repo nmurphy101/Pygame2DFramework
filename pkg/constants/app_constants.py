@@ -25,12 +25,18 @@ SOUND_UI_FORWARD = "assets/sounds/8bitsfxpack_windows/UI02.wav"
 SOUND_UI_BACKWARD = "assets/sounds/8bitsfxpack_windows/UI03.wav"
 
 # Colors
-COLOR_BLACK = (0, 0, 0, 0)
+COLOR_BLACK = (0, 0, 0)
 COLOR_RED = (255, 0 , 0)
 COLOR_WHITE = (255, 255, 255)
 COLOR_PURPLE = (128, 0, 128)
 COLOR_GREY = (128,128,128)
 COLOR_GREY_DARK = (50,50,50)
+
+# Dimensions
+X = 0
+Y = 1
+WIDTH = 0
+HEIGHT = 1
 
 # Menu options
 MENU_HOME = 0
@@ -41,6 +47,7 @@ MENU_DISPLAY = 4
 MENU_SOUND = 5
 MENU_KEYBINDING = 6
 MENU_GAMEPLAY = 7
+MENU_LEADERBOARD = 8
 
 # Mouse down event map
 MOUSE_DOWN_MAP = {

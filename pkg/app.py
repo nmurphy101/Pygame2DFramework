@@ -61,17 +61,19 @@ from .constants.app_constants import (
     SOUND_UI_BACKWARD,
 )
 from .menus.menus import Menu
+from .app_config import AppConfig
 
 
 NEXT = USEREVENT + 1
 
 
-def _get_log_level(json_config: dict):
+def _get_log_level(json_config: AppConfig):
     """_get_log_level
 
     Base game structure.
     """
-    match (json_config["settings"]["debug"]["log_level"]).lower():
+
+    match json_config["settings"]["debug"]["log_level"].lower():
         case "info":
             return INFO
 
@@ -98,7 +100,7 @@ class App():
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
-            self.app_config = json_load(json_data_file)
+            self.app_config: AppConfig = json_load(json_data_file)
 
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
@@ -315,7 +317,7 @@ class App():
 
         fps = str(int(self.clock.get_fps()))
 
-        _ = self.menu.render_button(f"now:{fps}", 1.6, 4, relative_from="top")
+        _ = self.menu.render_button(f"now:{fps}", 1.6, 12.2, relative_from="right")
 
         self.fps_list.append(int(fps))
 
@@ -325,11 +327,11 @@ class App():
 
         # Average FPS
         avg_fps = str(round(mean(self.fps_list)))
-        _ = self.menu.render_button(f"avg:{avg_fps}", 2.6, 4, relative_from="top")
+        _ = self.menu.render_button(f"avg:{avg_fps}", 2.6, 12.2, relative_from="right")
 
         # High and low FPS
-        _ = self.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 6.45, relative_from="top")
-        _ = self.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 6.45, relative_from="top")
+        _ = self.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 9, relative_from="right")
+        _ = self.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 8.8, relative_from="right")
 
 
     def event_checks(self, current_menu: int) -> None:

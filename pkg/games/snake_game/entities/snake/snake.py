@@ -10,18 +10,28 @@
 """
 
 from math import hypot as math_hypot
-from random import randrange, randint
-from typing import Deque
+from random import randrange
+from typing import Deque, TYPE_CHECKING
 from datetime import datetime, timedelta
 
-from pygame import (
-    key as pygame_key,
-    Surface,
-)
+from pygame import key as pygame_key
 
 from ..entity import Entity, Line
-from ...constants import COLOR_BLACK, COLOR_RED, INPUT_KEY_MAP
-from .....app import App
+
+from ...constants import (
+    COLOR_BLACK,
+    INPUT_KEY_MAP,
+    WIDTH,
+    HEIGHT,
+    SOUND_SNAKE_DEATH_IDX,
+    POS_IDX,
+    DIST_FROM_SELF_IDX,
+    X,
+    Y,
+)
+
+if TYPE_CHECKING:
+    from ...game import Game
 
 
 class Snake(Entity):
@@ -30,42 +40,42 @@ class Snake(Entity):
     obj for the snake
     """
 
-    def __init__(self, screen_size: tuple[int, int], app: App, is_player: bool = False):
+    def __init__(self, game: "Game", screen_size: tuple[int, int], is_player: bool = False):
         # Name for this type of object
         self.name = "snake_"
 
         # Initilize parent init
-        super().__init__(screen_size, self.name, app)
+        super().__init__(game, screen_size, self.name)
 
         # player indicator
         self.is_player = is_player
 
         # Where the snake is started located
-        x = self.screen_size[0] - randrange(
-            self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
+        pos_x = self.screen_size[WIDTH] - randrange(
+            self.game.grid_size, self.screen_size[WIDTH], self.game.grid_size
         )
 
-        y = self.screen_size[1] - randrange(
-            self.app.game.grid_size, self.screen_size[1] - self.app.game.game_bar_height - self.app.game.game_bar_height, self.app.game.grid_size
+        pos_y = self.screen_size[HEIGHT] - randrange(
+            self.game.grid_size, self.screen_size[HEIGHT] - self.game.game_bar_height - self.game.game_bar_height, self.game.grid_size
         )
 
-        self.position = (x, y)
+        self.position = (pos_x, pos_y)
 
         # Where the snake was located
-        self.prev_position = (x, y - self.app.game.grid_size)
+        self.prev_position = (pos_x, pos_y - self.game.grid_size)
 
         # How big snake parts are
-        self.size = self.app.game.grid_size
+        self.size = self.game.grid_size
 
         # How many moves the snake can make per second
         self.speed_mod = 2
 
         # Snake Sprite images
         if self.is_player:
-            self.sprite_images = self.app.game.snake_images
+            self.sprite_images = self.game.snake_images
             # self.obj_color = (0, randint(100, 175), 0, 1000)
         else:
-            self.sprite_images = self.app.game.snake_enemy_images
+            self.sprite_images = self.game.snake_enemy_images
             # self.obj_color = (randint(100, 175), 0, 0, 1000)
 
         # Entity's visual representation
@@ -78,48 +88,49 @@ class Snake(Entity):
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Snake death sound
-        if self.app.is_audio:
-            self.sound_death = self.app.game.sounds[0]
+        if self.game.app.is_audio:
+            self.sound_death = self.game.sounds[SOUND_SNAKE_DEATH_IDX]
             self.sound_mod = 4.5
-            self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         # Interact sound
-        # if self.app.is_audio:
+        # if self.game.app.is_audio:
             # self.sound_interact = pygame.mixer.Sound("")
 
         # AI difficulty setting (higher is more difficult/smarter)
-        self.ai_difficulty = 10
+        self.ai_difficulty = self.game.game_config["settings"]["gameplay"]["ai_difficulty"]
 
         # Entity's children/followers in a train of same children objs
         self.child_train = True
 
-        # Number of tail segments
+        # Number of starting tail segments
         self.num_tails = 5
 
         # Initilize starting tails
+        self.children: Deque[TailSegment] = Deque()
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(self, app, screen_size, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, screen_size, player=self.is_player))
             else:
-                self.children.append(TailSegment(self, app, screen_size, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, screen_size, player=self.is_player))
 
 
     def aquire_primary_target(self, target_name: str) -> None:
         # Set variables pre loop
         primary_target = (None, 10000*100000)
 
-        pos = (self.app.game.screen_size[0]/2, self.app.game.screen_size[1]/2)
+        pos = (self.game.screen_size[WIDTH]/2, self.game.screen_size[HEIGHT]/2)
 
-        for obj in self.app.game.sprite_group.sprites():
+        for obj in self.game.sprite_group.sprites():
             if target_name in obj.id:
-                dist_self = math_hypot(obj.position[0] - self.position[0], obj.position[1] - self.position[1])
-                if dist_self < primary_target[1]:
-                    pos = (obj.position[0], obj.position[1])
+                dist_self = math_hypot(obj.position[X] - self.position[X], obj.position[Y] - self.position[Y])
+                if dist_self < primary_target[DIST_FROM_SELF_IDX]:
+                    pos = (obj.position[X], obj.position[Y])
                     primary_target = (pos, dist_self)
 
-        self.target = (target_name, primary_target[0][0], primary_target[0][1])
+        self.target = (target_name, primary_target[POS_IDX][X], primary_target[POS_IDX][Y])
 
-        self.direction = self.app.game.chosen_ai.decide_direction(
+        self.direction = self.game.chosen_ai.decide_direction(
             self,
             self.target,
             ai_difficulty=self.ai_difficulty,
@@ -136,13 +147,13 @@ class Snake(Entity):
         draw does stuff
         """
 
-        if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
+        if self.is_alive and (updated_refresh[X] or updated_refresh[Y]):
 
             # Tint the sprite with a color
             # self.tint(self.obj_color)
 
             # Render the entity's obj based on it's parameters
-            self.app.game.screen.blit(self.image, self.position)
+            self.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
             for line in self.sight_lines:
@@ -152,7 +163,7 @@ class Snake(Entity):
                 Line.draw(line, self)
 
             # Draw all children on refresh or optimized one child per
-            if updated_refresh[1]:
+            if updated_refresh[Y]:
                 # Draw each child if there are any
                 for child in self.children:
                     child.refresh_draw()
@@ -180,7 +191,7 @@ class Snake(Entity):
             for _ in range(eaten_obj.growth):
                 tail = TailSegment(
                     self,
-                    self.app,
+                    self.game,
                     self.screen_size,
                     player=self.is_player,
                 )
@@ -204,7 +215,7 @@ class Snake(Entity):
             # Check if Ai or player controls this entity
             if self.is_player:
                 key = pygame_key.get_pressed()
-                config = self.app.game.game_config["settings"]["keybindings"]
+                config = self.game.game_config["settings"]["keybindings"]
                 # pylint: disable=access-member-before-definition
                 if key[INPUT_KEY_MAP[config["move_up"]]] and self.direction != 0 and self.prev_direction != 2:
                     # pylint: disable=access-member-before-definition
@@ -249,25 +260,25 @@ class Snake(Entity):
             if self.direction == 0:
                 self.image = self.sprite_images[10]
                 self.prev_direction = self.direction
-                self.position = (self.position[0], self.position[1] - self.size)
+                self.position = (self.position[X], self.position[Y] - self.size)
 
             # Moving down
             elif self.direction == 2:
                 self.image = self.sprite_images[11]
                 self.prev_direction = self.direction
-                self.position = (self.position[0], self.position[1] + self.size)
+                self.position = (self.position[X], self.position[Y] + self.size)
 
             # Moving left
             elif self.direction == 3:
                 self.image = self.sprite_images[13]
                 self.prev_direction = self.direction
-                self.position = (self.position[0] - self.size, self.position[1])
+                self.position = (self.position[X] - self.size, self.position[Y])
 
             # Moving right
             elif self.direction == 1:
                 self.image = self.sprite_images[12]
                 self.prev_direction = self.direction
-                self.position = (self.position[0] + self.size, self.position[1])
+                self.position = (self.position[X] + self.size, self.position[Y])
 
             # Set current position for hitbox
             self.rect.topleft = self.position
@@ -290,12 +301,15 @@ class TailSegment(Entity):
     Tail Segment for the snake
     """
 
-    def __init__(self, parent: Snake, app: App, screen_size: tuple[int, int], player: bool = False):
+    def __init__(self, parent: Snake, game: "Game", screen_size: tuple[int, int], player: bool = False):
         # Name for this type of object
         self.name = "tail-segment_"
 
         # Initilize parent init
-        super().__init__(screen_size, self.name, app)
+        super().__init__(game, screen_size, self.name)
+
+        # The game obj
+        self.game = game
 
         # Entity is dead or alive
         self.is_alive = True
@@ -334,7 +348,7 @@ class TailSegment(Entity):
         # render if alive
         if self.is_alive:
             # Clear previous frame obj's location
-            self.app.game.screen.fill(COLOR_BLACK, (self.position[0], self.position[1], self.rect.width, self.rect.height))
+            self.game.screen.fill(COLOR_BLACK, (self.position[X], self.position[Y], self.rect.width, self.rect.height))
 
             # Save current position as last position
             self.prev_position = self.position
@@ -350,7 +364,7 @@ class TailSegment(Entity):
             # self.tint(self.obj_color)
 
             # Render the tail segment based on it's parameters
-            self.app.game.screen.blit(self.image, self.position)
+            self.game.screen.blit(self.image, self.position)
 
             # Move the child to the front of the list
             self.parent.children.rotate()
@@ -441,7 +455,7 @@ class TailSegment(Entity):
         # self.tint(self.obj_color)
 
         # Render the tail segment based on it's parameters
-        self.app.game.screen.blit(self.image, self.position)
+        self.game.screen.blit(self.image, self.position)
 
 
     def interact(self, interacting_obj: Entity) -> None:

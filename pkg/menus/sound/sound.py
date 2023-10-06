@@ -10,6 +10,8 @@
 """
 
 
+from typing import TYPE_CHECKING
+
 from ...constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
@@ -18,8 +20,11 @@ from ...constants.app_constants import (
     MENU_SOUND,
 )
 
+if TYPE_CHECKING:
+    from ..menus import Menu
 
-def sound_menu(self):
+
+def sound_menu(self: "Menu"):
     """sound_menu
 
     sound_menu does stuff

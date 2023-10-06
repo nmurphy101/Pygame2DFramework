@@ -9,6 +9,7 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+from .....menus import Menu
 
 from ...constants.game_constants import (
     GAME_TITLE,
@@ -22,7 +23,7 @@ from ...constants.game_constants import (
 )
 
 
-def home_menu(self):
+def home_menu(self: Menu):
     """home_menu
 
     home_menu does stuff

@@ -10,6 +10,8 @@
 """
 
 
+from .....menus import Menu
+
 from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
@@ -19,7 +21,7 @@ from ...constants.game_constants import (
 )
 
 
-def keybinding_menu(self):
+def keybinding_menu(self: Menu):
     """keybinding_menu
 
     keybinding_menu does stuff

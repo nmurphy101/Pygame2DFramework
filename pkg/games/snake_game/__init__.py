@@ -9,8 +9,4 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-from .ai import *
-from .entities import *
-from .graphics import *
-from .menus import *
 from .game import Game

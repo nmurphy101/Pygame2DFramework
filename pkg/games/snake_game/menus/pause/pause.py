@@ -12,6 +12,8 @@
 
 from gc import collect as gc_collect
 
+from .....menus import Menu
+
 from ...constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
@@ -21,7 +23,7 @@ from ...constants.game_constants import (
 )
 
 
-def pause_menu(self):
+def pause_menu(self: Menu):
     """pause_menu
 
     pause_menu does stuff

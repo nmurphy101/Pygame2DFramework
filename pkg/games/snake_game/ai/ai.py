@@ -15,11 +15,14 @@ from math import hypot as math_hypot
 from datetime import datetime, timedelta
 from inspect import currentframe, getframeinfo
 from logging import warning as logging_warning
-from multiprocessing import Pool
+from typing import TYPE_CHECKING
 
 from pygame import Rect
 
 from ..entities import Entity, TelePortal
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 
 class DecisionBox:
@@ -29,8 +32,8 @@ class DecisionBox:
     """
 
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, game: "Game"):
+        self.game = game
         self.ai_difficulty = 10
         self.time_to_chase_target = 0
         self.portal_use_difficulty = 1
@@ -179,7 +182,7 @@ class DecisionBox:
         # print("Checking intent: ", intent)
         # Loop to check intent
         self.reset_sight_lines(entity)
-        for obj in self.app.game.sprite_group:
+        for obj in self.game.sprite_group:
             # Ignore the target object
             if entity.target[0] in obj.name:
                 continue
@@ -238,11 +241,11 @@ class DecisionBox:
 
             # Edge of screen detection
             # top
-            elif line.end[1] <= self.app.game.game_bar_height:
+            elif line.end[1] <= self.game.game_bar_height:
                 line.open = False
 
             # bottom
-            elif line.end[1] >= entity.screen_size[1]-self.app.game.game_bar_height:
+            elif line.end[1] >= entity.screen_size[1]:
                 line.open = False
 
             # left
@@ -268,18 +271,22 @@ class DecisionBox:
                     continue
 
             # Edge of screen detection
-            elif line.direction == 0 and line.end[1] <= (self.app.game.game_bar_height - entity.size):
+            # top
+            elif line.direction == 0 and line.end[1] <= (self.game.game_bar_height - entity.size):
                 line.open = False
                 continue
 
+            # bottom
             elif line.direction == 2 and line.end[1] >= (entity.screen_size[1] + entity.size):
                 line.open = False
                 continue
 
+            # left
             elif line.direction == 3 and line.end[0] <= (0 - entity.size):
                 line.open = False
                 continue
 
+            # right
             elif line.direction == 1 and line.end[0] >= (entity.screen_size[0] + entity.size):
                 line.open = False
                 continue

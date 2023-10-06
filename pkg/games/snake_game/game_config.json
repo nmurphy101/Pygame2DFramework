@@ -2,14 +2,15 @@
     "settings": {
         "gameplay": {
             "human_player": false,
-            "teleporter": true,
             "inv_player": false,
-            "inv_ai": true,
-            "num_ai": 1,
-            "ai_speed": 13.0,
             "player_speed": 0.7,
+            "num_ai": 1,
+            "inv_ai": true,
+            "ai_difficulty": 10,
+            "ai_speed": 13.0,
+            "teleporter": true,
             "num_of_food": 6,
-            "grid_size": 32
+            "grid_size": 16
         },
         "keybindings": {
             "move_up": "W",

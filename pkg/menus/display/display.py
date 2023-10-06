@@ -10,6 +10,8 @@
 """
 
 
+from typing import TYPE_CHECKING
+
 from ...constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
@@ -18,8 +20,11 @@ from ...constants.app_constants import (
     MENU_SETTINGS,
 )
 
+if TYPE_CHECKING:
+    from ..menus import Menu
 
-def display_menu(self):
+
+def display_menu(self: "Menu"):
     """display_menu
 
     display_menu does stuff

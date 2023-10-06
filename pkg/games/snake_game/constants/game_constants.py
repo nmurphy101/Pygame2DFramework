@@ -40,6 +40,31 @@ SPRITE_SHEET_SNAKE_ENEMY = "assets/sprites/snake/snake_enemy-sheet.png"
 SPRITE_SHEET_FOOD = "assets/sprites/food/food-sheet.png"
 SPIRTE_SHEET_TELEPORTAL = "assets/sprites/tele_portal/tele_portal-sheet.png"
 
+# Directions
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+UP_RIGHT = .5
+RIGHT_DOWN = 1.5
+DOWN_LEFT = 2.5
+LEFT_UP = 3.5
+
+# Dimensions
+X = 0
+Y = 1
+WIDTH = 0
+HEIGHT = 1
+
+# Sound indexes
+SOUND_SNAKE_DEATH_IDX = 0
+SOUND_FOOD_PICKUP_IDX = 1
+SOUND_PORTAL_ENTER_IDX = 2
+
+# Logic indexes
+POS_IDX = 0
+DIST_FROM_SELF_IDX = 1
+
 # Menu options
 MENU_HOME = 0
 MENU_PAUSE = 1
@@ -52,7 +77,7 @@ MENU_GAMEPLAY = 7
 MENU_LEADERBOARD = 8
 
 # Colors
-COLOR_BLACK = (0, 0, 0, 0)
+COLOR_BLACK = (0, 0, 0)
 COLOR_RED = (255, 0 , 0)
 COLOR_WHITE = (255, 255, 255)
 COLOR_PURPLE = (128, 0, 128)
@@ -92,3 +117,25 @@ INPUT_KEY_MAP = {
     "Left": K_LEFT,
     "Right": K_RIGHT,
 }
+
+# Human readable setting names
+DISPLAY_SETTING_MAP = {
+    "human_player": "Player",
+    "inv_player": "Killable",
+    "player_speed": "Speed",
+    "num_ai": "Number of AI",
+    "inv_ai": "Killable",
+    "ai_speed": "Speed",
+    "ai_difficulty": "AI Skill",
+    "teleporter": "Teleporter",
+    "num_of_food": "Number Food",
+    "grid_size": "Grid Size",
+    "move_up": "Up",
+    "move_left": "Left",
+    "move_down": "Down",
+    "move_right": "Right",
+    True: "Yes",
+    False: "No",
+}
+
+INV_DISPLAY_SETTING_MAP = {v: k for k, v in DISPLAY_SETTING_MAP.items()}

@@ -9,6 +9,8 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
+from inspect import currentframe, getframeinfo
+from logging import debug as logging_debug
 
 from pygame import (
     image,
@@ -24,10 +26,8 @@ class SpriteSheet:
     Definition of the image/surface
     """
 
-    def __init__(self, filename, debug=False):
+    def __init__(self, filename):
         """Load the sheet."""
-
-        self.debug = debug
 
         try:
             self.sheet = image.load(filename).convert()
@@ -100,7 +100,7 @@ class SpriteSheet:
 
         grid_images = self.images_at(sprite_rects)
 
-        if self.debug:
-            print(f"Loaded {len(grid_images)} grid images.")
+        frameinfo = getframeinfo(currentframe())
+        logging_debug(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: INFO: Loaded {len(grid_images)} grid images.")
 
         return grid_images

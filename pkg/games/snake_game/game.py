@@ -10,12 +10,10 @@
 """
 
 
-from datetime import datetime
 from gc import collect as gc_collect
 from json import load as json_load
 from os import path
 from threading import Thread
-from typing import Deque
 
 from pygame import (
     display,
@@ -52,6 +50,9 @@ from .constants import (
     SPRITE_SHEET_SNAKE_ENEMY,
     SPRITE_SHEET_FOOD,
     SPIRTE_SHEET_TELEPORTAL,
+    X,
+    Y,
+    WIDTH,
 )
 from .entities import (
     Entity,
@@ -70,23 +71,13 @@ from .menus import (
     leaderboard_menu,
 )
 
+from .game_configs import GameConfig, LeaderBoard
+
 from ...app import App
+from ...base_game import BaseGame
 
 
-def is_multiple_of_4(number):
-    """
-    Verify if a number is a multiple of 4.
-
-    Args:
-        number (int): The number to be checked.
-
-    Returns:
-        bool: True if the number is a multiple of 4, False otherwise.
-    """
-    return number % 4 == 0
-
-
-class Game():
+class Game(BaseGame):
     """Game
 
     The main object for playing the game of snake.
@@ -96,7 +87,7 @@ class Game():
     TITLE = GAME_TITLE
 
 
-    def __init__(self, alpha_screen: Surface, screen: Surface, app: App):
+    def __init__(self, app: App, alpha_screen: Surface, screen: Surface):
         """SnakeGame initilizer
 
         Args:
@@ -105,44 +96,33 @@ class Game():
             app (App): The gameplatform
         """
 
-        # Calling game platform
-        self.app = app
-
         # Game config file
         self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
         with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config = json_load(json_data_file)
+            self.game_config: GameConfig = json_load(json_data_file)
 
         # Game leaderboard file
         self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
         with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
-            self.leaderboard = json_load(json_data_file)
+            self.leaderboard: LeaderBoard = json_load(json_data_file)
 
-        # Set starting fps from the config file
-        self.app.fps = int(self.app.app_config["settings"]["display"]["fps"])
-
-        # Game settings
+        # Game board grid size (also sprite size modifer)
         self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
 
-        # Window settings
-        self.title = app.title + self.TITLE
-        display.set_caption(self.title)
-        self.screen = screen
-        self.alpha_screen = alpha_screen
-        screen_w, screen_h = screen.get_size()
+        # Initilize parent init
+        super().__init__(app, alpha_screen, screen)
+
+        if not is_multiple_of_4(self.grid_size):
+            raise OSError("grid_size must be a multiple of 4")
+
+        # Game bar
         self.game_bar_height = self.grid_size * 3
-        game_width = self.app.screen_width - (self.app.screen_width % self.grid_size)
-        game_height = self.app.screen_height - (self.app.screen_height % self.grid_size)
-        self.screen_size = (game_width, game_height)
 
         # Game fonts
         self.game_font = freetype.Font(
             file=REGULAR_FONT,
             size=REGULAR_FONT_SIZE,
         )
-
-        if not is_multiple_of_4(self.grid_size):
-            raise OSError("grid_size must be a multiple of 4")
 
         # Game music
         self.game_music_intro = MUSIC_INTRO
@@ -161,7 +141,7 @@ class Game():
             ]
 
         # Game object containers
-        self.sprite_group = sprite.RenderUpdates()
+        self.sprite_group: sprite.RenderUpdates[Entity] = sprite.RenderUpdates()
         self.entity_final_scores = {}
 
         ## Game sprite Sheets
@@ -220,7 +200,7 @@ class Game():
         """
 
         # Execute game object actions via parallel threads
-        thread_group = []
+        thread_group: list[Thread] = []
         for obj in self.sprite_group:
             if not obj.is_alive:
                 continue
@@ -265,8 +245,9 @@ class Game():
 
         start does stuff
         """
+
         # Clear previous frame render
-        self.app.game.screen.fill(COLOR_BLACK)
+        self.screen.fill(COLOR_BLACK)
 
         # Start on a clean slate
         self.clean_up()
@@ -279,27 +260,27 @@ class Game():
         self.app.pause_game_music = False
 
         # AI blackbox
-        self.chosen_ai = DecisionBox(self.app)
+        self.chosen_ai = DecisionBox(self)
 
         # Initilize game objects - Order of these objects actually matter
         # Food objects
         num_of_food = self.game_config["settings"]["gameplay"]["num_of_food"]
 
-        # if num_of_food <= 0:
-        #     raise OSError("1 or more food is required to play")
+        if num_of_food <= 0:
+            raise OSError("1 or more food is required to play")
 
         for _ in range(num_of_food):
-            self.sprite_group.add(Food(self.screen_size, self.app))
+            self.sprite_group.add(Food(self, self.screen_size))
 
         # teleporter objects
         teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter"]
         if teleporter_mod:
-            self.sprite_group.add(TelePortal(self.screen_size, self.app))
+            self.sprite_group.add(TelePortal(self, self.screen_size))
 
         # initilize player character
         is_human_playing = self.game_config["settings"]["gameplay"]["human_player"]
         if is_human_playing:
-            player_snake = Snake(self.screen_size, self.app, is_player=True)
+            player_snake = Snake(self, self.screen_size, is_player=True)
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
             player_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_player"]
             self.sprite_group.add(player_snake)
@@ -307,7 +288,7 @@ class Game():
         # initilize ai characters
         num_ai = self.game_config["settings"]["gameplay"]["num_ai"]
         for _ in range(num_ai):
-            enemy_snake = Snake(self.screen_size, self.app, is_player=False)
+            enemy_snake = Snake(self, self.screen_size, is_player=False)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
             enemy_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
             self.sprite_group.add(enemy_snake)
@@ -320,7 +301,7 @@ class Game():
         """
 
         # Clear previous frame render
-        # self.app.game.screen.fill(COLOR_BLACK)
+        # self.screen.fill(COLOR_BLACK)
 
         # Game settings
         self.app.pause_game_music = False
@@ -361,7 +342,6 @@ class Game():
     def unpause(self):
         """unpause
 
-
         unpause does stuff
         """
 
@@ -381,10 +361,10 @@ class Game():
         """
 
         # Clear previous frame obj's location with the game bar color
-        game_bar_pos = (0, 0, self.screen_size[0], self.game_bar_height)
+        game_bar_pos = (X, Y, self.screen_size[WIDTH], self.game_bar_height)
         draw.rect(self.screen, COLOR_GREY_DARK, game_bar_pos)
 
-        game_bar_pos = (0, self.game_bar_height-2, self.screen_size[0], 2)
+        game_bar_pos = (X, self.game_bar_height-2, self.screen_size[WIDTH], 2)
         draw.rect(self.screen, COLOR_GREY, game_bar_pos)
 
         score = 0
@@ -396,6 +376,10 @@ class Game():
 
 
     def transform_all_entity_images(self):
+        """transform_all_entity_images
+
+        transform_all_entity_images does stuff
+        """
 
         # Transform the snake's size
         index = 0
@@ -420,3 +404,16 @@ class Game():
         for image in self.tele_portal_images:
             self.tele_portal_images[index] = transform.scale(image, (self.grid_size, self.grid_size))
             index += 1
+
+
+def is_multiple_of_4(number):
+    """
+    Verify if a number is a multiple of 4.
+
+    Args:
+        number (int): The number to be checked.
+
+    Returns:
+        bool: True if the number is a multiple of 4, False otherwise.
+    """
+    return number % 4 == 0

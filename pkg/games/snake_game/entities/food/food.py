@@ -10,9 +10,19 @@
 """
 
 from random import randrange
+from typing import TYPE_CHECKING
+
+from ...constants import (
+    SOUND_FOOD_PICKUP_IDX,
+    X,
+    Y,
+)
 
 from ..entity import Entity
-from .....app import App
+from ..snake import Snake
+
+if TYPE_CHECKING:
+    from ...game import Game
 
 
 class Food(Entity):
@@ -21,24 +31,24 @@ class Food(Entity):
     Food for the snake
     """
 
-    def __init__(self, screen_size: tuple[int, int], app: App):
+    def __init__(self, game: "Game", screen_size: tuple[int, int]):
         # Name for this type of object
         self.name = "food_"
 
         # Initilize parent init
-        super().__init__(screen_size, self.name, app)
+        super().__init__(game, screen_size, self.name)
 
         # Where the food is located
-        x = self.screen_size[0] - randrange(
-            self.app.game.grid_size, self.screen_size[0], self.app.game.grid_size
+        x = self.screen_size[X] - randrange(
+            self.game.grid_size, self.screen_size[X], self.game.grid_size
         )
-        y = self.screen_size[1] - randrange(
-            self.app.game.grid_size, self.screen_size[1] - self.app.game.game_bar_height, self.app.game.grid_size
+        y = self.screen_size[Y] - randrange(
+            self.game.grid_size, self.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
         )
         self.position = (x, y)
 
         # Food Sprite images
-        self.food_images = self.app.game.food_images
+        self.food_images = self.game.food_images
 
         # Entity's visual representation
         self.image = self.food_images[0]
@@ -59,10 +69,10 @@ class Food(Entity):
         self.sight_lines = []
 
         # Death sound
-        if self.app.is_audio:
-            self.sound_death = self.app.game.sounds[1]
+        if self.game.app.is_audio:
+            self.sound_death = self.game.sounds[SOUND_FOOD_PICKUP_IDX]
             self.sound_mod = 1.5
-            self.sound_death_volume = float(app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         self.spawn()
 
@@ -83,11 +93,11 @@ class Food(Entity):
         """
 
         # render if alive and moved
-        if self.is_alive and (updated_refresh[0] or updated_refresh[1]):
+        if self.is_alive and (updated_refresh[X] or updated_refresh[Y]):
             # print(self.position, self.prev_position, self.is_alive, self.children, self.is_spawned)
 
             # Render the entity based on it's parameters
-            self.app.game.screen.blit(self.image, self.position)
+            self.game.screen.blit(self.image, self.position)
 
 
     def spawn(self) -> tuple[bool, bool]:
@@ -113,7 +123,7 @@ class Food(Entity):
         return False, False
 
 
-    def interact(self, interacting_obj: Entity) -> None:
+    def interact(self, interacting_obj: Snake) -> None:
         """interact
 
         Args:

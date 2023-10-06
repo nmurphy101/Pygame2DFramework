@@ -13,8 +13,8 @@
 from datetime import datetime
 from gc import collect as gc_collect
 from logging import warning as logging_warning
-from random import randrange, choices as random_choices
-from typing import Deque
+from random import randrange
+from typing import Deque, TYPE_CHECKING
 from uuid import uuid4
 
 from faker import Faker
@@ -32,8 +32,25 @@ from pygame import (
 )
 from pygame.sprite import Sprite
 
-from ....app import App
-from ..constants import COLOR_BLACK
+from ..constants import (
+    COLOR_BLACK,
+    MENU_GAME_OVER,
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT,
+    UP_RIGHT,
+    RIGHT_DOWN,
+    DOWN_LEFT,
+    LEFT_UP,
+    WIDTH,
+    HEIGHT,
+    X,
+    Y,
+)
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 
 FAKE = Faker()
@@ -45,11 +62,11 @@ class Entity(Sprite):
     base obj for all entities
     """
 
-    def __init__(self, screen_size: tuple[int, int], name: str, app: App):
+    def __init__(self, game: "Game", screen_size: tuple[int, int], name: str):
         Sprite.__init__(self)
 
         # Base game obj
-        self.app = app
+        self.game = game
 
         # Random name for this entity
         self.display_name = FAKE.first_name()
@@ -88,7 +105,7 @@ class Entity(Sprite):
         self.prev_position = None
 
         # How big entity is
-        self.size = self.app.game.grid_size
+        self.size = self.game.grid_size
 
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
@@ -97,11 +114,11 @@ class Entity(Sprite):
         self.time_last_moved = datetime.now()
 
         # Where entity was looking = (Up = 0, Right = 1, Down = 2, Left = 3)
-        self.prev_direction = 2
-        self.child_prev_direction = 2
+        self.prev_direction = DOWN
+        self.child_prev_direction = DOWN
 
-        # Where entity is looking = (Up = 0, Right = 1, Down = 2, Left = 3)
-        self.direction = 2
+        # Default direction
+        self.direction = DOWN
 
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight_mod = 2
@@ -118,23 +135,23 @@ class Entity(Sprite):
         self.rect = self.image.get_rect(topleft=self.position)
 
         # Default death sound
-        if self.app.is_audio:
+        if self.game.app.is_audio:
             self.sound_death = mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
             self.sound_mod = 4.5
-            self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
         # Sight lines
         self.sight_lines = [
-            Line(0, self),
-            Line(1, self),
-            Line(2, self),
-            Line(3, self),
+            Line(UP, self),
+            Line(RIGHT, self),
+            Line(DOWN, self),
+            Line(LEFT, self),
         ]
         self.sight_lines_diag = [
-            Line(.5, self),
-            Line(1.5, self),
-            Line(2.5, self),
-            Line(3.5, self),
+            Line(UP_RIGHT, self),
+            Line(RIGHT_DOWN, self),
+            Line(DOWN_LEFT, self),
+            Line(LEFT_UP, self),
         ]
 
         # Pathfinding variable
@@ -143,7 +160,7 @@ class Entity(Sprite):
         self.since_secondary_target = datetime.now()
 
         # children list
-        self.children = Deque()
+        self.children: Deque[Entity] = Deque()
 
 
     def update(self) -> tuple[bool, bool]:
@@ -173,7 +190,7 @@ class Entity(Sprite):
             self.rect.topleft = self.position
 
             # Render the entity based on it's image and position
-            self.app.game.screen.blit(self.image, self.position)
+            self.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
             draw = Line.draw # eval func only once
@@ -197,9 +214,9 @@ class Entity(Sprite):
         # render if alive
         if self.is_alive:
             # Clear screen where self was
-            # self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Render the entity based on it's parameters
-            self.app.game.screen.blit(self.image, self.position)
+            self.game.screen.blit(self.image, self.position)
 
             # Re-draw each child if there are any
             for child in self.children:
@@ -213,15 +230,15 @@ class Entity(Sprite):
         """
 
         # Play interacting_obj death sound
-        if self.app.is_audio:
+        if self.game.app.is_audio:
             sound = interacting_obj.sound_death
-            interacting_obj.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+            interacting_obj.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
             sound.set_volume(interacting_obj.sound_death_volume)
             mixer.Sound.play(sound)
 
         # Loose the game if interacting_obj is the player
         if interacting_obj.is_player:
-            self.app.game.menu.menu_option = 3
+            self.game.menu.menu_option = MENU_GAME_OVER
 
         # Kill interacting_obj
         interacting_obj.die(f"collided with {self.id} and died")
@@ -237,24 +254,24 @@ class Entity(Sprite):
             # print(f"{self.id} {death_reason}")
 
             # Play death sound
-            if self.app.is_audio:
+            if self.game.app.is_audio:
                 sound = self.sound_death
-                self.sound_death_volume = float(self.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
+                self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
                 sound.set_volume(self.sound_death_volume)
                 mixer.Sound.play(sound)
 
             # Loose the game if self is the player
             if self.is_player:
-                self.app.menu.menu_option = 3
+                self.game.app.menu.menu_option = MENU_GAME_OVER
 
             # Kill self
             self.is_alive = False
 
             # "remove" the entity from the game
             if "snake" in self.name:
-                self.app.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+                self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
-                self.app.game.sprite_group.remove(self)
+                self.game.sprite_group.remove(self)
 
                 self.sight_lines_diag = None
 
@@ -262,17 +279,17 @@ class Entity(Sprite):
 
                 if self.children:
                     for child in self.children:
-                        self.app.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                        self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
                         child.kill()
                     self.children = None
 
                 self.kill()
 
             # Clear previous frame render (from menu)
-            # self.app.game.screen.fill(COLOR_BLACK)
+            # self.game.screen.fill(COLOR_BLACK)
 
             # draw the object
-            for obj in self.app.game.sprite_group:
+            for obj in self.game.sprite_group:
                 obj.draw((False, True))
 
             # Free unreferenced memory
@@ -286,7 +303,7 @@ class Entity(Sprite):
         """
 
         # Collision check for all entities
-        for obj in self.app.game.sprite_group.sprites():
+        for obj in self.game.sprite_group.sprites():
             # Make sure not checking collision with dead obj's
             if not self.is_alive or not obj.is_alive:
                 continue
@@ -317,53 +334,53 @@ class Entity(Sprite):
         """
 
         # Collision check for edge of screen (Right)
-        if self.position[0] > self.screen_size[0]:
+        if self.position[X] > self.screen_size[WIDTH]:
             if self.is_killable:
                 self.die("Right edge of screen")
 
             else:
                 # Set new location
-                self.position = (0, self.position[1])
+                self.position = (0, self.position[Y])
 
             return True
 
         # Collision check for edge of screen (Bottom)
-        elif self.position[1] > self.screen_size[1]:
+        elif self.position[Y] > self.screen_size[HEIGHT]:
             if self.is_killable:
                 self.die("Bottom edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.position[0], self.app.game.game_bar_height)
+                self.position = (self.position[X], self.game.game_bar_height)
 
             return True
 
         # Collision check for edge of screen (Left)
-        elif self.position[0] < 0:
+        elif self.position[X] < 0:
             if self.is_killable:
                 self.die("Left edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.screen_size[0] - self.size, self.position[1])
+                self.position = (self.screen_size[WIDTH] - self.size, self.position[Y])
 
             return True
 
         # Collision check for edge of screen (Top)
-        elif self.position[1] < self.app.game.game_bar_height:
+        elif self.position[Y] < self.game.game_bar_height:
             if self.is_killable:
                 self.die("Top edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.position[0], self.screen_size[1])
+                self.position = (self.position[X], self.screen_size[HEIGHT])
 
             return True
 
         return False
 
 
-    def check_obj_collision(self, obj: "Enity") -> bool:
+    def check_obj_collision(self, obj: "Entity") -> bool:
         """check_obj_collision
 
         Check for self to other obj collision/interaction
@@ -420,28 +437,28 @@ class Entity(Sprite):
 
         # pylint: enable=access-member-before-definition
         while not found_spawn:
-            # print(self.screen_size[0], self.app.game.game_bar_height)
+            # print(self.screen_size[WIDTH], self.game.game_bar_height)
             # Where the entity is located
-            x = self.screen_size[0] - randrange(
-                self.size * 5, self.screen_size[0] - self.size * 5, self.size
+            pos_x = self.screen_size[WIDTH] - randrange(
+                self.size * 5, self.screen_size[WIDTH] - self.size * 5, self.size
             )
 
-            y = self.screen_size[1] - randrange(
-                self.size * 5, self.screen_size[1] - self.app.game.game_bar_height - self.size * 5, self.size
+            pos_y = self.screen_size[HEIGHT] - randrange(
+                self.size * 5, self.screen_size[HEIGHT] - self.game.game_bar_height - self.size * 5, self.size
             )
 
             # Check if the chosen random spawn location is taken
             taken = False
-            for obj in self.app.game.sprite_group:
+            for obj in self.game.sprite_group:
                 if obj != self: # don't check self
-                    if (x, y) == obj.position:
+                    if (pos_x, pos_y) == obj.position:
                         taken = True
                         break
 
                     elif obj.children:
                         for child in obj.children:
                             if child != self: # don't check self
-                                if (x, y) == child.position:
+                                if (pos_x, pos_y) == child.position:
                                     taken = True
 
                                     break
@@ -455,7 +472,7 @@ class Entity(Sprite):
             found_spawn = True
 
         # change position
-        self.position = (x, y)
+        self.position = (pos_x, pos_y)
 
         # place hitbox at position
         self.rect.topleft = self.position
@@ -493,7 +510,7 @@ class Entity(Sprite):
         # Increase the score
         if self.is_alive:
             self.score += score_obj.point_value
-            self.app.game.entity_final_scores[self.id] = {
+            self.game.entity_final_scores[self.id] = {
                 "is_player": self.is_player,
                 "name": self.name + self.display_name,
                 "score": self.score
@@ -536,7 +553,7 @@ class Line(Sprite):
         self.line_options.get(self.direction)(entity)
 
         if self.opasity == 0:
-            chosen_screen = entity.app.game.alpha_screen
+            chosen_screen = entity.game.alpha_screen
 
         else :
             chosen_screen = entity.screen
@@ -558,7 +575,7 @@ class Line(Sprite):
 
         # Choose the screen to draw to
         if self.opasity == 0:
-            chosen_screen = entity.app.game.alpha_screen
+            chosen_screen = entity.game.alpha_screen
 
         else :
             chosen_screen = entity.screen

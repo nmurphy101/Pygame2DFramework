@@ -10,14 +10,15 @@
 """
 
 from json import dump as json_dump, load as json_load
+from typing import TYPE_CHECKING
+
 from pygame import (
     mixer,
     display,
     Surface,
     transform,
-)
-from pygame import (
-    DOUBLEBUF, FULLSCREEN
+    DOUBLEBUF,
+    FULLSCREEN,
 )
 
 from .display import display_menu
@@ -26,7 +27,23 @@ from .sound import sound_menu
 from ..constants.app_constants import (
     COLOR_BLACK,
     COLOR_WHITE,
+    MENU_HOME,
+    MENU_PAUSE,
+    MENU_SETTINGS,
+    MENU_GAME_OVER,
+    MENU_DISPLAY,
+    MENU_SOUND,
+    MENU_KEYBINDING,
+    MENU_GAMEPLAY,
+    MENU_LEADERBOARD,
+    WIDTH,
+    HEIGHT,
+    X,
+    Y,
 )
+
+if TYPE_CHECKING:
+    from ..app import App
 
 
 class Menu():
@@ -35,7 +52,7 @@ class Menu():
     All menus for the game
     """
 
-    def __init__(self, app):
+    def __init__(self, app: "App"):
         """__init__
 
         Args:
@@ -46,25 +63,26 @@ class Menu():
         self.app = app
 
         # Game settings
-        self.menu_option = 0
-        self.prev_menu = 0
-        self.root_menu = 0
+        self.menu_option = MENU_HOME
+        self.prev_menu = MENU_HOME
+        self.root_menu = MENU_HOME
 
         # Menu options
         self.menu_options = {
-            0: None, # home_menu from chosen_game
-            1: None, # pause_menu from chosen_game
-            2: None, # settings_menu from chosen_game
-            3: None, # game_over_menu from chosen_game
-            4: lambda: display_menu(self),
-            5: lambda: sound_menu(self),
-            6: None, # keybinding_menu from chosen_game
-            7: None, # gameplay_menu from chosen_game
-            8: None, # leaderboard_menu from chosen_game
+            MENU_HOME: None, # home_menu from chosen_game
+            MENU_PAUSE: None, # pause_menu from chosen_game
+            MENU_SETTINGS: None, # settings_menu from chosen_game
+            MENU_GAME_OVER: None, # game_over_menu from chosen_game
+            MENU_DISPLAY: lambda: display_menu(self),
+            MENU_SOUND: lambda: sound_menu(self),
+            MENU_KEYBINDING: None, # keybinding_menu from chosen_game
+            MENU_GAMEPLAY: None, # gameplay_menu from chosen_game
+            MENU_LEADERBOARD: None, # leaderboard_menu from chosen_game
         }
 
 
-    def render_button(self,
+    def render_button(
+        self,
         title,
         virtical_position=1,
         horizontal_position=1,
@@ -99,25 +117,31 @@ class Menu():
 
         if relative_from == "center":
             position = (
-                self.app.game.screen_size[0] / 2 - (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
-                self.app.game.screen_size[1] / 2 - self.app.game.game_font.size * virtical_position + w_offset
+                self.app.game.screen_size[WIDTH] / 2 - (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.screen_size[HEIGHT] / 2 - self.app.game.game_font.size * virtical_position + w_offset
             )
 
         elif relative_from == "left":
             position = (
-                0 + (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
-                0 + self.app.game.game_font.size * virtical_position + w_offset
+                (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "right":
+            position = (
+                self.app.game.screen_size[WIDTH] - 20 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
             )
 
         elif relative_from == "top":
             position = (
-                self.app.game.screen_size[0] / 2 + (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
-                0 + self.app.game.game_font.size * virtical_position + w_offset
+                self.app.game.screen_size[WIDTH] / 2 + (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
             )
 
         # clear out first
         if clear_background:
-            chosen_screen.fill((0, 0, 0), (position[0], position[1], (len(text_str) * self.app.game.game_font.size), self.app.game.game_font.size))
+            chosen_screen.fill(COLOR_BLACK, (position[X], position[Y], (len(text_str) * self.app.game.game_font.size), self.app.game.game_font.size))
 
         obj = self.app.game.game_font.render_to(
             chosen_screen,
@@ -131,6 +155,8 @@ class Menu():
 
     def save_settings(self):
         """save_settings
+
+        save_settings does stuff
         """
 
         # Save the app settings config
@@ -144,6 +170,8 @@ class Menu():
 
     def save_leaderboard(self):
         """save_leaderboard
+
+        save_leaderboard does stuff
         """
 
         with open(self.app.game.leaderboard_file_path, "w", encoding="utf-8") as _file:
