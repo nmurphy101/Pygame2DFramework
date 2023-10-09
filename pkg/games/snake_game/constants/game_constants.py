@@ -53,8 +53,10 @@ LEFT_UP = 3.5
 # Dimensions
 X = 0
 Y = 1
+NAME = 2
 WIDTH = 0
 HEIGHT = 1
+TOP = 2
 
 # Sound indexes
 SOUND_SNAKE_DEATH_IDX = 0
@@ -121,13 +123,14 @@ INPUT_KEY_MAP = {
 # Human readable setting names
 DISPLAY_SETTING_MAP = {
     "human_player": "Player",
-    "inv_player": "Killable",
-    "player_speed": "Speed",
+    "inv_player": "Pla.Killable",
+    "player_speed": "Player Speed",
     "num_ai": "Number of AI",
-    "inv_ai": "Killable",
-    "ai_speed": "Speed",
+    "inv_ai": "AI Killable",
+    "ai_speed": "AI Speed",
     "ai_difficulty": "AI Skill",
     "teleporter": "Teleporter",
+    "visible_sight_lines": "Sightlines",
     "num_of_food": "Number Food",
     "grid_size": "Grid Size",
     "move_up": "Up",

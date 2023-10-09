@@ -106,17 +106,11 @@ class Game(BaseGame):
         with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
             self.leaderboard: LeaderBoard = json_load(json_data_file)
 
-        # Game board grid size (also sprite size modifer)
-        self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
-
         # Initilize parent init
         super().__init__(app, alpha_screen, screen)
 
         if not is_multiple_of_4(self.grid_size):
             raise OSError("grid_size must be a multiple of 4")
-
-        # Game bar
-        self.game_bar_height = self.grid_size * 3
 
         # Game fonts
         self.game_font = freetype.Font(
@@ -270,17 +264,17 @@ class Game(BaseGame):
             raise OSError("1 or more food is required to play")
 
         for _ in range(num_of_food):
-            self.sprite_group.add(Food(self, self.screen_size))
+            self.sprite_group.add(Food(self))
 
         # teleporter objects
         teleporter_mod = self.game_config["settings"]["gameplay"]["teleporter"]
         if teleporter_mod:
-            self.sprite_group.add(TelePortal(self, self.screen_size))
+            self.sprite_group.add(TelePortal(self))
 
         # initilize player character
         is_human_playing = self.game_config["settings"]["gameplay"]["human_player"]
         if is_human_playing:
-            player_snake = Snake(self, self.screen_size, is_player=True)
+            player_snake = Snake(self, is_player=True)
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
             player_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_player"]
             self.sprite_group.add(player_snake)
@@ -288,7 +282,7 @@ class Game(BaseGame):
         # initilize ai characters
         num_ai = self.game_config["settings"]["gameplay"]["num_ai"]
         for _ in range(num_ai):
-            enemy_snake = Snake(self, self.screen_size, is_player=False)
+            enemy_snake = Snake(self, is_player=False)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
             enemy_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
             self.sprite_group.add(enemy_snake)

@@ -28,48 +28,53 @@ def game_over_menu(self: Menu):
     game_over_menu does stuff
     """
 
-    # Clear previous frame render
-    self.app.game.screen.fill(COLOR_BLACK)
+    if self.refresh or self.menu_option != MENU_GAME_OVER:
+        # Clear previous frame render
+        self.app.game.screen.fill(COLOR_BLACK)
 
-    # Make sure the right menu option is selected
-    self.menu_option = MENU_GAME_OVER
+        # Make sure the right menu option is selected
+        self.menu_option = MENU_GAME_OVER
 
-    # Stop the music
-    if self.app.is_audio:
-        mixer.music.stop()
+        # Stop the music
+        if self.app.is_audio:
+            mixer.music.stop()
 
-    # Render the Game Over text
-    _ = self.render_button("Game Over", 10, color=COLOR_RED)
+        # Render the Game Over text
+        _ = self.render_button("Game Over", 10, color=COLOR_RED)
 
-    # Get the player score
-    score = 0
-    for _, value in self.app.game.entity_final_scores.items():
-        if value["is_player"]:
-            score = value["score"]
+        # Get the player score
+        score = 0
+        for _, value in self.app.game.entity_final_scores.items():
+            if value["is_player"]:
+                score = value["score"]
 
-    # Render the score
-    _ = self.render_button('Score: ' + str(score), 8, color=COLOR_RED)
+        # Render the score
+        _ = self.render_button('Score: ' + str(score), 8, color=COLOR_RED)
 
-    # Render the restart button
-    restart_obj = self.render_button("Restart", 1)
+        # Render the restart button
+        restart_obj = self.render_button("Restart", 1, has_outline=True)
 
-    # Render the quit button
-    quit_obj = self.render_button("Quit", -2)
+        # Render the quit button
+        quit_obj = self.render_button("Quit", -2, has_outline=True)
 
-    def restart():
-        _get_score(self)
-        self.app.game.start()
+        def restart():
+            _get_score(self)
+            self.app.game.start()
 
-    def return_to_home():
-        _get_score(self)
-        self.menu_options[MENU_HOME]()
+        def return_to_home():
+            _get_score(self)
+            self.menu_options[MENU_HOME]()
 
-    menu = [
-        (restart_obj, restart, 3),
-        (quit_obj, return_to_home, 3),
-    ]
+        self.menu = [
+            (restart_obj, restart, 3, None),
+            (quit_obj, return_to_home, 3, None),
+        ]
 
-    return menu
+        self.refresh = False
+
+    return self.menu
+
+
 
 
 def _get_score(self):

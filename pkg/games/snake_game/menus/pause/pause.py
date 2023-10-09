@@ -29,12 +29,13 @@ def pause_menu(self: Menu):
     pause_menu does stuff
     """
 
+    # if self.refresh or self.menu_option != MENU_PAUSE:
+
     # Clear previous frame render
     self.app.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_PAUSE
-    self.root_menu = MENU_PAUSE
 
     if self.prev_menu is None:
         # Free unreferenced memory
@@ -57,18 +58,22 @@ def pause_menu(self: Menu):
     _ = self.render_button("Score: " + str(score), 8, color=COLOR_RED)
 
     # Render the quit button
-    resume_obj = self.render_button("Resume", 1)
+    resume_obj = self.render_button("Resume", 1, has_outline=True)
 
     # Render the settings button
-    settings_obj = self.render_button("Settings", -1)
+    settings_obj = self.render_button("Settings", -1, has_outline=True)
 
     # Render the main menu button
-    return_obj = self.render_button("Main Menu", -3)
+    return_obj = self.render_button("Main Menu", -3, has_outline=True)
 
-    menu = [
-        (resume_obj, self.app.game.unpause, 1),
-        (settings_obj, self.menu_options[MENU_SETTINGS], 1),
-        (return_obj, self.menu_options[MENU_HOME], 1),
+    self.menu = [
+        (resume_obj, self.app.game.unpause, MENU_PAUSE, None),
+        (settings_obj, self.menu_options[MENU_SETTINGS], MENU_PAUSE, None),
+        (return_obj, self.menu_options[MENU_HOME], MENU_PAUSE, None),
     ]
 
-    return menu
+    self.refresh = False
+
+    return self.menu
+
+

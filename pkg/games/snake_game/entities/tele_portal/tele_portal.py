@@ -38,11 +38,11 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     """
 
-    def __init__(self, game: "Game", screen_size: tuple[int, int], parent: "TelePortal" = None):
+    def __init__(self, game: "Game", parent: "TelePortal" = None):
         self.name = "teleportal_"
 
         # Initilize parent init
-        super().__init__(game, screen_size, self.name)
+        super().__init__(game, self.name)
 
         # Determines if entity can be killed
         self.is_killable = False
@@ -61,11 +61,11 @@ class TelePortal(Entity):
         self.spawn_timer = now + timedelta(seconds=randint(2, 5))
 
         # Where the portal is located
-        x_pos = self.screen_size[X] - randrange(
-            self.game.grid_size, self.screen_size[X], self.game.grid_size
+        x_pos = self.game.screen_size[X] - randrange(
+            self.game.grid_size, self.game.screen_size[X], self.game.grid_size
         )
-        y_pos = self.screen_size[Y] - randrange(
-            self.game.grid_size, self.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
+        y_pos = self.game.screen_size[Y] - randrange(
+            self.game.grid_size, self.game.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
         )
         self.position = (x_pos, y_pos)
 
@@ -94,7 +94,7 @@ class TelePortal(Entity):
         # Initilize starting children if it has no parent (and thus is the parent)
         self.children: Deque[TelePortal]
         if not parent:
-            self.children.append(TelePortal(game, screen_size, parent=self))
+            self.children.append(TelePortal(game, parent=self))
 
         self.spawn()
 

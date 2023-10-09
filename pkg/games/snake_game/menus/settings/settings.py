@@ -29,38 +29,39 @@ def settings_menu(self: Menu):
     settings_menu does stuff
     """
 
-    # Clear previous frame render
-    self.app.screen.fill(COLOR_BLACK)
+    if self.refresh or self.menu_option != MENU_SETTINGS:
+        # Clear previous frame render
+        self.app.screen.fill(COLOR_BLACK)
 
-    # Make sure the right menu option is selected
-    self.menu_option = MENU_SETTINGS
+        # Make sure the right menu option is selected
+        self.menu_option = MENU_SETTINGS
 
-    # Render the Settings Menu text
-    _ = self.render_button("Settings", 10, color=COLOR_RED)
+        # Render the Settings Menu text
+        _ = self.render_button("Settings", 10, color=COLOR_RED)
 
-    # Render the display button
-    display_obj = self.render_button("Display", 5)
+        # Render the display button
+        display_obj = self.render_button("Display", 5, has_outline=True)
 
-    # Render the Sound button
-    sound_obj = self.render_button("Sound", 3)
+        # Render the Sound button
+        sound_obj = self.render_button("Sound", 3, has_outline=True)
 
-    # Render the Sound button
-    gameplay_obj = self.render_button("Gameplay", 1)
+        # Render the Sound button
+        gameplay_obj = self.render_button("Gameplay", 1, has_outline=True)
 
-    # Render the Sound button
-    keybinding_obj = self.render_button("Keybinding", -1)
+        # Render the Sound button
+        keybinding_obj = self.render_button("Keybinding", -1, has_outline=True)
 
-    # Render the Return button
-    back_obj = self.render_button("Back", -8)
+        # Render the Return button
+        back_obj = self.render_button("Back", -8, has_outline=True)
 
-    menu = [
-        (display_obj, self.menu_options[MENU_DISPLAY], 2),
-        (sound_obj, self.menu_options[MENU_SOUND], 2),
-        (gameplay_obj, self.menu_options[MENU_GAMEPLAY], 2),
-        (keybinding_obj, self.menu_options[MENU_KEYBINDING], 2),
-        (back_obj, self.menu_options[self.root_menu], 2),
-    ]
+        self.menu = [
+            (display_obj, self.menu_options[MENU_DISPLAY], MENU_SETTINGS, None),
+            (sound_obj, self.menu_options[MENU_SOUND], MENU_SETTINGS, None),
+            (gameplay_obj, self.menu_options[MENU_GAMEPLAY], MENU_SETTINGS, None),
+            (keybinding_obj, self.menu_options[MENU_KEYBINDING], MENU_SETTINGS, None),
+            (back_obj, self.menu_options[self.root_menu], MENU_SETTINGS, None),
+        ]
 
-    self.prev_menu = 2
+        self.refresh = False
 
-    return menu
+    return self.menu

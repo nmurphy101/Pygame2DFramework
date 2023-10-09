@@ -30,7 +30,7 @@ class SpriteSheet:
         """Load the sheet."""
 
         try:
-            self.sheet = image.load(filename).convert()
+            self.sheet = image.load(filename).convert_alpha()
 
         except FileNotFoundError as error:
             print(f"Unable to load spritesheet image: {filename}")

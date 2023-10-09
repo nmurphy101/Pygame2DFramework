@@ -17,8 +17,10 @@ from pygame import (
     display,
     Surface,
     transform,
+    gfxdraw,
     DOUBLEBUF,
     FULLSCREEN,
+    Rect,
 )
 
 from .display import display_menu
@@ -64,7 +66,7 @@ class Menu():
 
         # Game settings
         self.menu_option = MENU_HOME
-        self.prev_menu = MENU_HOME
+        self.prev_menu = None
         self.root_menu = MENU_HOME
 
         # Menu options
@@ -80,6 +82,23 @@ class Menu():
             MENU_LEADERBOARD: None, # leaderboard_menu from chosen_game
         }
 
+        # The chosen menu obj
+        self.menu = None
+
+        # If the menu display needs to be updated
+        self.refresh = False
+
+
+    def _draw_rect_outline(self, rect, color, width=1):
+        x, y, w, h = rect
+        width = max(width, 1)  # Draw at least one rect.
+        width = min(min(width, w//2), h//2)  # Don't overdraw.
+
+        # This draws several smaller outlines inside the first outline. Invert
+        # the direction if it should grow outwards.
+        for i in range(width):
+            gfxdraw.rectangle(self.app.game.screen, (x + i, y + i, w - i * 2, h - i * 2), color)
+
 
     def render_button(
         self,
@@ -91,7 +110,8 @@ class Menu():
         clear_background=True,
         h_offset=0,
         w_offset=0,
-        screen=None
+        screen=None,
+        has_outline=False,
     ):
         """render_button
 
@@ -143,12 +163,18 @@ class Menu():
         if clear_background:
             chosen_screen.fill(COLOR_BLACK, (position[X], position[Y], (len(text_str) * self.app.game.game_font.size), self.app.game.game_font.size))
 
-        obj = self.app.game.game_font.render_to(
+        obj: Rect = self.app.game.game_font.render_to(
             chosen_screen,
             position,
             text_str,
             color
         )
+
+        if has_outline:
+            outline_offset = 10
+            rect_pos = (position[X] - outline_offset, position[Y] - outline_offset, (len(text_str) * self.app.game.game_font.size) + outline_offset * 1.5, self.app.game.game_font.size + outline_offset * 1.5)
+            self._draw_rect_outline(rect_pos, COLOR_WHITE)
+            obj.update(rect_pos)
 
         return obj
 
@@ -167,6 +193,10 @@ class Menu():
         with open(self.app.game.game_config_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.app.game.game_config, _file, ensure_ascii=False, indent=4)
 
+        if self.app.is_audio:
+            music_volume = self.app.app_config["settings"]["sound"]["music_volume"]
+            mixer.music.set_volume(float(music_volume))
+
 
     def save_leaderboard(self):
         """save_leaderboard
@@ -180,6 +210,7 @@ class Menu():
 
     def toggle_setting(self, config, page, setting_name):
        config["settings"][page][setting_name] = not config["settings"][page][setting_name]
+       self.refresh = True
 
 
     def toggle_game_music(self):
@@ -189,6 +220,7 @@ class Menu():
         """
 
         self.toggle_setting(self.app.app_config, "sound", "music")
+        self.refresh = True
 
 
     def increase_music_volume(self):
@@ -198,9 +230,8 @@ class Menu():
         """
 
         music_volume = self.app.app_config["settings"]["sound"]["music_volume"]
-        self.app.app_config["settings"]["sound"]["music_volume"] = round(str(float(music_volume) + .05), 2)
-        if self.app.is_audio:
-            mixer.music.set_volume(float(music_volume))
+        self.app.app_config["settings"]["sound"]["music_volume"] = round(float(music_volume) + .05, 2)
+        self.refresh = True
 
 
     def decrease_music_volume(self):
@@ -210,9 +241,8 @@ class Menu():
         """
 
         music_volume = self.app.app_config["settings"]["sound"]["music_volume"]
-        self.app.app_config["settings"]["sound"]["music_volume"] = round(str(float(music_volume) - .05), 2)
-        if self.app.is_audio:
-            mixer.music.set_volume(float(music_volume))
+        self.app.app_config["settings"]["sound"]["music_volume"] = round(float(music_volume) - .05, 2)
+        self.refresh = True
 
 
     def increase_effect_volume(self):
@@ -222,7 +252,8 @@ class Menu():
         """
 
         effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
-        self.app.app_config["settings"]["sound"]["effect_volume"] = round(str(float(effect_volume) + .05), 2)
+        self.app.app_config["settings"]["sound"]["effect_volume"] = round(float(effect_volume) + .05, 2)
+        self.refresh = True
 
 
     def decrease_effect_volume(self):
@@ -232,7 +263,8 @@ class Menu():
         """
 
         effect_volume = self.app.app_config["settings"]["sound"]["effect_volume"]
-        self.app.app_config["settings"]["sound"]["effect_volume"] = round(str(float(effect_volume) - .05), 2)
+        self.app.app_config["settings"]["sound"]["effect_volume"] = round(float(effect_volume) - .05, 2)
+        self.refresh = True
 
 
     def increase_menu_volume(self):
@@ -245,6 +277,7 @@ class Menu():
         self.app.app_config["settings"]["sound"]["menu_volume"] = (
             str(float(menu_volume) + .05)
         )
+        self.refresh = True
 
 
     def decrease_menu_volume(self):
@@ -257,6 +290,7 @@ class Menu():
         self.app.app_config["settings"]["sound"]["menu_volume"] = (
             str(float(menu_volume) - .05)
         )
+        self.refresh = True
 
 
     def increase_gameplay_setting(self, setting):
@@ -274,6 +308,7 @@ class Menu():
         self.app.game.game_config["settings"]["gameplay"][setting] = (
             round(setting_value + change_mod, 1)
         )
+        self.refresh = True
 
 
     def decrease_gameplay_setting(self, setting):
@@ -291,6 +326,7 @@ class Menu():
         self.app.game.game_config["settings"]["gameplay"][setting] = (
             round(setting_value - change_mod, 1)
         )
+        self.refresh = True
 
 
     def toggle_gameplay_setting(self, setting):
@@ -301,6 +337,7 @@ class Menu():
 
         # print("toggling setting: {setting}")
         self.toggle_setting(self.app.game.game_config, "gameplay", setting)
+        self.refresh = True
 
 
     def toggle_fps_display(self):
@@ -310,6 +347,7 @@ class Menu():
         """
 
         self.toggle_setting(self.app.app_config, "display", "fps_display")
+        self.refresh = True
 
 
     def toggle_fullscreen(self):
@@ -320,6 +358,7 @@ class Menu():
 
         self.toggle_setting(self.app.app_config, "display", "fullscreen")
         display.toggle_fullscreen()
+        self.refresh = True
 
 
     def change_keybinding(self, action):
@@ -330,6 +369,7 @@ class Menu():
 
         self.app.keybinding_switch = (True, action)
         self.app.game.game_config["settings"]["keybindings"][action] = "Select"
+        self.refresh = True
 
 
     def change_resolution(self, resolution):
@@ -370,3 +410,4 @@ class Menu():
         )
 
         self.app.background_0.set_colorkey(COLOR_BLACK)
+        self.refresh = True

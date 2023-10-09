@@ -40,23 +40,23 @@ class Snake(Entity):
     obj for the snake
     """
 
-    def __init__(self, game: "Game", screen_size: tuple[int, int], is_player: bool = False):
+    def __init__(self, game: "Game", is_player: bool = False):
         # Name for this type of object
         self.name = "snake_"
 
         # Initilize parent init
-        super().__init__(game, screen_size, self.name)
+        super().__init__(game, self.name)
 
         # player indicator
         self.is_player = is_player
 
         # Where the snake is started located
-        pos_x = self.screen_size[WIDTH] - randrange(
-            self.game.grid_size, self.screen_size[WIDTH], self.game.grid_size
+        pos_x = self.game.screen_size[WIDTH] - randrange(
+            self.game.grid_size, self.game.screen_size[WIDTH], self.game.grid_size
         )
 
-        pos_y = self.screen_size[HEIGHT] - randrange(
-            self.game.grid_size, self.screen_size[HEIGHT] - self.game.game_bar_height - self.game.game_bar_height, self.game.grid_size
+        pos_y = self.game.screen_size[HEIGHT] - randrange(
+            self.game.grid_size, self.game.screen_size[HEIGHT] - self.game.game_bar_height - self.game.game_bar_height, self.game.grid_size
         )
 
         self.position = (pos_x, pos_y)
@@ -110,9 +110,9 @@ class Snake(Entity):
         self.children: Deque[TailSegment] = Deque()
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(self, self.game, screen_size, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, player=self.is_player))
             else:
-                self.children.append(TailSegment(self, self.game, screen_size, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, player=self.is_player))
 
 
     def aquire_primary_target(self, target_name: str) -> None:
@@ -128,7 +128,7 @@ class Snake(Entity):
                     pos = (obj.position[X], obj.position[Y])
                     primary_target = (pos, dist_self)
 
-        self.target = (target_name, primary_target[POS_IDX][X], primary_target[POS_IDX][Y])
+        self.target = (primary_target[POS_IDX][X], primary_target[POS_IDX][Y], target_name)
 
         self.direction = self.game.chosen_ai.decide_direction(
             self,
@@ -157,10 +157,10 @@ class Snake(Entity):
 
             # Render the entity's sight lines
             for line in self.sight_lines:
-                Line.draw(line, self)
+                line.draw()
 
             for line in self.sight_lines_diag:
-                Line.draw(line, self)
+                line.draw()
 
             # Draw all children on refresh or optimized one child per
             if updated_refresh[Y]:
@@ -192,7 +192,6 @@ class Snake(Entity):
                 tail = TailSegment(
                     self,
                     self.game,
-                    self.screen_size,
                     player=self.is_player,
                 )
 
@@ -301,12 +300,12 @@ class TailSegment(Entity):
     Tail Segment for the snake
     """
 
-    def __init__(self, parent: Snake, game: "Game", screen_size: tuple[int, int], player: bool = False):
+    def __init__(self, parent: Snake, game: "Game", player: bool = False):
         # Name for this type of object
         self.name = "tail-segment_"
 
         # Initilize parent init
-        super().__init__(game, screen_size, self.name)
+        super().__init__(game, self.name)
 
         # The game obj
         self.game = game

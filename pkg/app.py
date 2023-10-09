@@ -24,6 +24,7 @@ from statistics import mean
 
 from guppy import hpy
 from pygame import (
+    draw as pygame_draw,
     event as pygame_event,
     error as pygame_error,
     display as pygame_display,
@@ -35,10 +36,11 @@ from pygame import (
     Surface,
     DOUBLEBUF,
     FULLSCREEN,
+    USEREVENT,
 )
 from pygame.constants import (
     QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
-    WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
+    MOUSEBUTTONUP, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
 )
 
 from .constants.app_constants import (
@@ -151,6 +153,9 @@ class App():
         self.menu = Menu(self)
         self.pause_menu_options = {}
 
+        # Define custom events
+        MOUSEHOVER = USEREVENT + 1
+
         # Event settings
         self.event_options = {
             QUIT: lambda **kwargs: self.quit(**kwargs),
@@ -159,6 +164,8 @@ class App():
             WINDOWFOCUSLOST: lambda **kwargs: self.window_focus(focus=True, **kwargs),
             KEYDOWN: lambda **kwargs: self.key_down(**kwargs),
             MOUSEBUTTONDOWN: lambda **kwargs: self.mouse_down(**kwargs),
+            MOUSEBUTTONUP: lambda **kwargs: self.mouse_up(**kwargs),
+            MOUSEHOVER: lambda **kwargs: self.mouse_hover(**kwargs),
         }
 
         # Limit the type of game events that can happen
@@ -422,8 +429,8 @@ class App():
 
         # Pressed escape to pause/unpause/back
         if kwargs["event"].key == K_ESCAPE and self.game:
-            # If not game over
-            if self.menu.menu_option != 3:
+            print(self.menu.menu_option)
+            if self.menu.menu_option == None:
                 self.play_ui_sound(1)
 
                 # Clear previous frame render
@@ -432,6 +439,10 @@ class App():
                 # Either unpause or pause the game
                 self.menu.prev_menu = self.menu.menu_option
                 self.menu.menu_option = self.pause_menu_options.get(self.menu.menu_option, self.menu.prev_menu)
+
+            elif self.menu.menu_option == MENU_PAUSE:
+                self.play_menu_sound(2)
+                self.game.unpause()
 
         elif self.keybinding_switch[0]:
             self.change_keybinding(self.keybinding_switch[1], kwargs["event"].unicode)
@@ -444,19 +455,50 @@ class App():
         Args:
             kwargs ([args]): [description]
         """
+        print(kwargs)
+        if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
+            print("mouse down")
+            for button in kwargs["menu"]:
+                button_obj, button_action, button_prev_menu, button_action_param = button
+                if self.game:
+                    # button_surface = Surface((button_obj.size))
+                    # button_surface.set_alpha(128)
+                    # button_surface.fill(255, 255, 255)
+                    # self.game.surface.blit(button_surface, button_obj.topleft)
+                    pygame_draw.rect(self.alpha_screen, (255, 255, 255, 0), button_obj, 0)
 
+
+
+    def mouse_up(self, **kwargs) -> None:
+        """mouse_up
+
+        Args:
+            kwargs ([args]): [description]
+        """
         if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
             for button in kwargs["menu"]:
+                button_obj, button_action, button_prev_menu, button_action_param = button
+                if self.game:
+                    pygame_draw.rect(self.alpha_screen, (255, 255, 255, 0), button_obj, 0)
                 frameinfo = getframeinfo(currentframe())
                 logging_debug(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: INFO: Testing buttons: {button}, {kwargs['event'].pos}, {kwargs['event']}")
-                if button[0].collidepoint(kwargs["event"].pos):
+                if button_obj.collidepoint(kwargs["event"].pos):
                     logging_debug(f"{frameinfo.filename}::{getframeinfo(currentframe()).lineno}: DEBUG: Chosen button: {button}")
-                    self.play_menu_sound(button)
+                    self.play_menu_sound(button_action)
 
                     if self.game:
-                        self.menu.prev_menu = button[2]
+                        self.menu.prev_menu = button_prev_menu
 
-                    button[1](button[3]) if len(button) == 4 else button[1]()
+                    button_action(button_action_param) if button_action_param else button_action()
+
+
+    def mouse_hover(self, **kwargs) -> None:
+        """mouse_hover
+
+        Args:
+            kwargs ([args]): [description]
+        """
+        pass
 
 
     def next_music(self, **_) -> None:
@@ -474,14 +516,15 @@ class App():
                 mixer.music.play(0, 0, 1)
 
 
-    def play_menu_sound(self, button) -> None:
+    def play_menu_sound(self, action) -> None:
         """play_menu_sound
 
         Args:
             button ([list]): [description]
         """
 
-        num = self.ui_sound_options.get(button[1], 0)
+        num = self.ui_sound_options.get(action, 0)
+        print(f"Sound num: {num}")
         self.play_ui_sound(num)
 
 

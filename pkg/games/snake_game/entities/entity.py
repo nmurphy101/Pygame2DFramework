@@ -45,6 +45,7 @@ from ..constants import (
     LEFT_UP,
     WIDTH,
     HEIGHT,
+    TOP,
     X,
     Y,
 )
@@ -62,7 +63,7 @@ class Entity(Sprite):
     base obj for all entities
     """
 
-    def __init__(self, game: "Game", screen_size: tuple[int, int], name: str):
+    def __init__(self, game: "Game", name: str):
         Sprite.__init__(self)
 
         # Base game obj
@@ -95,14 +96,8 @@ class Entity(Sprite):
         # Where the entity was located
         self.prev_position = (-20, -20)
 
-        # Size of the game screen
-        self.screen_size = screen_size
-
         # Where the entity is located
         self.position = (-20, -20)
-
-        # Where the entity was located
-        self.prev_position = None
 
         # How big entity is
         self.size = self.game.grid_size
@@ -117,12 +112,12 @@ class Entity(Sprite):
         self.prev_direction = DOWN
         self.child_prev_direction = DOWN
 
-        # Default direction
+        # Direction entity is going
         self.direction = DOWN
 
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight_mod = 2
-        self.sight = self.sight_mod * self.size
+        self.sight = self.sight_mod * self.game.grid_size
 
         # RGB color = pink default
         self.obj_color = (255,105,180)
@@ -193,12 +188,11 @@ class Entity(Sprite):
             self.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
-            draw = Line.draw # eval func only once
             for line in self.sight_lines:
-                draw(line, self)
+                line.draw()
 
             for line in self.sight_lines_diag:
-                draw(line, self)
+                line.draw()
 
             # Draw each child if there are any
             for child in self.children:
@@ -334,46 +328,46 @@ class Entity(Sprite):
         """
 
         # Collision check for edge of screen (Right)
-        if self.position[X] > self.screen_size[WIDTH]:
+        if self.position[X] > self.game.screen_size[WIDTH]:
             if self.is_killable:
                 self.die("Right edge of screen")
 
             else:
                 # Set new location
-                self.position = (0, self.position[Y])
+                self.position = (self.game.screen_size[LEFT], self.position[Y])
 
             return True
 
         # Collision check for edge of screen (Bottom)
-        elif self.position[Y] > self.screen_size[HEIGHT]:
+        elif self.position[Y] > self.game.screen_size[HEIGHT]:
             if self.is_killable:
                 self.die("Bottom edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.position[X], self.game.game_bar_height)
+                self.position = (self.position[X], self.game.screen_size[TOP])
 
             return True
 
         # Collision check for edge of screen (Left)
-        elif self.position[X] < 0:
+        elif self.position[X] < self.game.screen_size[LEFT]:
             if self.is_killable:
                 self.die("Left edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.screen_size[WIDTH] - self.size, self.position[Y])
+                self.position = (self.game.screen_size[WIDTH] - self.size, self.position[Y])
 
             return True
 
         # Collision check for edge of screen (Top)
-        elif self.position[Y] < self.game.game_bar_height:
+        elif self.position[Y] < self.game.screen_size[TOP]:
             if self.is_killable:
                 self.die("Top edge of screen")
 
             else:
                 # Set new location
-                self.position = (self.position[X], self.screen_size[HEIGHT])
+                self.position = (self.position[X], self.game.screen_size[HEIGHT])
 
             return True
 
@@ -426,25 +420,23 @@ class Entity(Sprite):
         return False
 
 
-    def set_random_spawn(self) -> None:
+    def set_random_spawn(self, x_mod=1, y_mod=1) -> None:
         """set_random_spawn
 
         Check for a random spawn location and if it's taken already
         """
 
-        # set pre loop variables
+        # Spawn location found or not
         found_spawn = False
 
-        # pylint: enable=access-member-before-definition
         while not found_spawn:
-            # print(self.screen_size[WIDTH], self.game.game_bar_height)
-            # Where the entity is located
-            pos_x = self.screen_size[WIDTH] - randrange(
-                self.size * 5, self.screen_size[WIDTH] - self.size * 5, self.size
+            # Where the entity is to be spawned at (x, y) position
+            pos_x = self.game.screen_size[WIDTH] - randrange(
+                self.size * x_mod, self.game.screen_size[WIDTH] - self.size * x_mod, self.size
             )
 
-            pos_y = self.screen_size[HEIGHT] - randrange(
-                self.size * 5, self.screen_size[HEIGHT] - self.game.game_bar_height - self.size * 5, self.size
+            pos_y = self.game.screen_size[HEIGHT] - randrange(
+                self.size * y_mod, self.game.screen_size[HEIGHT] - self.game.screen_size[TOP] - self.size * y_mod, self.size
             )
 
             # Check if the chosen random spawn location is taken
@@ -534,95 +526,87 @@ class Line(Sprite):
 
     def __init__(self, direction: int, entity: Entity):
         self.open = True
-        self.opasity = 0 # Change this to 1 if you want to see sightlines
-        self.color = (255, 105, 180, (self.opasity))
+        self.entity = entity
+        self.is_visible = self.entity.game.game_config["settings"]["gameplay"]["visible_sight_lines"]
+        self.color = (255, 105, 180)
         self.direction = direction
+        self.end = (0, 0)
 
         # determine entity's sightline end point
         self.line_options = {
-            0: lambda *args: self.draw_up(*args),
-            .5: lambda *args: self.draw_up_right(*args),
-            1: lambda *args: self.draw_right(*args),
-            1.5: lambda *args: self.draw_down_right(*args),
-            2: lambda *args: self.draw_down(*args),
-            2.5: lambda *args: self.draw_down_left(*args),
-            3: lambda *args: self.draw_left(*args),
-            3.5: lambda *args: self.draw_up_left(*args),
+            UP: lambda *args: self.draw_up(*args),
+            UP_RIGHT: lambda *args: self.draw_up_right(*args),
+            RIGHT: lambda *args: self.draw_right(*args),
+            RIGHT_DOWN: lambda *args: self.draw_right_down(*args),
+            DOWN: lambda *args: self.draw_down(*args),
+            DOWN_LEFT: lambda *args: self.draw_down_left(*args),
+            LEFT: lambda *args: self.draw_left(*args),
+            LEFT_UP: lambda *args: self.draw_left_up(*args),
         }
 
-        self.line_options.get(self.direction)(entity)
+        # Choose the screen to draw to
+        chosen_screen = self.entity.game.screen if self.is_visible else self.entity.game.alpha_screen
 
-        if self.opasity == 0:
-            chosen_screen = entity.game.alpha_screen
-
-        else :
-            chosen_screen = entity.screen
-
+        # Draw the line representing the rect
         self.rect = pygame_draw.line(
             chosen_screen,
             self.color,
-            entity.rect.center,
+            self.entity.rect.center,
             self.end,
-            1,
         )
 
 
-    def draw(self, entity: Entity) -> None:
+    def draw(self) -> None:
         """draw
 
         draw does stuff
         """
 
         # Choose the screen to draw to
-        if self.opasity == 0:
-            chosen_screen = entity.game.alpha_screen
-
-        else :
-            chosen_screen = entity.screen
+        chosen_screen = self.entity.game.screen if self.is_visible else self.entity.game.alpha_screen
 
         # Clear previous frame obj's location
         chosen_screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
         # determine entity's sightline end point and draw it
-        self.line_options.get(self.direction)(entity)
+        self.line_options.get(self.direction)()
 
         # Draw the line representing the rect
         self.rect = pygame_draw.line(
             chosen_screen,
             self.color,
-            entity.rect.center,
+            self.entity.rect.center,
             self.end,
-            1,
         )
 
 
-    def draw_up(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0], entity.rect.center[1] - entity.sight
+    def draw_up(self) -> None:
+        self.end = self.entity.rect.center[X], self.entity.rect.center[Y] - self.entity.sight
 
 
-    def draw_up_right(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5
+    def draw_up_right(self) -> None:
+        self.end = self.entity.rect.center[X] + self.entity.sight/1.5, self.entity.rect.center[Y] - self.entity.sight/1.5
 
 
-    def draw_right(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] + entity.sight, entity.rect.center[1]
+    def draw_right(self) -> None:
+        self.end = self.entity.rect.center[X] + self.entity.sight, self.entity.rect.center[Y]
 
 
-    def draw_down_right(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] + entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
+    def draw_right_down(self) -> None:
+        self.end = self.entity.rect.center[X] + self.entity.sight/1.5, self.entity.rect.center[Y] + self.entity.sight/1.5
 
 
-    def draw_down(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0], entity.rect.center[1] + entity.sight
+    def draw_down(self) -> None:
+        self.end = self.entity.rect.center[X], self.entity.rect.center[Y] + self.entity.sight
 
 
-    def draw_down_left(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] + entity.sight/1.5
+    def draw_down_left(self) -> None:
+        self.end = self.entity.rect.center[X] - self.entity.sight/1.5, self.entity.rect.center[Y] + self.entity.sight/1.5
 
 
-    def draw_left(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] - entity.sight, entity.rect.center[1]
+    def draw_left(self) -> None:
+        self.end = self.entity.rect.center[X] - self.entity.sight, self.entity.rect.center[Y]
 
 
-    def draw_up_left(self, entity: Entity) -> None:
-        self.end = entity.rect.center[0] - entity.sight/1.5, entity.rect.center[1] - entity.sight/1.5
+    def draw_left_up(self) -> None:
+        self.end = self.entity.rect.center[X] - self.entity.sight/1.5, self.entity.rect.center[Y] - self.entity.sight/1.5

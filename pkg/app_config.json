@@ -2,13 +2,13 @@
     "settings": {
         "sound": {
             "music": false,
-            "music_volume": "0.10",
-            "effect_volume": "0.05",
-            "menu_volume": "0.05"
+            "music_volume": 0.0,
+            "effect_volume": 0.1,
+            "menu_volume": "0.1"
         },
         "display": {
             "fps": 3000,
-            "fps_display": false,
+            "fps_display": true,
             "fullscreen": false,
             "resolution": "1280x720",
             "window_title": "Game Platform - "

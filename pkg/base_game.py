@@ -47,12 +47,20 @@ class BaseGame():
         self.title = app.title + self.TITLE
         display.set_caption(self.title)
 
+        # Game board grid size (also sprite size modifer)
+        self.grid_size = self.game_config["settings"]["gameplay"]["grid_size"]
+
+        # Game bar
+        self.game_bar_height = self.grid_size * 3
+
         # Game screens
         self.screen = screen
         self.alpha_screen = alpha_screen
         game_width = self.app.screen_width - (self.app.screen_width % self.grid_size)
         game_height = self.app.screen_height - (self.app.screen_height % self.grid_size)
-        self.screen_size = (game_width, game_height)
+        game_top = self.game_bar_height
+        game_left = 0
+        self.screen_size = (game_width, game_height, game_top, game_left)
 
         # Game object containers
         self.sprite_group = sprite.RenderUpdates()

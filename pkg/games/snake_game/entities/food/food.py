@@ -31,19 +31,19 @@ class Food(Entity):
     Food for the snake
     """
 
-    def __init__(self, game: "Game", screen_size: tuple[int, int]):
+    def __init__(self, game: "Game"):
         # Name for this type of object
         self.name = "food_"
 
         # Initilize parent init
-        super().__init__(game, screen_size, self.name)
+        super().__init__(game, self.name)
 
         # Where the food is located
-        x = self.screen_size[X] - randrange(
-            self.game.grid_size, self.screen_size[X], self.game.grid_size
+        x = self.game.screen_size[X] - randrange(
+            self.game.grid_size, self.game.screen_size[X], self.game.grid_size
         )
-        y = self.screen_size[Y] - randrange(
-            self.game.grid_size, self.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
+        y = self.game.screen_size[Y] - randrange(
+            self.game.grid_size, self.game.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
         )
         self.position = (x, y)
 

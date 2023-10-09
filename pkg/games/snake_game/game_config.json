@@ -9,6 +9,7 @@
             "ai_difficulty": 10,
             "ai_speed": 13.0,
             "teleporter": true,
+            "visible_sight_lines": false,
             "num_of_food": 6,
             "grid_size": 16
         },
