@@ -10,6 +10,7 @@
 """
 
 from json import dump as json_dump, load as json_load
+from os import path
 from typing import TYPE_CHECKING
 
 from pygame import (
@@ -89,10 +90,22 @@ class Menu():
         self.refresh = False
 
 
-    def _draw_rect_outline(self, rect, color, width=1):
+    def _draw_rect_outline(self, rect: Rect, color: tuple, width=1) -> None:
+        """_draw_rect_outline
+
+        Args:
+            rect ([type]): [description]
+            color (tuple): [description]. Defaults to WHITE.
+            width (int, optional): [description]. Defaults to 1.
+
+        """
+
         x, y, w, h = rect
-        width = max(width, 1)  # Draw at least one rect.
-        width = min(min(width, w//2), h//2)  # Don't overdraw.
+        # Draw at least one rect.
+        width = max(width, 1)
+
+        # Don't overdraw.
+        width = min(min(width, w//2), h//2)
 
         # This draws several smaller outlines inside the first outline. Invert
         # the direction if it should grow outwards.
@@ -102,18 +115,95 @@ class Menu():
 
     def render_button(
         self,
-        title,
-        virtical_position=1,
-        horizontal_position=1,
-        color=COLOR_WHITE,
-        relative_from="center",
-        clear_background=True,
-        h_offset=0,
-        w_offset=0,
-        screen=None,
-        has_outline=False,
-    ):
+        content: str,
+        virtical_position: int = 1,
+        horizontal_position: int = 1,
+        color: tuple = COLOR_WHITE,
+        relative_from: str = "center",
+        clear_background: bool = True,
+        h_offset: int = 0,
+        w_offset: int = 0,
+        screen = None,
+        has_outline: bool = False,
+    ) -> Rect:
         """render_button
+
+        Args:
+            content ([type]): [description]
+            virtical_position ([type]): [description]
+            color (tuple, optional): [description]. Defaults to WHITE.
+            h_offset (int, optional): [description]. Defaults to 0.
+            screen ([type], optional): [description]. Defaults to None.
+
+        Returns:
+            [Rect]: [description]
+        """
+
+        if screen:
+            chosen_screen = screen
+
+        else:
+            chosen_screen = self.app.game.screen
+
+        content = str(content)
+
+        if relative_from == "center":
+            position = (
+                self.app.game.screen_size[WIDTH] / 2 - (len((content)) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.screen_size[HEIGHT] / 2 - self.app.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "left":
+            position = (
+                (len((content)) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "right":
+            position = (
+                self.app.game.screen_size[WIDTH] - 20 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
+            )
+
+        elif relative_from == "top":
+            position = (
+                self.app.game.screen_size[WIDTH] / 2 + (len(content) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.game_font.size * virtical_position + w_offset
+            )
+
+        # clear out first
+        if clear_background:
+            chosen_screen.fill(COLOR_BLACK, (position[X], position[Y], (len(content) * self.app.game.game_font.size), self.app.game.game_font.size))
+
+        obj: Rect = self.app.game.game_font.render_to(
+            chosen_screen,
+            position,
+            content,
+            color
+        )
+
+        if has_outline:
+            outline_offset = 10
+            rect_pos = (position[X] - outline_offset, position[Y] - outline_offset, (len(content) * self.app.game.game_font.size) + outline_offset * 1.5, self.app.game.game_font.size + outline_offset * 1.5)
+            self._draw_rect_outline(rect_pos, COLOR_WHITE)
+            obj.update(rect_pos)
+
+        return obj
+
+
+    def render_text(
+        self,
+        content: str,
+        virtical_position: int = 1,
+        horizontal_position: int = 1,
+        color: tuple = COLOR_WHITE,
+        relative_from: str = "center",
+        clear_background: bool = True,
+        h_offset: int = 0,
+        w_offset: int = 0,
+        screen = None,
+    ) -> None:
+        """render_text
 
         Args:
             title ([type]): [description]
@@ -132,18 +222,17 @@ class Menu():
         else:
             chosen_screen = self.app.game.screen
 
-        # Render the Display text
-        text_str = str(title)
+        content = str(content)
 
         if relative_from == "center":
             position = (
-                self.app.game.screen_size[WIDTH] / 2 - (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.screen_size[WIDTH] / 2 - (len(content) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
                 self.app.game.screen_size[HEIGHT] / 2 - self.app.game.game_font.size * virtical_position + w_offset
             )
 
         elif relative_from == "left":
             position = (
-                (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                (len(content) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
                 self.app.game.game_font.size * virtical_position + w_offset
             )
 
@@ -155,28 +244,20 @@ class Menu():
 
         elif relative_from == "top":
             position = (
-                self.app.game.screen_size[WIDTH] / 2 + (len(text_str) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
+                self.app.game.screen_size[WIDTH] / 2 + (len(content) * self.app.game.game_font.size) / 2 * horizontal_position + h_offset,
                 self.app.game.game_font.size * virtical_position + w_offset
             )
 
         # clear out first
         if clear_background:
-            chosen_screen.fill(COLOR_BLACK, (position[X], position[Y], (len(text_str) * self.app.game.game_font.size), self.app.game.game_font.size))
+            chosen_screen.fill(COLOR_BLACK, (position[X], position[Y], (len(content) * self.app.game.game_font.size), self.app.game.game_font.size))
 
-        obj: Rect = self.app.game.game_font.render_to(
+        self.app.game.game_font.render_to(
             chosen_screen,
             position,
-            text_str,
+            content,
             color
         )
-
-        if has_outline:
-            outline_offset = 10
-            rect_pos = (position[X] - outline_offset, position[Y] - outline_offset, (len(text_str) * self.app.game.game_font.size) + outline_offset * 1.5, self.app.game.game_font.size + outline_offset * 1.5)
-            self._draw_rect_outline(rect_pos, COLOR_WHITE)
-            obj.update(rect_pos)
-
-        return obj
 
 
     def save_settings(self):
@@ -206,6 +287,21 @@ class Menu():
 
         with open(self.app.game.leaderboard_file_path, "w", encoding="utf-8") as _file:
             json_dump(self.app.game.leaderboard, _file, ensure_ascii=False, indent=4)
+
+
+    def reload_settings(self):
+        """save_leaderboard
+
+        save_leaderboard does stuff
+        """
+
+        # App config file
+        with open(self.app.app_config_file_path, encoding="utf8") as json_data_file:
+            self.app.app_config = json_load(json_data_file)
+
+         # Game config file
+        with open(self.app.game.game_config_file_path, encoding="utf8") as json_data_file:
+            self.app.game.game_config = json_load(json_data_file)
 
 
     def toggle_setting(self, config, page, setting_name):
@@ -361,10 +457,10 @@ class Menu():
         self.refresh = True
 
 
-    def change_keybinding(self, action):
-        """ change_keybinding
+    def select_keybinding(self, action):
+        """ select_keybinding
 
-        change_keybinding does stuff
+        select_keybinding does stuff
         """
 
         self.app.keybinding_switch = (True, action)

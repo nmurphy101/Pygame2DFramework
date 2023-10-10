@@ -54,7 +54,12 @@ def gameplay_menu(self: Menu):
 
         # Render the Return button
         back_obj = self.render_button("Back", -8, h_offset=-125, has_outline=True)
-        menu_builder.append((back_obj, self.menu_options[MENU_SETTINGS], MENU_GAMEPLAY, None))
+
+        def back_action():
+            self.reload_settings()
+            self.menu_options[MENU_SETTINGS]()
+
+        menu_builder.append((back_obj, back_action, MENU_GAMEPLAY, None))
 
         # Render all the gameplay buttons
         gameplay_config = self.app.game.game_config["settings"]["gameplay"]
@@ -72,20 +77,20 @@ def gameplay_menu(self: Menu):
 
             if isinstance(value, bool):
                 padding = largest_setting_len - len(setting)
-                _ = self.render_button(f"{padding*' '}{setting}:", index, h_offset=row_mod-210, w_offset=15, clear_background=False)
-                button = self.render_button(value, index, color=COLOR_PURPLE, h_offset=row_mod+195, w_offset=15, clear_background=False, has_outline=True)
+                self.render_text(f"{padding*' '}{setting}:", index, h_offset=row_mod-210, w_offset=15, clear_background=False)
+                button = self.render_button(value, index, color=COLOR_PURPLE, h_offset=row_mod+195, w_offset=15, clear_background=False)
                 menu_builder.append((button, self.toggle_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))
 
             elif isinstance(value, int) or isinstance(value, float):
                 padding = largest_setting_len - len(setting)
-                _ = self.render_button(f"{padding*' '}{setting}:", index, h_offset=row_mod-210, w_offset=15, clear_background=False)
-                _ = self.render_button(float(value), index, color=COLOR_PURPLE, h_offset=row_mod+195, w_offset=15, clear_background=False)
+                self.render_text(f"{padding*' '}{setting}:", index, h_offset=row_mod-210, w_offset=15, clear_background=False)
+                self.render_text(float(value), index, color=COLOR_PURPLE, h_offset=row_mod+195, w_offset=15, clear_background=False)
                 index -= 1.5
                 # Render the Volume Up button
-                up_obj = self.render_button("Up", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod+50, clear_background=False, has_outline=True)
+                up_obj = self.render_button("Up", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod+50, clear_background=False)
                 menu_builder.append((up_obj,  self.increase_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))
                 # Render the Volume Down button
-                down_obj = self.render_button("Down", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod-100, clear_background=False, has_outline=True)
+                down_obj = self.render_button("Down", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod-100, clear_background=False)
                 menu_builder.append((down_obj, self.decrease_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))
 
             index -= 2

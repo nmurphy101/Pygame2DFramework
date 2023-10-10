@@ -2,12 +2,12 @@
     "settings": {
         "gameplay": {
             "human_player": false,
-            "inv_player": false,
+            "killable_player": false,
             "player_speed": 0.7,
             "num_ai": 1,
-            "inv_ai": true,
+            "killable_ai": true,
             "ai_difficulty": 10,
-            "ai_speed": 13.0,
+            "ai_speed": 5,
             "teleporter": true,
             "visible_sight_lines": false,
             "num_of_food": 6,

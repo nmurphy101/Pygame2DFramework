@@ -46,7 +46,7 @@ def pause_menu(self: Menu):
     self.app.pause_game_music = True
 
     # Render the paused text
-    _ = self.render_button("-Paused-", 10, color=COLOR_RED)
+    self.render_text("-Paused-", 10, color=COLOR_RED)
 
     # Get the player score
     score = 0
@@ -55,7 +55,7 @@ def pause_menu(self: Menu):
             score = obj.score
 
     # Render the score
-    _ = self.render_button("Score: " + str(score), 8, color=COLOR_RED)
+    self.render_text("Score: " + str(score), 8, color=COLOR_RED)
 
     # Render the quit button
     resume_obj = self.render_button("Resume", 1, has_outline=True)

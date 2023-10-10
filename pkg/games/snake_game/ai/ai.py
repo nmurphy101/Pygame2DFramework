@@ -31,6 +31,7 @@ from ..constants import (
     X,
     Y,
     NAME,
+    POS_IDX,
     WIDTH,
     HEIGHT,
     TOP,
@@ -50,10 +51,10 @@ class DecisionBox:
 
     def __init__(self, game: "Game"):
         self.game = game
-        self.ai_difficulty = -10
-        self.time_to_chase_target = -0
-        self.portal_use_difficulty = -1
-        self.farsight_use_difficulty = -1
+        self.ai_difficulty = 10
+        self.time_to_chase_target = 0
+        self.portal_use_difficulty = 1
+        self.farsight_use_difficulty = 1
 
 
     def decide_direction(self, ai_entity: Entity, target: tuple, ai_difficulty:int=None) -> int:
@@ -76,7 +77,7 @@ class DecisionBox:
         # Use intent algorithm depending on ai_difficulty to decide what direction to move
         direction = self.situational_intent(ai_entity, target)
 
-        # print(f"Got Direction: {direction}")
+        print(f"Got Direction: {direction}")
 
         return direction
 
@@ -96,17 +97,17 @@ class DecisionBox:
         intent = None
 
         # Equal, Right, or left  Intent
-        if ai_entity.position[X] < target[X]:
+        if ai_entity.position[X] < target[POS_IDX][X]:
             intent = RIGHT
 
-        elif ai_entity.position[X] > target[X]:
+        elif ai_entity.position[X] > target[POS_IDX][X]:
             intent = LEFT
 
         # Equal, down, or up  Intent
-        elif ai_entity.position[Y] < target[Y]:
+        elif ai_entity.position[Y] < target[POS_IDX][Y]:
             intent = DOWN
 
-        elif ai_entity.position[Y] > target[Y]:
+        elif ai_entity.position[Y] > target[POS_IDX][Y]:
             intent = UP
 
         intent = self.check_intent(ai_entity, intent)
@@ -131,55 +132,55 @@ class DecisionBox:
         intent = None
         # print(ai_entity.secondary_target)
         if ai_entity.secondary_target == None:
-            # Equal, down, or up  Intent
-            if ai_entity.position[Y] < target[Y]:
+            # down, or up  Intent
+            if ai_entity.position[Y] < target[POS_IDX][Y]:
                 intent = DOWN
 
-            elif ai_entity.position[Y] > target[Y]:
+            elif ai_entity.position[Y] > target[POS_IDX][Y]:
                 intent = UP
 
-            # Equal, Right, or left  Intent
-            elif ai_entity.position[X] < target[X]:
+            # Right, or left  Intent
+            elif ai_entity.position[X] < target[POS_IDX][X]:
                 intent = RIGHT
 
-            elif ai_entity.position[X] > target[X]:
+            elif ai_entity.position[X] > target[POS_IDX][X]:
                 intent = LEFT
 
         else:
             # Go for secondary target within timeframe
             if datetime.now() <= ai_entity.since_secondary_target + timedelta(seconds=self.time_to_chase_target):
-                # Equal, down, or up  Intent
-                if ai_entity.position[Y] < ai_entity.secondary_target[Y]:
+                # down, or up  Intent
+                if ai_entity.position[Y] < ai_entity.secondary_target[POS_IDX][Y]:
                     intent = DOWN
 
-                elif ai_entity.position[Y] > ai_entity.secondary_target[Y]:
+                elif ai_entity.position[Y] > ai_entity.secondary_target[POS_IDX][Y]:
                     intent = UP
 
-                # Equal, Right, or left  Intent
-                elif ai_entity.position[X] < ai_entity.secondary_target[X]:
+                # Right, or left  Intent
+                elif ai_entity.position[X] < ai_entity.secondary_target[POS_IDX][X]:
                     intent = RIGHT
 
-                elif ai_entity.position[X] > ai_entity.secondary_target[X]:
+                elif ai_entity.position[X] > ai_entity.secondary_target[POS_IDX][X]:
                     intent = LEFT
 
             else:
-                # Equal, down, or up  Intent
-                if ai_entity.position[Y] < target[Y]:
+                # down, or up  Intent
+                if ai_entity.position[Y] < target[POS_IDX][Y]:
                     intent = DOWN
 
-                elif ai_entity.position[Y] > target[Y]:
+                elif ai_entity.position[Y] > target[POS_IDX][Y]:
                     intent = UP
 
-                # Equal, Right, or left  Intent
-                elif ai_entity.position[X] < target[X]:
+                # Right, or left  Intent
+                elif ai_entity.position[X] < target[POS_IDX][X]:
                     intent = RIGHT
 
-                elif ai_entity.position[X] > target[X]:
+                elif ai_entity.position[X] > target[POS_IDX][X]:
                     intent = LEFT
 
         intent = self.check_intent(ai_entity, intent)
 
-        # print(f"Got situational intent: {intent}")
+        print(f"Got situational intent: {intent}")
 
         return intent
 
@@ -195,7 +196,7 @@ class DecisionBox:
             [int]: [description]
         """
 
-        # print("Checking intent: ", intent)
+        print("Checking intent: ", intent)
         # Loop to check intent
         self.reset_sight_lines(ai_entity)
         for obj in self.game.sprite_group:
@@ -212,12 +213,14 @@ class DecisionBox:
                 try:
                     for child in obj.children:
                         intent = self._obj_check_intent(child, ai_entity, intent)
+
                 except RuntimeError as error:
                     if error == "deque mutated during iteration":
                         pass
+
                     else:
                         frameinfo = getframeinfo(currentframe())
-                        logging_warning(f"{frameinfo.filename}::{frameinfo.lineno}: ERROR: {error}")
+                        logging_warning(f"{frameinfo.filename}::{frameinfo.lineno}: WARNING: {error}")
 
         return intent
 
@@ -250,32 +253,33 @@ class DecisionBox:
             [None]: [description]
         """
 
-        for line in ai_entity.sight_lines_diag:
-            # Check the sight lines for a open direction
-            if Rect.collidepoint(other_object.rect, line.end):
-                line.open = False
+        # for diag_line in ai_entity.sight_lines_diag:
+        #     # Check the sight lines for a open direction
+        #     if Rect.colliderect(other_object.rect, diag_line.rect):
+        #         diag_line.open = False
 
-            # Edge of screen detection
-            # top
-            elif line.end[Y] <= self.game.screen_size[TOP]:
-                line.open = False
+        #     # Edge of screen detection
+        #     # top
+        #     elif diag_line.position[Y] <= self.game.screen_size[TOP]:
+        #         diag_line.open = False
 
-            # bottom
-            elif line.end[Y] >= self.game.screen_size[HEIGHT]:
-                line.open = False
+        #     # bottom
+        #     elif diag_line.position[Y] >= self.game.screen_size[HEIGHT]:
+        #         diag_line.open = False
 
-            # left
-            elif line.end[X] <= self.game.screen_size[LEFT]:
-                line.open = False
+        #     # left
+        #     elif diag_line.position[X] <= self.game.screen_size[LEFT]:
+        #         diag_line.open = False
 
-            # right
-            elif line.end[X] >= self.game.screen_size[WIDTH]:
-                line.open = False
+        #     # right
+        #     elif diag_line.position[X] >= self.game.screen_size[WIDTH]:
+        #         diag_line.open = False
 
         # Verify intention with sight lines
         for line in ai_entity.sight_lines:
             # Check the sight lines for a open direction
             if Rect.colliderect(other_object.rect, line.rect):
+                print(f"It sees the collision between {other_object.id} and self on line {line.direction}")
                 # if not "segment" in other_object.id:
                 # print(f"cardinal line collision {other_object.id} and {line.direction}")
                 # Will Ai see and use portals?
@@ -288,50 +292,50 @@ class DecisionBox:
 
             # Edge of screen detection
             # top
-            elif line.direction == UP and line.end[Y] <= (self.game.screen_size[TOP] - ai_entity.size):
+            elif line.direction == UP and line.position[Y] <= (self.game.screen_size[TOP] - ai_entity.size):
                 line.open = False
                 continue
 
             # bottom
-            elif line.direction == DOWN and line.end[Y] >= (self.game.screen_size[HEIGHT] + ai_entity.size):
+            elif line.direction == DOWN and line.position[Y] >= (self.game.screen_size[HEIGHT] + ai_entity.size):
                 line.open = False
                 continue
 
             # left
-            elif line.direction == LEFT and line.end[X] <= (self.game.screen_size[LEFT] - ai_entity.size):
+            elif line.direction == LEFT and line.position[X] <= (self.game.screen_size[LEFT] - ai_entity.size):
                 line.open = False
                 continue
 
             # right
-            elif line.direction == RIGHT and line.end[X] >= (self.game.screen_size[WIDTH] + ai_entity.size):
+            elif line.direction == RIGHT and line.position[X] >= (self.game.screen_size[WIDTH] + ai_entity.size):
                 line.open = False
                 continue
 
-            # Verify with farsight sight lines
-            if ai_entity.sight_lines_diag and self.ai_difficulty >= self.farsight_use_difficulty:
-                if line.direction == UP and intent == UP:
-                    if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
-                        line.open = False
-                        # input(f"Press to continue: 0 - {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open} and {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open}")
-                        continue
+            # # Verify with farsight sight lines if available
+            # if self.ai_difficulty >= self.farsight_use_difficulty:
+            #     if line.direction == UP and intent == UP:
+            #         if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
+            #             line.open = False
+            #             # input(f"Press to continue: 0 - {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open} and {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open}")
+            #             continue
 
-                elif line.direction == DOWN and intent == DOWN:
-                    if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
-                        line.open = False
-                        # input(f"Press to continue: 2 - {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open} and {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open}")
-                        continue
+            #     elif line.direction == DOWN and intent == DOWN:
+            #         if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
+            #             line.open = False
+            #             # input(f"Press to continue: 2 - {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open} and {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open}")
+            #             continue
 
-                elif line.direction == LEFT and intent == LEFT:
-                    if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
-                        line.open = False
-                        # input(f"Press to continue: 3 - {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open} and {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open}")
-                        continue
+            #     elif line.direction == LEFT and intent == LEFT:
+            #         if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
+            #             line.open = False
+            #             # input(f"Press to continue: 3 - {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open} and {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open}")
+            #             continue
 
-                elif line.direction == RIGHT and intent == RIGHT:
-                    if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
-                        line.open = False
-                        # input(f"Press to continue: 1 - {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open} and {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open}")
-                        continue
+            #     elif line.direction == RIGHT and intent == RIGHT:
+            #         if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
+            #             line.open = False
+            #             # input(f"Press to continue: 1 - {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open} and {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open}")
+            #             continue
 
 
     def reset_sight_lines(self, ai_entity: Entity) -> None:
@@ -364,29 +368,30 @@ class DecisionBox:
 
         # Check which open direction to use
         for line in ai_entity.sight_lines:
+            print(f"Line:{line.direction} is open:{line.open}")
             if intent == line.direction and line.open:
                 if line.direction == UP and ai_entity.direction != DOWN:
-                    # print(f"Original Line {line.direction} is open")
+                    print(f"Original Line {line.direction} is open")
                     # break inner line for-loop
                     break
 
                 elif line.direction == DOWN and ai_entity.direction != UP:
-                    # print(f"Original Line {line.direction} is open")
+                    print(f"Original Line {line.direction} is open")
                     # break inner line for-loop
                     break
 
                 elif line.direction == LEFT and ai_entity.direction != RIGHT:
-                    # print(f"Original Line {line.direction} is open")
+                    print(f"Original Line {line.direction} is open")
                     # break inner line for-loop
                     break
 
                 elif line.direction == RIGHT and ai_entity.direction != LEFT:
-                    # print(f"Original Line {line.direction} is open")
+                    print(f"Original Line {line.direction} is open")
                     # break inner line for-loop
                     break
 
-                # else:
-                    # print(f"Original Line {line.direction} is closed")
+                else:
+                    print(f"Original Line {line.direction} is closed")
 
             elif intent == line.direction and not line.open:
                 # Find a different line to use
@@ -394,30 +399,30 @@ class DecisionBox:
                     if intent != line2.direction and line2.open:
                         if line2.direction == UP and ai_entity.direction != DOWN:
                             intent = line2.direction
-                            # print(f"New Line {line.direction} is open")
+                            print(f"New Line {line2.direction} is open")
                             # break inner line for-loop
                             break
 
                         elif line2.direction == DOWN and ai_entity.direction != UP:
                             intent = line2.direction
-                            # print(f"New Line {line.direction} is open")
+                            print(f"New Line {line2.direction} is open")
                             # break inner line for-loop
                             break
 
                         elif line2.direction == LEFT and ai_entity.direction != RIGHT:
                             intent = line2.direction
-                            # print(f"New Line {line.direction} is open")
+                            print(f"New Line {line2.direction} is open")
                             # break inner line for-loop
                             break
 
                         elif line2.direction == RIGHT and ai_entity.direction != LEFT:
                             intent = line2.direction
-                            # print(f"New Line {line.direction} is open")
+                            print(f"New Line {line2.direction} is open")
                             # break inner line for-loop
                             break
 
-                        # else:
-                            # print("Couldn't get a different open line")
+                        else:
+                            print("Couldn't get a different open line")
 
         return intent
 
@@ -434,28 +439,28 @@ class DecisionBox:
         """
 
         if portal.parent:
-            dist_other_portal_to_target = math_hypot(ai_entity.target[X] - portal.parent.position[X], ai_entity.target[Y] - portal.parent.position[Y])
-            dist_self_to_target = math_hypot(ai_entity.target[X] - ai_entity.position[X], ai_entity.target[Y] - ai_entity.position[Y])
+            dist_other_portal_to_target = math_hypot(ai_entity.target[POS_IDX][X] - portal.parent.position[X], ai_entity.target[POS_IDX][Y] - portal.parent.position[Y])
+            dist_self_to_target = math_hypot(ai_entity.target[POS_IDX][X] - ai_entity.position[X], ai_entity.target[POS_IDX][Y] - ai_entity.position[Y])
 
             if dist_other_portal_to_target < dist_self_to_target:
                 if ai_entity.secondary_target:
                     return True
 
-                ai_entity.secondary_target = portal.position
+                ai_entity.secondary_target = (portal.position, 0, "Portal")
                 self.situational_intent(ai_entity, ai_entity.target)
 
             else:
                 return False
 
         else:
-            dist_other_portal_to_target = math_hypot(ai_entity.target[X] - portal.children[0].position[X], ai_entity.target[Y] - portal.children[0].position[Y])
-            dist_self_to_target = math_hypot(ai_entity.target[X] - ai_entity.position[X], ai_entity.target[Y] - ai_entity.position[Y])
+            dist_other_portal_to_target = math_hypot(ai_entity.target[POS_IDX][X] - portal.children[0].position[X], ai_entity.target[POS_IDX][Y] - portal.children[0].position[Y])
+            dist_self_to_target = math_hypot(ai_entity.target[POS_IDX][X] - ai_entity.position[X], ai_entity.target[POS_IDX][Y] - ai_entity.position[Y])
 
             if dist_other_portal_to_target < dist_self_to_target:
                 if ai_entity.secondary_target:
                     return True
 
-                ai_entity.secondary_target = portal.position
+                ai_entity.secondary_target = (portal.position, 0, "Portal")
                 self.situational_intent(ai_entity, ai_entity.target)
 
             else:

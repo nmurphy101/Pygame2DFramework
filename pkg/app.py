@@ -47,14 +47,9 @@ from .constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
-    CONFIG_FILE_NAME,
+    CONFIG_APP_FILE_NAME,
     LOG_FILE_NAME,
-    MENU_HOME,
     MENU_PAUSE,
-    MENU_SETTINGS,
-    MENU_GAME_OVER,
-    MENU_KEYBINDING,
-    MENU_GAMEPLAY,
     MOUSE_DOWN_MAP,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
@@ -66,7 +61,9 @@ from .menus.menus import Menu
 from .app_config import AppConfig
 
 
+# Define custom events
 NEXT = USEREVENT + 1
+MOUSEHOVER = USEREVENT + 2
 
 
 def _get_log_level(json_config: AppConfig):
@@ -100,7 +97,7 @@ class App():
         self.set_up_audio_mixer()
 
         # App config file
-        self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_FILE_NAME)
+        self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_APP_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
             self.app_config: AppConfig = json_load(json_data_file)
 
@@ -153,9 +150,6 @@ class App():
         self.menu = Menu(self)
         self.pause_menu_options = {}
 
-        # Define custom events
-        MOUSEHOVER = USEREVENT + 1
-
         # Event settings
         self.event_options = {
             QUIT: lambda **kwargs: self.quit(**kwargs),
@@ -196,12 +190,13 @@ class App():
         # App loop
         while self.running:
             # Send event NEXT every time music tracks ends
-            if self.is_audio:
-                mixer.music.set_endevent(NEXT)
+            mixer.music.set_endevent(NEXT)
 
             chosen_menu = None
             # Go into gameplay loop if not in a menu
             if self.menu.menu_option is None:
+                # Clear previous frame render
+                # self.game.screen.fill(COLOR_BLACK)
 
                 # Gameplay logic/drawing this turn/tick
                 self.game.play_loop()
@@ -322,9 +317,9 @@ class App():
         fps_counter_display for the game
         """
 
-        fps = str(int(self.clock.get_fps()))
+        fps = str(int(self.clock.get_fps()))[0:3].rjust(3, "0")
 
-        _ = self.menu.render_button(f"now:{fps}", 1.6, 12.2, relative_from="right")
+        _ = self.menu.render_text(f"now:{fps}", 1.6, 12.2, relative_from="right")
 
         self.fps_list.append(int(fps))
 
@@ -333,12 +328,14 @@ class App():
             self.fps_list.pop(0)
 
         # Average FPS
-        avg_fps = str(round(mean(self.fps_list)))
-        _ = self.menu.render_button(f"avg:{avg_fps}", 2.6, 12.2, relative_from="right")
+        avg_fps = str(round(mean(self.fps_list)))[0:3].rjust(3, "0")
+        _ = self.menu.render_text(f"avg:{avg_fps}", 2.6, 12.2, relative_from="right")
 
         # High and low FPS
-        _ = self.menu.render_button(f"H:{max(self.fps_list)}", 3.7, 9, relative_from="right")
-        _ = self.menu.render_button(f"L:{min(self.fps_list)}", 4.7, 8.8, relative_from="right")
+        high_fps = str(max(self.fps_list)).rjust(3, "0")
+        low_fps = str(min(self.fps_list)).rjust(3, "0")
+        self.menu.render_text(f"H:{high_fps}", 3.7, 9, relative_from="right")
+        self.menu.render_text(f"L:{low_fps}", 4.7, 8.8, relative_from="right")
 
 
     def event_checks(self, current_menu: int) -> None:
@@ -417,7 +414,7 @@ class App():
 
         # print("changing keybinding for/new_key", action, new_key)
         self.game.game_config["settings"]["keybindings"][action] = new_key.upper()
-        self.menu.save_settings()
+        self.menu.refresh = True
 
 
     def key_down(self, **kwargs) -> None:
@@ -429,7 +426,7 @@ class App():
 
         # Pressed escape to pause/unpause/back
         if kwargs["event"].key == K_ESCAPE and self.game:
-            print(self.menu.menu_option)
+            # print(self.menu.menu_option)
             if self.menu.menu_option == None:
                 self.play_ui_sound(1)
 
@@ -455,18 +452,14 @@ class App():
         Args:
             kwargs ([args]): [description]
         """
-        print(kwargs)
-        if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
-            print("mouse down")
-            for button in kwargs["menu"]:
-                button_obj, button_action, button_prev_menu, button_action_param = button
-                if self.game:
-                    # button_surface = Surface((button_obj.size))
-                    # button_surface.set_alpha(128)
-                    # button_surface.fill(255, 255, 255)
-                    # self.game.surface.blit(button_surface, button_obj.topleft)
-                    pygame_draw.rect(self.alpha_screen, (255, 255, 255, 0), button_obj, 0)
 
+        if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
+            # print("mouse down")
+            for button in kwargs["menu"]:
+                button_obj, _, _, _ = button
+                if self.game:
+                    # do some button modification to indicate you're clicking it here
+                    pass
 
 
     def mouse_up(self, **kwargs) -> None:
@@ -498,6 +491,9 @@ class App():
         Args:
             kwargs ([args]): [description]
         """
+
+        # do some button modification to indicate you're hovering it here
+        # possibly send an event in some other function that checks for mouse + button collision
         pass
 
 
@@ -524,7 +520,7 @@ class App():
         """
 
         num = self.ui_sound_options.get(action, 0)
-        print(f"Sound num: {num}")
+        # print(f"Sound num: {num}")
         self.play_ui_sound(num)
 
 

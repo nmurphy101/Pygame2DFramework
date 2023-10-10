@@ -16,8 +16,8 @@ from typing import TypedDict
 class GameplayConfig(TypedDict):
     human_player: bool
     teleporter: bool
-    inv_player: bool
-    inv_ai: bool
+    killable_player: bool
+    killable_ai: bool
     num_ai: int
     ai_difficulty: int
     ai_speed: int

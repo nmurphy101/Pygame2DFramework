@@ -40,7 +40,7 @@ def game_over_menu(self: Menu):
             mixer.music.stop()
 
         # Render the Game Over text
-        _ = self.render_button("Game Over", 10, color=COLOR_RED)
+        self.render_text("Game Over", 10, color=COLOR_RED)
 
         # Get the player score
         score = 0
@@ -49,7 +49,7 @@ def game_over_menu(self: Menu):
                 score = value["score"]
 
         # Render the score
-        _ = self.render_button('Score: ' + str(score), 8, color=COLOR_RED)
+        self.render_text('Score: ' + str(score), 8, color=COLOR_RED)
 
         # Render the restart button
         restart_obj = self.render_button("Restart", 1, has_outline=True)

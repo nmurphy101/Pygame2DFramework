@@ -12,7 +12,7 @@
 
 
 # filenames
-CONFIG_FILE_NAME = "app_config.json"
+CONFIG_APP_FILE_NAME = "app_config.json"
 LOG_FILE_NAME = "output.log"
 
 # Font

@@ -46,16 +46,21 @@ def keybinding_menu(self: Menu):
 
         # Render the Return button
         back_obj = self.render_button("Back", -8, h_offset=-125, has_outline=True)
-        menu_builder.append((back_obj, self.menu_options[MENU_SETTINGS], MENU_KEYBINDING, None))
+
+        def back_action():
+            self.reload_settings()
+            self.menu_options[MENU_SETTINGS]()
+
+        menu_builder.append((back_obj, back_action, MENU_KEYBINDING, None))
 
         # Render all the keybinding buttons
         keybindings = self.app.game.game_config["settings"]["keybindings"]
 
         index = 4
         for action, key in keybindings.items():
-            _ = self.render_button(f"{action.replace('_', ' ')}:", index, h_offset=-110, w_offset=20)
-            button = self.render_button(key, index, color=COLOR_PURPLE, h_offset=145, w_offset=20, has_outline=True)
-            menu_builder.append((button, self.change_keybinding, MENU_KEYBINDING, action))
+            self.render_text(f"{action.replace('_', ' ')}:", index, h_offset=-110, w_offset=35)
+            button = self.render_button(key, index, color=COLOR_PURPLE, h_offset=145, w_offset=35)
+            menu_builder.append((button, self.select_keybinding, MENU_KEYBINDING, action))
             index -= 1.5
 
         self.menu = menu_builder

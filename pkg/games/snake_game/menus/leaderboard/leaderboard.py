@@ -33,19 +33,14 @@ def leaderboard_menu(self: Menu):
         self.menu_option = MENU_LEADERBOARD
 
         # Render the Leaderboard text
-        _ = self.render_button("Leaderboard", 10, color=COLOR_RED)
-
-        # initilize menu
-        menu_builder = []
+        self.render_text("Leaderboard", 10, color=COLOR_RED)
 
         # Render the Return button
         back_obj = self.render_button("Back", -9, has_outline=True)
-        menu_builder.append((back_obj, self.menu_options[MENU_HOME], MENU_LEADERBOARD, None))
 
         # Render the highscore
         highscore = self.app.game.leaderboard["highscore"]
-        highscore_obj = self.render_button(f"HIGH-SCORE: {highscore}", 8)
-        menu_builder.append((highscore_obj, None, MENU_LEADERBOARD, None))
+        _ = self.render_text(f"HIGH-SCORE: {highscore}", 8)
 
         # Render the top 10 scores
         self.app.game.leaderboard["top_ten"].sort(reverse=True)
@@ -53,12 +48,14 @@ def leaderboard_menu(self: Menu):
         index = 7
         ranking = 1
         for score in self.app.game.leaderboard["top_ten"]:
-            _ = self.render_button(f"{ranking}:", index, w_offset=20, h_offset=-50)
-            _ = self.render_button(score, index, w_offset=20, h_offset=50)
+            self.render_text(f"{ranking}:", index, w_offset=20, h_offset=-50)
+            self.render_text(score, index, w_offset=20, h_offset=50)
             index -= 1.5
             ranking += 1
 
-        self.menu = menu_builder
+        self.menu = [
+            (back_obj, self.menu_options[MENU_HOME], MENU_LEADERBOARD, None)
+        ]
 
         self.refresh = False
 

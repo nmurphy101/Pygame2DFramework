@@ -12,7 +12,10 @@
 
 from datetime import datetime
 from gc import collect as gc_collect
-from logging import warning as logging_warning
+from logging import (
+    warning as logging_warning,
+    info as logging_info,
+)
 from random import randrange
 from typing import Deque, TYPE_CHECKING
 from uuid import uuid4
@@ -35,6 +38,8 @@ from pygame.sprite import Sprite
 from ..constants import (
     COLOR_BLACK,
     MENU_GAME_OVER,
+    ENTITY,
+    CHILD,
     UP,
     RIGHT,
     DOWN,
@@ -104,7 +109,7 @@ class Entity(Sprite):
 
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
-        self.speed_mod = 1
+        self.speed_mod = 0
         self.base_speed = 30
         self.time_last_moved = datetime.now()
 
@@ -164,13 +169,8 @@ class Entity(Sprite):
         update does stuff
         """
 
-        # try to choose a direction if entity can
-        self.choose_direction()
-
-        # Try to move if entity can
-        updated = self.move()
-
-        return updated, False
+        # place hitbox at position
+        self.rect.topleft = self.position
 
 
     def draw(self, updated_refresh: tuple[bool, bool]) -> None:
@@ -180,9 +180,7 @@ class Entity(Sprite):
         """
 
         # render if alive and moved
-        if self.is_alive and self.position != self.prev_position:
-            # place hitbox at position
-            self.rect.topleft = self.position
+        if self.is_alive and  (updated_refresh[ENTITY] or updated_refresh[CHILD]):
 
             # Render the entity based on it's image and position
             self.game.screen.blit(self.image, self.position)
@@ -191,8 +189,8 @@ class Entity(Sprite):
             for line in self.sight_lines:
                 line.draw()
 
-            for line in self.sight_lines_diag:
-                line.draw()
+            # for line in self.sight_lines_diag:
+            #     line.draw()
 
             # Draw each child if there are any
             for child in self.children:
@@ -245,7 +243,8 @@ class Entity(Sprite):
         """
 
         if self.is_killable:
-            # print(f"{self.id} {death_reason}")
+            logging_info(f"{self.id}: {death_reason}")
+            print((f"{self.id}: {death_reason}"))
 
             # Play death sound
             if self.game.app.is_audio:
@@ -274,17 +273,17 @@ class Entity(Sprite):
                 if self.children:
                     for child in self.children:
                         self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                        child.die(f"Parent {self.id} died")
                         child.kill()
-                    self.children = None
+                self.children = None
 
                 self.kill()
 
-            # Clear previous frame render (from menu)
-            # self.game.screen.fill(COLOR_BLACK)
+            input("press enter to continue from death")
 
             # draw the object
-            for obj in self.game.sprite_group:
-                obj.draw((False, True))
+            # for obj in self.game.sprite_group:
+            #     obj.draw((False, True))
 
             # Free unreferenced memory
             gc_collect()
@@ -306,19 +305,22 @@ class Entity(Sprite):
 
             # Allow for early termination of checks
             while not collision:
-                # Make sure not checking collision with self
-                if self != obj and updated:
-                    # Collision check between self and other obj
-                    collision = self.check_obj_collision(obj)
+                # Skip collision checks if not updated
+                if not updated: break
 
+                # Make sure not checking collision with self
+                if self != obj:
                     # Screen edge collision check
                     collision = self.check_edge_collision()
 
-                # Collision check between self and obj's children even if self=obj
+                    # Collision check between self and other obj
+                    collision = self.check_obj_collision(obj)
+
+                # Collision check between self and obj's children even if self is obj
                 collision = self.check_child_collision(obj)
 
                 # Always exit the while loop at the end
-                collision = True
+                break
 
 
     def check_edge_collision(self) -> bool:
@@ -530,29 +532,31 @@ class Line(Sprite):
         self.is_visible = self.entity.game.game_config["settings"]["gameplay"]["visible_sight_lines"]
         self.color = (255, 105, 180)
         self.direction = direction
-        self.end = (0, 0)
+        self.position = (0, 0)
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
 
         # determine entity's sightline end point
         self.line_options = {
             UP: lambda *args: self.draw_up(*args),
-            UP_RIGHT: lambda *args: self.draw_up_right(*args),
+            UP_RIGHT: lambda *args: None,
             RIGHT: lambda *args: self.draw_right(*args),
-            RIGHT_DOWN: lambda *args: self.draw_right_down(*args),
+            RIGHT_DOWN: lambda *args: None,
             DOWN: lambda *args: self.draw_down(*args),
-            DOWN_LEFT: lambda *args: self.draw_down_left(*args),
+            DOWN_LEFT: lambda *args:None,
             LEFT: lambda *args: self.draw_left(*args),
-            LEFT_UP: lambda *args: self.draw_left_up(*args),
+            LEFT_UP: lambda *args: None,
         }
 
         # Choose the screen to draw to
         chosen_screen = self.entity.game.screen if self.is_visible else self.entity.game.alpha_screen
 
-        # Draw the line representing the rect
-        self.rect = pygame_draw.line(
+        # Draw the rectangle representing the sightline
+        self.rect = pygame_draw.rect(
             chosen_screen,
             self.color,
-            self.entity.rect.center,
-            self.end,
+            (self.position, (self.width, self.height)),
+            0
         )
 
 
@@ -568,45 +572,61 @@ class Line(Sprite):
         # Clear previous frame obj's location
         chosen_screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
-        # determine entity's sightline end point and draw it
+        # determine entity's sightline position
         self.line_options.get(self.direction)()
 
-        # Draw the line representing the rect
-        self.rect = pygame_draw.line(
+        # Draw the rectangle representing the sightline
+        self.rect = pygame_draw.rect(
             chosen_screen,
             self.color,
-            self.entity.rect.center,
-            self.end,
+            (self.position, (self.width, self.height)),
+            0
         )
 
 
     def draw_up(self) -> None:
-        self.end = self.entity.rect.center[X], self.entity.rect.center[Y] - self.entity.sight
+        self.position = self.entity.rect.topleft[X], self.entity.rect.topleft[Y] - self.entity.sight
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.sight
 
 
     def draw_up_right(self) -> None:
-        self.end = self.entity.rect.center[X] + self.entity.sight/1.5, self.entity.rect.center[Y] - self.entity.sight/1.5
+        self.position = self.entity.rect.topleft[X] + self.entity.sight/1.5, self.entity.rect.topleft[Y] - self.entity.sight/1.5
+        self.width = self.entity.sight
+        self.height = self.entity.sight
 
 
     def draw_right(self) -> None:
-        self.end = self.entity.rect.center[X] + self.entity.sight, self.entity.rect.center[Y]
+        self.position = self.entity.rect.topleft[X] + self.entity.game.grid_size, self.entity.rect.topleft[Y]
+        self.width = self.entity.sight
+        self.height = self.entity.game.grid_size
 
 
     def draw_right_down(self) -> None:
-        self.end = self.entity.rect.center[X] + self.entity.sight/1.5, self.entity.rect.center[Y] + self.entity.sight/1.5
+        self.position = self.entity.rect.topleft[X] + self.entity.sight/1.5, self.entity.rect.topleft[Y] + self.entity.sight/1.5
+        self.width = self.entity.sight
+        self.height = self.entity.sight
 
 
     def draw_down(self) -> None:
-        self.end = self.entity.rect.center[X], self.entity.rect.center[Y] + self.entity.sight
+        self.position = self.entity.rect.topleft[X], self.entity.rect.topleft[Y] + self.entity.game.grid_size
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.sight
 
 
     def draw_down_left(self) -> None:
-        self.end = self.entity.rect.center[X] - self.entity.sight/1.5, self.entity.rect.center[Y] + self.entity.sight/1.5
+        self.position = self.entity.rect.topleft[X] - self.entity.sight/1.5, self.entity.rect.topleft[Y] + self.entity.sight/1.5
+        self.width = self.entity.sight
+        self.height = self.entity.sight
 
 
     def draw_left(self) -> None:
-        self.end = self.entity.rect.center[X] - self.entity.sight, self.entity.rect.center[Y]
+        self.position = self.entity.rect.topleft[X] - self.entity.sight, self.entity.rect.topleft[Y]
+        self.width = self.entity.sight
+        self.height = self.entity.game.grid_size
 
 
     def draw_left_up(self) -> None:
-        self.end = self.entity.rect.center[X] - self.entity.sight/1.5, self.entity.rect.center[Y] - self.entity.sight/1.5
+        self.position = self.entity.rect.topleft[X] - self.entity.sight/1.5, self.entity.rect.topleft[Y] - self.entity.sight/1.5
+        self.width = self.entity.sight
+        self.height = self.entity.sight

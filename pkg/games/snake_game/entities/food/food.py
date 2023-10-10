@@ -14,6 +14,9 @@ from typing import TYPE_CHECKING
 
 from ...constants import (
     SOUND_FOOD_PICKUP_IDX,
+    TOP,
+    ENTITY,
+    CHILD,
     X,
     Y,
 )
@@ -43,7 +46,7 @@ class Food(Entity):
             self.game.grid_size, self.game.screen_size[X], self.game.grid_size
         )
         y = self.game.screen_size[Y] - randrange(
-            self.game.grid_size, self.game.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
+            self.game.grid_size, self.game.screen_size[Y] - self.game.screen_size[TOP], self.game.grid_size
         )
         self.position = (x, y)
 
@@ -93,7 +96,7 @@ class Food(Entity):
         """
 
         # render if alive and moved
-        if self.is_alive and (updated_refresh[X] or updated_refresh[Y]):
+        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
             # print(self.position, self.prev_position, self.is_alive, self.children, self.is_spawned)
 
             # Render the entity based on it's parameters
@@ -107,7 +110,7 @@ class Food(Entity):
         """
 
         if not self.is_spawned:
-            self.set_random_spawn()
+            self.set_random_spawn(5, 5)
             self.is_spawned = True
             self.is_alive = True
 

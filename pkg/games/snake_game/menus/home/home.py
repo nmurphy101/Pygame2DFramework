@@ -48,19 +48,19 @@ def home_menu(self: Menu):
             self.prev_menu = MENU_SETTINGS
 
         # Render the Home Menu text
-        _ = self.render_button(GAME_TITLE, 8, color=COLOR_RED)
+        self.render_text(GAME_TITLE, 8, color=COLOR_RED)
 
         # Render the play button
-        play_obj = self.render_button("Play", 1, has_outline=True)
+        play_obj = self.render_button("Play", 2, has_outline=True)
 
         # Render the leaderboard button
-        leaderboard_obj = self.render_button("Leaderboard", -1, has_outline=True)
+        leaderboard_obj = self.render_button("Leaderboard", 0, has_outline=True)
 
         # Render the settings button
-        settings_obj = self.render_button("Settings", -3, has_outline=True)
+        settings_obj = self.render_button("Settings", -2, has_outline=True)
 
         # Render the quit button
-        quit_obj = self.render_button("Quit", -5, has_outline=True)
+        quit_obj = self.render_button("Quit", -4, has_outline=True)
 
         self.menu = [
             (play_obj, self.app.game.start, MENU_HOME, None),

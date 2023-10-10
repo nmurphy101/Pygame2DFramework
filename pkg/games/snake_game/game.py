@@ -276,7 +276,9 @@ class Game(BaseGame):
         if is_human_playing:
             player_snake = Snake(self, is_player=True)
             player_snake.speed_mod = self.game_config["settings"]["gameplay"]["player_speed"]
-            player_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_player"]
+            if player_snake.speed_mod <= 0:
+                player_snake.speed_mod = 0.6
+            player_snake.is_killable = self.game_config["settings"]["gameplay"]["killable_player"]
             self.sprite_group.add(player_snake)
 
         # initilize ai characters
@@ -284,7 +286,9 @@ class Game(BaseGame):
         for _ in range(num_ai):
             enemy_snake = Snake(self, is_player=False)
             enemy_snake.speed_mod = self.game_config["settings"]["gameplay"]["ai_speed"]
-            enemy_snake.is_killable = not self.game_config["settings"]["gameplay"]["inv_ai"]
+            if enemy_snake.speed_mod <= 0:
+                enemy_snake.speed_mod = 0.6
+            enemy_snake.is_killable = self.game_config["settings"]["gameplay"]["killable_ai"]
             self.sprite_group.add(enemy_snake)
 
 
@@ -366,7 +370,7 @@ class Game(BaseGame):
             if value["is_player"]:
                 score = value["score"]
 
-        _ = self.app.menu.render_button(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")
+        self.app.menu.render_text(f"Score:{score}", .35, -1, color=COLOR_RED, clear_background=False, relative_from="top")
 
 
     def transform_all_entity_images(self):

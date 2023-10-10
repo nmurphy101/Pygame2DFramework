@@ -38,39 +38,43 @@ def display_menu(self: "Menu"):
         self.menu_option = MENU_DISPLAY
 
         # Render the Display text
-        _ = self.render_button("Display", 10, color=COLOR_RED)
+        self.render_text("Display", 10, color=COLOR_RED)
 
         # Render the fps button
-        _ = self.render_button('FPS: ', 8, h_offset=-65)
+        self.render_text('FPS: ', 8, h_offset=-65)
         text_str = str(self.app.app_config["settings"]["display"]["fps_display"])
-        fps_obj = self.render_button(text_str, 8, color=COLOR_PURPLE, h_offset=65, has_outline=True)
+        fps_obj = self.render_button(text_str, 8, color=COLOR_PURPLE, h_offset=65)
 
         # Render the fullscreen button
-        _ = self.render_button('Fullscreen: ', 6, h_offset=-125)
+        self.render_text('Fullscreen: ', 6, h_offset=-125)
         text_str = str(self.app.app_config["settings"]["display"]["fullscreen"])
-        fullscreen_obj = self.render_button(text_str, 6, color=COLOR_PURPLE, h_offset=125, has_outline=True)
+        fullscreen_obj = self.render_button(text_str, 6, color=COLOR_PURPLE, h_offset=125)
 
         # Render the resolution button options = ["1280x720", "1366×768", "1920×1080", "2560x1440"]
         text_str = 'Resolution:'
-        _ = self.render_button(text_str, 4)
+        self.render_text(text_str, 4)
 
         # Render the 720p resolution choice button
-        resolution_obj_0 = self.render_button("1280x720", 3, color=COLOR_PURPLE, h_offset=-300, w_offset=10, has_outline=True)
+        resolution_obj_0 = self.render_button("1280x720", 3, color=COLOR_PURPLE, h_offset=-300, w_offset=10)
 
         # Render the 768p resolution choice button
-        resolution_obj_1 = self.render_button("1366x768", 3, color=COLOR_PURPLE, h_offset=0, w_offset=10, has_outline=True)
+        resolution_obj_1 = self.render_button("1366x768", 3, color=COLOR_PURPLE, h_offset=0, w_offset=10)
 
         # Render the 1080p resolution choice button
-        resolution_obj_2 = self.render_button("1920x1080", 3, color=COLOR_PURPLE, h_offset=300, w_offset=10, has_outline=True)
+        resolution_obj_2 = self.render_button("1920x1080", 3, color=COLOR_PURPLE, h_offset=300, w_offset=10)
 
         # Render the 1440p resolution choice button
-        resolution_obj_3 = self.render_button("2560x1440", 2, color=COLOR_PURPLE, h_offset=0, w_offset=20, has_outline=True)
+        resolution_obj_3 = self.render_button("2560x1440", 2, color=COLOR_PURPLE, h_offset=0, w_offset=20)
 
         # Render the Save button
         save_obj = self.render_button("Save", -8, h_offset=125, has_outline=True)
 
         # Render the Return button
         back_obj = self.render_button("Back", -8, h_offset=-125, has_outline=True)
+
+        def back_action():
+            self.reload_settings()
+            self.menu_options[MENU_SETTINGS]()
 
         self.menu = [
             (fps_obj, self.toggle_fps_display, self.prev_menu, None),
@@ -80,7 +84,7 @@ def display_menu(self: "Menu"):
             (resolution_obj_2, self.change_resolution, self.prev_menu, "1920x1080"),
             (resolution_obj_3, self.change_resolution, self.prev_menu, "2560x1440"),
             (save_obj, self.save_settings, 6, None),
-            (back_obj, self.menu_options[MENU_SETTINGS], MENU_DISPLAY, None),
+            (back_obj, back_action, MENU_DISPLAY, None),
         ]
 
         self.refresh = False

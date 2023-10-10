@@ -23,6 +23,9 @@ from ...constants import (
     SOUND_PORTAL_ENTER_IDX,
     X,
     Y,
+    ENTITY,
+    CHILD,
+    TOP,
     UP,
     RIGHT,
     DOWN,
@@ -65,7 +68,7 @@ class TelePortal(Entity):
             self.game.grid_size, self.game.screen_size[X], self.game.grid_size
         )
         y_pos = self.game.screen_size[Y] - randrange(
-            self.game.grid_size, self.game.screen_size[Y] - self.game.game_bar_height, self.game.grid_size
+            self.game.grid_size, self.game.screen_size[Y] - self.game.screen_size[TOP], self.game.grid_size
         )
         self.position = (x_pos, y_pos)
 
@@ -128,7 +131,7 @@ class TelePortal(Entity):
         """
 
         # render if alive and moved
-        if self.is_alive and (updated_refresh[X] or updated_refresh[Y]):
+        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
             # print(self.position, self.prev_position, self.is_alive, self.children)
 
             # Render the teleportal based on it's parameters
@@ -149,7 +152,7 @@ class TelePortal(Entity):
         # Clear previous frame obj's location
         self.game.screen.fill(COLOR_BLACK, (self.position[X], self.position[Y], self.rect.width, self.rect.height))
 
-        self.set_random_spawn()
+        self.set_random_spawn(3, 3)
 
         self.is_alive = True
 

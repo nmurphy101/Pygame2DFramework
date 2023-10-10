@@ -21,6 +21,9 @@ from pygame.constants import (
 
 GAME_TITLE = "Snake"
 
+# filenames
+CONFIG_GAME_FILE_NAME = "game_config.json"
+
 # Font
 REGULAR_FONT = "assets/fonts/PressStart2P-Regular.ttf"
 REGULAR_FONT_SIZE = 32
@@ -66,6 +69,8 @@ SOUND_PORTAL_ENTER_IDX = 2
 # Logic indexes
 POS_IDX = 0
 DIST_FROM_SELF_IDX = 1
+ENTITY = 0
+CHILD = 1
 
 # Menu options
 MENU_HOME = 0
@@ -123,10 +128,10 @@ INPUT_KEY_MAP = {
 # Human readable setting names
 DISPLAY_SETTING_MAP = {
     "human_player": "Player",
-    "inv_player": "Pla.Killable",
+    "killable_player": "Pla.Killable",
     "player_speed": "Player Speed",
     "num_ai": "Number of AI",
-    "inv_ai": "AI Killable",
+    "killable_ai": "AI Killable",
     "ai_speed": "AI Speed",
     "ai_difficulty": "AI Skill",
     "teleporter": "Teleporter",

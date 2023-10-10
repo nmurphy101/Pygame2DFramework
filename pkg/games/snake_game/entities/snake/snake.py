@@ -23,9 +23,12 @@ from ...constants import (
     INPUT_KEY_MAP,
     WIDTH,
     HEIGHT,
+    TOP,
     SOUND_SNAKE_DEATH_IDX,
     POS_IDX,
     DIST_FROM_SELF_IDX,
+    ENTITY,
+    CHILD,
     X,
     Y,
 )
@@ -51,23 +54,16 @@ class Snake(Entity):
         self.is_player = is_player
 
         # Where the snake is started located
-        pos_x = self.game.screen_size[WIDTH] - randrange(
-            self.game.grid_size, self.game.screen_size[WIDTH], self.game.grid_size
-        )
-
-        pos_y = self.game.screen_size[HEIGHT] - randrange(
-            self.game.grid_size, self.game.screen_size[HEIGHT] - self.game.game_bar_height - self.game.game_bar_height, self.game.grid_size
-        )
-
-        self.position = (pos_x, pos_y)
+        self.set_random_spawn(10, 10)
 
         # Where the snake was located
-        self.prev_position = (pos_x, pos_y - self.game.grid_size)
+        self.prev_position = (0, 0)
 
         # How big snake parts are
         self.size = self.game.grid_size
 
-        # How many moves the snake can make per second
+        # How fast the entity can move per loop-tick
+        # 1 = 100%, 0 = 0%,
         self.speed_mod = 2
 
         # Snake Sprite images
@@ -116,10 +112,13 @@ class Snake(Entity):
 
 
     def aquire_primary_target(self, target_name: str) -> None:
-        # Set variables pre loop
-        primary_target = (None, 10000*100000)
+        """update
 
-        pos = (self.game.screen_size[WIDTH]/2, self.game.screen_size[HEIGHT]/2)
+        update does stuff
+        """
+
+        # Set variables pre loop
+        primary_target = (None, 10000)
 
         for obj in self.game.sprite_group.sprites():
             if target_name in obj.id:
@@ -128,7 +127,7 @@ class Snake(Entity):
                     pos = (obj.position[X], obj.position[Y])
                     primary_target = (pos, dist_self)
 
-        self.target = (primary_target[POS_IDX][X], primary_target[POS_IDX][Y], target_name)
+        self.target = ((primary_target[POS_IDX][X], primary_target[POS_IDX][Y]), dist_self, target_name)
 
         self.direction = self.game.chosen_ai.decide_direction(
             self,
@@ -139,6 +138,21 @@ class Snake(Entity):
         self.since_secondary_target = datetime.now()
 
 
+    def update(self) -> tuple[bool, bool]:
+        """update
+
+        update does stuff
+        """
+
+        # try to choose a direction if entity can
+        self.choose_direction()
+
+        # Try to move if entity can
+        is_updated = self.move()
+
+        return is_updated, False
+
+
     def draw(self, updated_refresh: tuple[bool, bool], *kwargs) -> None:
         """
         draw
@@ -147,13 +161,10 @@ class Snake(Entity):
         draw does stuff
         """
 
-        if self.is_alive and (updated_refresh[X] or updated_refresh[Y]):
+        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
 
             # Tint the sprite with a color
             # self.tint(self.obj_color)
-
-            # Render the entity's obj based on it's parameters
-            self.game.screen.blit(self.image, self.position)
 
             # Render the entity's sight lines
             for line in self.sight_lines:
@@ -162,15 +173,12 @@ class Snake(Entity):
             for line in self.sight_lines_diag:
                 line.draw()
 
-            # Draw all children on refresh or optimized one child per
-            if updated_refresh[Y]:
-                # Draw each child if there are any
-                for child in self.children:
-                    child.refresh_draw()
+            # Render the entity's obj based on it's parameters
+            self.game.screen.blit(self.image, self.position)
 
-            elif len(self.children) > 0 and self.child_train:
+            if len(self.children) > 0 and self.child_train:
                 # Only move/render the last child to front of the train
-                self.children[-1].draw(updated_refresh)
+                self.children[-1].draw()
 
                 # Change the new last child's image to the tail
                 self.children[-1].make_end_img()
@@ -242,13 +250,14 @@ class Snake(Entity):
         move does stuff
         """
 
-        # pylint: disable=access-member-before-definition
-        if datetime.now() >= self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod) and self.is_alive:
+        move_cooldown_timer = self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod)
+        if datetime.now() >= move_cooldown_timer and self.is_alive:
             if not self.is_player:
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target("food")
 
-            # pylint: disable=access-member-before-definition
+            input(f"press enter to continue move {self.direction}")
+
             # Save current position as last position
             self.prev_position = self.position
 
@@ -284,8 +293,6 @@ class Snake(Entity):
 
             # Set the new last moved time
             self.time_last_moved = datetime.now()
-
-            # input("enter to continue")
 
             # Entity updated
             return True
@@ -339,7 +346,6 @@ class TailSegment(Entity):
     def draw(self, *kwargs) -> None:
         """
         draw
-
 
         draw does stuff
         """
@@ -456,13 +462,3 @@ class TailSegment(Entity):
         # Render the tail segment based on it's parameters
         self.game.screen.blit(self.image, self.position)
 
-
-    def interact(self, interacting_obj: Entity) -> None:
-        """interact
-
-        Args:
-            interacting_obj ([type]): [description]
-        """
-
-        # Kill interacting_obj
-        interacting_obj.die(f"collided with {self.id} and died")

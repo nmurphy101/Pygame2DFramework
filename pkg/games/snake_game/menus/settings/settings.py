@@ -17,6 +17,7 @@ from ...constants.game_constants import (
     MENU_DISPLAY,
     MENU_GAMEPLAY,
     MENU_KEYBINDING,
+    MENU_HOME,
     MENU_PAUSE,
     MENU_SOUND,
     MENU_SETTINGS,
@@ -36,8 +37,11 @@ def settings_menu(self: Menu):
         # Make sure the right menu option is selected
         self.menu_option = MENU_SETTINGS
 
+        if self.prev_menu in [MENU_HOME, MENU_PAUSE]:
+            self.root_menu = self.prev_menu
+
         # Render the Settings Menu text
-        _ = self.render_button("Settings", 10, color=COLOR_RED)
+        self.render_text("Settings", 10, color=COLOR_RED)
 
         # Render the display button
         display_obj = self.render_button("Display", 5, has_outline=True)
