@@ -189,8 +189,8 @@ class Entity(Sprite):
             for line in self.sight_lines:
                 line.draw()
 
-            # for line in self.sight_lines_diag:
-            #     line.draw()
+            for line in self.sight_lines_diag:
+                line.draw()
 
             # Draw each child if there are any
             for child in self.children:
@@ -539,13 +539,13 @@ class Line(Sprite):
         # determine entity's sightline end point
         self.line_options = {
             UP: lambda *args: self.draw_up(*args),
-            UP_RIGHT: lambda *args: None,
+            UP_RIGHT: lambda *args: self.draw_up_right(*args),
             RIGHT: lambda *args: self.draw_right(*args),
-            RIGHT_DOWN: lambda *args: None,
+            RIGHT_DOWN: lambda *args: self.draw_right_down(*args),
             DOWN: lambda *args: self.draw_down(*args),
-            DOWN_LEFT: lambda *args:None,
+            DOWN_LEFT: lambda *args: self.draw_down_left(*args),
             LEFT: lambda *args: self.draw_left(*args),
-            LEFT_UP: lambda *args: None,
+            LEFT_UP: lambda *args: self.draw_left_up(*args),
         }
 
         # Choose the screen to draw to
@@ -591,33 +591,33 @@ class Line(Sprite):
 
 
     def draw_up_right(self) -> None:
-        self.position = self.entity.rect.topleft[X] + self.entity.sight/1.5, self.entity.rect.topleft[Y] - self.entity.sight/1.5
-        self.width = self.entity.sight
-        self.height = self.entity.sight
+        self.position = self.entity.rect.topright[X] + self.entity.game.grid_size, self.entity.rect.topleft[Y] - self.entity.game.grid_size * 2
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
 
 
     def draw_right(self) -> None:
-        self.position = self.entity.rect.topleft[X] + self.entity.game.grid_size, self.entity.rect.topleft[Y]
+        self.position = self.entity.rect.topright
         self.width = self.entity.sight
         self.height = self.entity.game.grid_size
 
 
     def draw_right_down(self) -> None:
-        self.position = self.entity.rect.topleft[X] + self.entity.sight/1.5, self.entity.rect.topleft[Y] + self.entity.sight/1.5
-        self.width = self.entity.sight
-        self.height = self.entity.sight
+        self.position = self.entity.rect.bottomright[X] + self.entity.game.grid_size, self.entity.rect.bottomright[Y] + self.entity.game.grid_size
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
 
 
     def draw_down(self) -> None:
-        self.position = self.entity.rect.topleft[X], self.entity.rect.topleft[Y] + self.entity.game.grid_size
+        self.position = self.entity.rect.bottomleft
         self.width = self.entity.game.grid_size
         self.height = self.entity.sight
 
 
     def draw_down_left(self) -> None:
-        self.position = self.entity.rect.topleft[X] - self.entity.sight/1.5, self.entity.rect.topleft[Y] + self.entity.sight/1.5
-        self.width = self.entity.sight
-        self.height = self.entity.sight
+        self.position = self.entity.rect.bottomleft[X] - self.entity.game.grid_size * 2, self.entity.rect.bottomleft[Y] + self.entity.game.grid_size
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
 
 
     def draw_left(self) -> None:
@@ -627,6 +627,6 @@ class Line(Sprite):
 
 
     def draw_left_up(self) -> None:
-        self.position = self.entity.rect.topleft[X] - self.entity.sight/1.5, self.entity.rect.topleft[Y] - self.entity.sight/1.5
-        self.width = self.entity.sight
-        self.height = self.entity.sight
+        self.position = self.entity.rect.topleft[X] - self.entity.game.grid_size * 2, self.entity.rect.topleft[Y] - self.entity.game.grid_size * 2
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
