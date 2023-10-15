@@ -12,4 +12,4 @@
 from .snake import *
 from .food import *
 from .tele_portal import *
-from .entity import Entity
+from .entity import Entity, Line

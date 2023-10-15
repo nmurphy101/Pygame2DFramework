@@ -122,6 +122,7 @@ class Entity(Sprite):
 
         # Determines how far the entity can see ahead of itself in the direction it's looking
         self.sight_mod = 2
+        self.prev_sight_mod = self.sight_mod
         self.sight = self.sight_mod * self.game.grid_size
 
         # RGB color = pink default
@@ -261,23 +262,23 @@ class Entity(Sprite):
             self.is_alive = False
 
             # "remove" the entity from the game
-            if "snake" in self.name:
-                self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            # if "snake" in self.name:
+            #     self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
-                self.game.sprite_group.remove(self)
+            #     self.game.sprite_group.remove(self)
 
-                self.sight_lines_diag = None
+            #     self.sight_lines_diag = None
 
-                self.sight_lines = None
+            #     self.sight_lines = None
 
-                if self.children:
-                    for child in self.children:
-                        self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
-                        child.die(f"Parent {self.id} died")
-                        child.kill()
-                self.children = None
+            #     if self.children:
+            #         for child in self.children:
+            #             self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+            #             child.die(f"Parent {self.id} died")
+            #             child.kill()
+            #     self.children = None
 
-                self.kill()
+            #     self.kill()
 
             input("press enter to continue from death")
 
@@ -551,7 +552,7 @@ class Line(Sprite):
         # Choose the screen to draw to
         chosen_screen = self.entity.game.screen if self.is_visible else self.entity.game.alpha_screen
 
-        # Draw the rectangle representing the sightline
+        # Set the rectangle representing the sightline
         self.rect = pygame_draw.rect(
             chosen_screen,
             self.color,
@@ -591,6 +592,12 @@ class Line(Sprite):
 
 
     def draw_up_right(self) -> None:
+        self.position = self.entity.rect.topright[X], self.entity.rect.topleft[Y] - self.entity.game.grid_size
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
+
+
+    def draw_up_right_2(self) -> None:
         self.position = self.entity.rect.topright[X] + self.entity.game.grid_size, self.entity.rect.topleft[Y] - self.entity.game.grid_size * 2
         self.width = self.entity.game.grid_size
         self.height = self.entity.game.grid_size
@@ -603,6 +610,12 @@ class Line(Sprite):
 
 
     def draw_right_down(self) -> None:
+        self.position = self.entity.rect.bottomright[X], self.entity.rect.bottomright[Y]
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
+
+
+    def draw_right_down_2(self) -> None:
         self.position = self.entity.rect.bottomright[X] + self.entity.game.grid_size, self.entity.rect.bottomright[Y] + self.entity.game.grid_size
         self.width = self.entity.game.grid_size
         self.height = self.entity.game.grid_size
@@ -615,6 +628,12 @@ class Line(Sprite):
 
 
     def draw_down_left(self) -> None:
+        self.position = self.entity.rect.bottomleft[X] - self.entity.game.grid_size, self.entity.rect.bottomleft[Y]
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
+
+
+    def draw_down_left_2(self) -> None:
         self.position = self.entity.rect.bottomleft[X] - self.entity.game.grid_size * 2, self.entity.rect.bottomleft[Y] + self.entity.game.grid_size
         self.width = self.entity.game.grid_size
         self.height = self.entity.game.grid_size
@@ -627,6 +646,12 @@ class Line(Sprite):
 
 
     def draw_left_up(self) -> None:
+        self.position = self.entity.rect.topleft[X] - self.entity.game.grid_size, self.entity.rect.topleft[Y] - self.entity.game.grid_size
+        self.width = self.entity.game.grid_size
+        self.height = self.entity.game.grid_size
+
+
+    def draw_left_up_2(self) -> None:
         self.position = self.entity.rect.topleft[X] - self.entity.game.grid_size * 2, self.entity.rect.topleft[Y] - self.entity.game.grid_size * 2
         self.width = self.entity.game.grid_size
         self.height = self.entity.game.grid_size

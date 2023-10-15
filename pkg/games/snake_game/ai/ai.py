@@ -18,6 +18,7 @@ from logging import warning as logging_warning
 from typing import TYPE_CHECKING
 
 from pygame import Rect
+from pygame.sprite import spritecollide
 
 from ..constants import (
     UP,
@@ -28,6 +29,7 @@ from ..constants import (
     RIGHT_DOWN,
     DOWN_LEFT,
     LEFT_UP,
+    DIRECTION_MAP,
     X,
     Y,
     NAME,
@@ -36,7 +38,7 @@ from ..constants import (
     HEIGHT,
     TOP,
 )
-from ..entities import Entity, TelePortal
+from ..entities import Entity, TelePortal, Line
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -55,6 +57,8 @@ class DecisionBox:
         self.time_to_chase_target = 0
         self.portal_use_difficulty = 1
         self.farsight_use_difficulty = 1
+        self.diagonal_sight_use_difficulty = 1
+        self.number_open_lines = 4
 
 
     def decide_direction(self, ai_entity: Entity, target: tuple, ai_difficulty:int=None) -> int:
@@ -240,6 +244,30 @@ class DecisionBox:
         """
 
         self.verify_sight_lines(other_object, ai_entity, intent)
+
+        if self.number_open_lines <= 0:
+            ai_entity.prev_sight_mod =  ai_entity.sight_mod
+            ai_entity.sight_mod = ai_entity.sight_mod - 1
+            ai_entity.sight = ai_entity.sight_mod * self.game.grid_size
+            print("Reducing sight and re-verifying")
+            for line in ai_entity.sight_lines:
+                line.open = True
+                line.draw()
+
+            for diag_line in ai_entity.sight_lines_diag:
+                line.open = True
+                line.draw()
+
+            self.verify_sight_lines(other_object, ai_entity, intent)
+
+            ai_entity.sight_mod = ai_entity.prev_sight_mod
+            ai_entity.sight = ai_entity.sight_mod * self.game.grid_size
+            for line in ai_entity.sight_lines:
+                line.draw()
+
+            for diag_line in ai_entity.sight_lines_diag:
+                line.draw()
+
         return self.get_intent(intent, ai_entity)
 
 
@@ -255,33 +283,26 @@ class DecisionBox:
             [None]: [description]
         """
 
+        # Check the diagonal lines for collisions
         for diag_line in ai_entity.sight_lines_diag:
             # Check the sight lines for a open direction
             if Rect.colliderect(other_object.rect, diag_line.rect):
+                print(f"It sees the collision between {other_object.id} and self on diagonal line {DIRECTION_MAP[diag_line.direction]}")
                 diag_line.open = False
 
-            # Edge of screen detection
-            # top
-            elif diag_line.position[Y] <= self.game.screen_size[TOP]:
-                diag_line.open = False
-
-            # bottom
-            elif diag_line.position[Y] >= self.game.screen_size[HEIGHT]:
-                diag_line.open = False
-
-            # left
-            elif diag_line.position[X] <= self.game.screen_size[LEFT]:
-                diag_line.open = False
-
-            # right
-            elif diag_line.position[X] >= self.game.screen_size[WIDTH]:
-                diag_line.open = False
+        # figure the current number of open lines
+        self.number_open_lines = 0
+        for line in ai_entity.sight_lines:
+            if line.open:
+                self.number_open_lines += 1
 
         # Verify intention with sight lines
         for line in ai_entity.sight_lines:
+            if not line.open: continue
+
             # Check the sight lines for a open direction
-            if Rect.colliderect(other_object.rect, line.rect):
-                print(f"It sees the collision between {other_object.id} and self on line {line.direction}")
+            elif Rect.colliderect(other_object.rect, line.rect):
+                print(f"It sees the collision between {other_object.id} and self on cardinal line {DIRECTION_MAP[line.direction]}")
                 # if not "segment" in other_object.id:
                 # print(f"cardinal line collision {other_object.id} and {line.direction}")
                 # Will Ai see and use portals?
@@ -289,81 +310,109 @@ class DecisionBox:
                     line.open = self.decide_portal(other_object, ai_entity)
                     continue
 
-                else:
-                    line.open = False
-                    continue
+                line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                continue
 
             # Edge of screen detection
             # top
-            elif line.direction == UP and line.position[Y] - (ai_entity.sight / ai_entity.sight_mod) < (self.game.screen_size[TOP] - ai_entity.sight - self.game.grid_size):
+            elif line.direction == UP and ai_entity.position[Y] <= self.game.screen_size[TOP]:
                 print("Top edge collision predicted")
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # bottom
-            elif line.direction == DOWN and line.position[Y] >= (self.game.screen_size[HEIGHT] + ai_entity.sight):
+            elif line.direction == DOWN and ai_entity.position[Y] + ai_entity.size >= self.game.screen_size[HEIGHT]:
                 print("bottom edge collision predicted")
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # left
-            elif line.direction == LEFT and line.position[X] <= (self.game.screen_size[LEFT] - ai_entity.sight):
+            elif line.direction == LEFT and ai_entity.position[X] <= self.game.screen_size[LEFT]:
                 print("left edge collision predicted")
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # right
-            elif line.direction == RIGHT and line.position[X] >= (self.game.screen_size[WIDTH] + ai_entity.sight):
+            elif line.direction == RIGHT and ai_entity.position[X] + ai_entity.size >= self.game.screen_size[WIDTH]:
                 print("right edge collision predicted")
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # can't move backwards
             # Up not allowed when previously having moved down
             elif line.direction == UP and ai_entity.direction == DOWN:
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                print("failed line UP on can't move backwards")
                 continue
 
-            # Down not allowed when previously having moved up
+            # # Down not allowed when previously having moved up
             elif line.direction == DOWN and ai_entity.direction == UP:
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                print("failed line DOWN on can't move backwards")
                 continue
 
-            # Right not allowed when previously having moved down
+            # # Right not allowed when previously having moved down
             elif line.direction == RIGHT and ai_entity.direction == LEFT:
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                print("failed line RIGHT on can't move backwards")
                 continue
 
-            # Left not allowed when previously having moved down
+            # # Left not allowed when previously having moved down
             elif line.direction == LEFT and ai_entity.direction == RIGHT:
                 line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                print("failed line LEFT on can't move backwards")
                 continue
 
-            # Verify with farsight sight lines if available
-            if self.ai_difficulty >= self.farsight_use_difficulty:
+            elif other_object.parent is not None and spritecollide(line, other_object.parent.children, False):
+                line.open = False
+                self.number_open_lines = self.number_open_lines - 1
+                print(f"Line {line.direction} definitely has some sort of collision with child obj's")
+                continue
+
+            # Verify with diagonal sight lines if available
+            elif self.ai_difficulty >= self.diagonal_sight_use_difficulty and not ai_entity.sight_mod == 1:
                 if line.direction == UP and intent == UP:
-                    if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
                         line.open = False
+                        self.number_open_lines = self.number_open_lines - 1
+                        print("failed line UP on diagonal")
                         # input(f"Press to continue: 0 - {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open} and {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open}")
                         continue
 
                 elif line.direction == DOWN and intent == DOWN:
-                    if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
                         line.open = False
+                        self.number_open_lines = self.number_open_lines - 1
+                        print("failed line DOWN on diagonal")
                         # input(f"Press to continue: 2 - {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open} and {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open}")
                         continue
 
                 elif line.direction == LEFT and intent == LEFT:
-                    if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
                         line.open = False
+                        self.number_open_lines = self.number_open_lines - 1
+                        print("failed line LEFT on diagonal")
                         # input(f"Press to continue: 3 - {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open} and {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open}")
                         continue
 
                 elif line.direction == RIGHT and intent == RIGHT:
-                    if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
+                    if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
                         line.open = False
+                        self.number_open_lines = self.number_open_lines - 1
+                        print("failed line RIGHT on diagonal")
                         # input(f"Press to continue: 1 - {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open} and {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open}")
                         continue
+
+        print(f"num open lines: {self.number_open_lines}")
 
 
     def reset_sight_lines(self, ai_entity: Entity) -> None:

@@ -52,6 +52,16 @@ UP_RIGHT = .5
 RIGHT_DOWN = 1.5
 DOWN_LEFT = 2.5
 LEFT_UP = 3.5
+DIRECTION_MAP = {
+    0: "UP",
+    .5: "UP_RIGHT",
+    1: "RIGHT",
+    1.5: "RIGHT_DOWN",
+    2: "DOWN",
+    2.5: "DOWN_LEFT",
+    3: "LEFT",
+    3.5: "LEFT_UP",
+}
 
 # Dimensions
 X = 0
