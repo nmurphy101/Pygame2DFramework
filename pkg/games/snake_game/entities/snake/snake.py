@@ -10,20 +10,17 @@
 """
 
 from math import hypot as math_hypot
-from random import randrange
 from typing import Deque, TYPE_CHECKING
 from datetime import datetime, timedelta
 
 from pygame import key as pygame_key
 
-from ..entity import Entity, Line
+from ...ai.helpers import obj_pos_to_node
+from ..entity import Entity
 
 from ...constants import (
     COLOR_BLACK,
     INPUT_KEY_MAP,
-    WIDTH,
-    HEIGHT,
-    TOP,
     SOUND_SNAKE_DEATH_IDX,
     POS_IDX,
     DIST_FROM_SELF_IDX,
@@ -53,11 +50,11 @@ class Snake(Entity):
         # player indicator
         self.is_player = is_player
 
+        # Where the snake was located
+        # self.prev_position = (0, 0)
+
         # Where the snake is started located
         self.set_random_spawn(10, 10)
-
-        # Where the snake was located
-        self.prev_position = (0, 0)
 
         # How big snake parts are
         self.size = self.game.grid_size
@@ -95,6 +92,9 @@ class Snake(Entity):
 
         # AI difficulty setting (higher is more difficult/smarter)
         self.ai_difficulty = self.game.game_config["settings"]["gameplay"]["ai_difficulty"]
+
+        # Initilize the cached calculated path to target
+        self.path = []
 
         # Entity's children/followers in a train of same children objs
         self.child_train = True
@@ -161,7 +161,7 @@ class Snake(Entity):
         draw does stuff
         """
 
-        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
+        if self.state == Entity.ALIVE and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
 
             # Tint the sprite with a color
             # self.tint(self.obj_color)
@@ -193,7 +193,7 @@ class Snake(Entity):
         """
 
         # Add a new tail segment
-        if self.is_alive:
+        if self.state == Entity.ALIVE:
             new_tails = Deque()
 
             for _ in range(eaten_obj.growth):
@@ -218,7 +218,7 @@ class Snake(Entity):
         choose_direction does stuff
         """
 
-        if self.is_alive:
+        if self.state == Entity.ALIVE:
             # Check if Ai or player controls this entity
             if self.is_player:
                 key = pygame_key.get_pressed()
@@ -251,7 +251,7 @@ class Snake(Entity):
         """
 
         move_cooldown_timer = self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod)
-        if datetime.now() >= move_cooldown_timer and self.is_alive:
+        if datetime.now() >= move_cooldown_timer and self.state == Entity.ALIVE:
             if not self.is_player:
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target("food")
@@ -288,6 +288,12 @@ class Snake(Entity):
                 self.prev_direction = self.direction
                 self.position = (self.position[X] + self.size, self.position[Y])
 
+            # Mark previous grid position as walkable for pathfinding
+            obj_pos_to_node(self.game, self.prev_position).walkable = True
+
+            # Mark grid position as unwalkable for pathfinding
+            obj_pos_to_node(self.game, self.position).walkable = False
+
             # Set current position for hitbox
             self.rect.topleft = self.position
 
@@ -317,8 +323,8 @@ class TailSegment(Entity):
         # The game obj
         self.game = game
 
-        # Entity is dead or alive
-        self.is_alive = True
+        # The entity state, defaults to alive
+        self.state = Entity.ALIVE
 
         # Parent of this child
         self.parent = parent
@@ -340,6 +346,9 @@ class TailSegment(Entity):
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
+        # Mark grid position as unwalkable for pathfinding
+        obj_pos_to_node(self.game, self.position).walkable = False
+
         # self.obj_color = self.parent.obj_color
 
 
@@ -351,7 +360,7 @@ class TailSegment(Entity):
         """
 
         # render if alive
-        if self.is_alive:
+        if self.state == Entity.ALIVE:
             # Clear previous frame obj's location
             self.game.screen.fill(COLOR_BLACK, (self.position[X], self.position[Y], self.rect.width, self.rect.height))
 
@@ -361,6 +370,12 @@ class TailSegment(Entity):
             # located where the parent obj was last
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
+
+            # Mark previous grid position as walkable for pathfinding
+            obj_pos_to_node(self.game, self.prev_position).walkable = True
+
+            # Mark grid position as unwalkable for pathfinding
+            obj_pos_to_node(self.game, self.position).walkable = False
 
             # Choose the right image for this segment
             self.choose_img()

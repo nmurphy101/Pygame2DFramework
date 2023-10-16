@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from pygame import Rect
 from pygame.sprite import spritecollide
 
+from ..ai.helpers import astar, obj_pos_to_node
 from ..constants import (
     UP,
     RIGHT,
@@ -57,6 +58,8 @@ class DecisionBox:
         self.time_to_chase_target = 0
         self.portal_use_difficulty = 1
         self.farsight_use_difficulty = 1
+        self.a_star_use_difficulty = 1
+        self.a_star_situational_backup_difficulty = 2
         self.diagonal_sight_use_difficulty = 1
         self.number_open_lines = 4
 
@@ -79,7 +82,8 @@ class DecisionBox:
         self.ai_difficulty = ai_difficulty or self.ai_difficulty
 
         # Use intent algorithm depending on ai_difficulty to decide what direction to move
-        direction = self.situational_intent(ai_entity, target)
+        # direction = self.situational_intent(ai_entity, target)
+        direction = self.astar_intent(ai_entity, target)
 
         print(f"Got Direction: {direction}")
 
@@ -187,6 +191,46 @@ class DecisionBox:
         print(f"Got situational intent: {intent}")
 
         return intent
+
+
+    def astar_intent(self, ai_entity, target):
+        # Get the start and end node
+        start_node = obj_pos_to_node(self.game, ai_entity.position)
+        end_node = obj_pos_to_node(self.game, target[POS_IDX])
+
+        # Get the path to target via astar pathfinding algorithm
+        path = astar(self.game, start_node, end_node)
+
+        # TODO: Validate on difficulty check if the next move will trap self by checking the next a_star path
+
+        # In case the snake has no valid route use backup logic
+        if not path:
+            if self.ai_difficulty > self.a_star_use_difficulty:
+                return self.situational_intent(ai_entity, target)
+            else:
+                return self.simple_intent(ai_entity, target)
+
+        next_pos = (path[0][X] * self.game.grid_size,  path[0][Y] * self.game.grid_size)
+
+        # UP
+        if next_pos[X] == ai_entity.position[X] and next_pos[Y] < ai_entity.position[Y]:
+            return UP
+
+        # DOWN
+        elif next_pos[X] == ai_entity.position[X] and next_pos[Y] > ai_entity.position[Y]:
+            return DOWN
+
+        # LEFT
+        elif next_pos[X] < ai_entity.position[X] and next_pos[Y] == ai_entity.position[Y]:
+            return LEFT
+
+        # RIGHT
+        elif next_pos[X] > ai_entity.position[X] and next_pos[Y] == ai_entity.position[Y]:
+            return RIGHT
+
+        # Get the intent of the next direction
+        else:
+            print(f"Was unable to find the direction from the A_star position: {next_pos}")
 
 
     def check_intent(self, ai_entity: Entity, intent: int) -> int:
@@ -381,7 +425,7 @@ class DecisionBox:
             # Verify with diagonal sight lines if available
             elif self.ai_difficulty >= self.diagonal_sight_use_difficulty and not ai_entity.sight_mod == 1:
                 if line.direction == UP and intent == UP:
-                    if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
                         print("failed line UP on diagonal")
@@ -389,7 +433,7 @@ class DecisionBox:
                         continue
 
                 elif line.direction == DOWN and intent == DOWN:
-                    if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
                         print("failed line DOWN on diagonal")
@@ -397,7 +441,7 @@ class DecisionBox:
                         continue
 
                 elif line.direction == LEFT and intent == LEFT:
-                    if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
+                    if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
                         print("failed line LEFT on diagonal")
@@ -405,7 +449,7 @@ class DecisionBox:
                         continue
 
                 elif line.direction == RIGHT and intent == RIGHT:
-                    if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
+                    if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open :
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
                         print("failed line RIGHT on diagonal")

@@ -25,12 +25,15 @@ from pygame import (
     transform,
 )
 
-from .ai.ai import DecisionBox
+from .ai import DecisionBox, Node
 from .constants import (
     COLOR_BLACK,
+    COLOR_BLUE,
+    COLOR_GREEN,
     COLOR_GREY,
     COLOR_GREY_DARK,
     COLOR_RED,
+    COLOR_WHITE,
     GAME_TITLE,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
@@ -53,6 +56,7 @@ from .constants import (
     X,
     Y,
     WIDTH,
+    HEIGHT,
 )
 from .entities import (
     Entity,
@@ -177,6 +181,11 @@ class Game(BaseGame):
         # AI blackbox
         self.chosen_ai = None
 
+        # Pathfinding grid of the game space
+        self.grid_width = self.screen_size[WIDTH] // self.grid_size
+        self.grid_height = self.screen_size[HEIGHT] // self.grid_size
+        self.grid = [[Node(x, y) for y in range(self.grid_height)] for x in range(self.grid_width)]
+
         # Set the game menus to the app menu object
         self.app.menu.menu_options[MENU_HOME] = lambda: home_menu(self.app.menu)
         self.app.menu.menu_options[MENU_PAUSE] = lambda: pause_menu(self.app.menu)
@@ -196,7 +205,7 @@ class Game(BaseGame):
         # Execute game object actions via parallel threads
         thread_group: list[Thread] = []
         for obj in self.sprite_group:
-            if not obj.is_alive:
+            if not obj.state == Entity.ALIVE:
                 continue
 
             if self.app.menu.prev_menu in [MENU_HOME, MENU_PAUSE, MENU_GAME_OVER]:
@@ -216,6 +225,22 @@ class Game(BaseGame):
 
         # show the game bar at top of screen
         self.game_bar_display()
+
+        # self.screen.fill(COLOR_WHITE)
+
+        # for obj in self.sprite_group:
+        #     if "snake" in obj.name:
+        #         for x, y in obj.path:
+        #             draw.rect(self.screen, COLOR_BLUE, (x * self.grid_size, y * self.grid_size, self.grid_size, self.grid_size))
+        #         draw.rect(self.screen, COLOR_GREEN, (obj.position[0], obj.position[1], self.grid_size, self.grid_size))
+        #         draw.rect(self.screen, COLOR_RED, (obj.target[0][0], obj.target[0][1], self.grid_size, self.grid_size))
+
+        # for row in self.grid:
+        #     for node in row:
+        #         if not node.walkable:
+        #             draw.rect(self.screen, COLOR_BLACK, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size))
+                # else:
+                #     draw.rect(self.screen, COLOR_WHITE, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size), 1)
 
 
     def _object_actions(self, obj: Entity):
@@ -324,6 +349,9 @@ class Game(BaseGame):
 
         # AI blackbox
         self.chosen_ai = None
+
+        # Clear the grid
+        self.grid = [[Node(x, y) for y in range(self.grid_height)] for x in range(self.grid_width)]
 
         # Free unreferenced memory
         gc_collect()

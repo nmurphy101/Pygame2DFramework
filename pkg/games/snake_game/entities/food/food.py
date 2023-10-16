@@ -41,15 +41,6 @@ class Food(Entity):
         # Initilize parent init
         super().__init__(game, self.name)
 
-        # Where the food is located
-        x = self.game.screen_size[X] - randrange(
-            self.game.grid_size, self.game.screen_size[X], self.game.grid_size
-        )
-        y = self.game.screen_size[Y] - randrange(
-            self.game.grid_size, self.game.screen_size[Y] - self.game.screen_size[TOP], self.game.grid_size
-        )
-        self.position = (x, y)
-
         # Food Sprite images
         self.food_images = self.game.food_images
 
@@ -95,9 +86,9 @@ class Food(Entity):
         draw does stuff
         """
 
-        # render if alive and moved
-        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
-            # print(self.position, self.prev_position, self.is_alive, self.children, self.is_spawned)
+        # render if alive and was updated
+        if self.state == Entity.ALIVE and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
+            # print(self.position, self.prev_position, self.state, self.children, self.is_spawned)
 
             # Render the entity based on it's parameters
             self.game.screen.blit(self.image, self.position)
@@ -112,7 +103,7 @@ class Food(Entity):
         if not self.is_spawned:
             self.set_random_spawn(5, 5)
             self.is_spawned = True
-            self.is_alive = True
+            self.state = Entity.ALIVE
 
             updated_child = False
 
@@ -140,4 +131,4 @@ class Food(Entity):
         # Kill self
         self.is_spawned = False
         self.die(f"Eaten by {interacting_obj.id}")
-        self.is_alive = True
+        self.state = Entity.ALIVE

@@ -35,6 +35,8 @@ from pygame import (
 )
 from pygame.sprite import Sprite
 
+from ..ai.helpers import obj_pos_to_node
+
 from ..constants import (
     COLOR_BLACK,
     MENU_GAME_OVER,
@@ -80,8 +82,8 @@ class Entity(Sprite):
         # Unique identifier
         self.id = name + str(uuid4())
 
-        # Entity is dead or alive
-        self.is_alive = True
+        # The entity state starts at alive
+        self.state = Entity.ALIVE
 
         # Determines if entity can be killed
         self.is_killable = True
@@ -99,10 +101,10 @@ class Entity(Sprite):
         self.score = 0
 
         # Where the entity was located
-        self.prev_position = (-20, -20)
+        self.prev_position = (0, 0)
 
         # Where the entity is located
-        self.position = (-20, -20)
+        self.position = (0, 0)
 
         # How big entity is
         self.size = self.game.grid_size
@@ -181,7 +183,7 @@ class Entity(Sprite):
         """
 
         # render if alive and moved
-        if self.is_alive and  (updated_refresh[ENTITY] or updated_refresh[CHILD]):
+        if obj.state == Entity.ALIVE and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
 
             # Render the entity based on it's image and position
             self.game.screen.blit(self.image, self.position)
@@ -205,7 +207,7 @@ class Entity(Sprite):
         """
 
         # render if alive
-        if self.is_alive:
+        if self.state == Entity.ALIVE:
             # Clear screen where self was
             # self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
             # Render the entity based on it's parameters
@@ -259,7 +261,7 @@ class Entity(Sprite):
                 self.game.app.menu.menu_option = MENU_GAME_OVER
 
             # Kill self
-            self.is_alive = False
+            self.state = Entity.DEAD
 
             # "remove" the entity from the game
             # if "snake" in self.name:
@@ -299,7 +301,7 @@ class Entity(Sprite):
         # Collision check for all entities
         for obj in self.game.sprite_group.sprites():
             # Make sure not checking collision with dead obj's
-            if not self.is_alive or not obj.is_alive:
+            if not self.state == Entity.ALIVE or not obj.state == Entity.ALIVE:
                 continue
 
             collision = False
@@ -466,8 +468,17 @@ class Entity(Sprite):
 
             found_spawn = True
 
+        # Save the current position as previous
+        self.prev_position = self.position
+
         # change position
         self.position = (pos_x, pos_y)
+
+        # Mark previous grid position as walkable for pathfinding
+        obj_pos_to_node(self.game, self.prev_position).walkable = True
+
+        # Mark grid position as unwalkable for pathfinding
+        obj_pos_to_node(self.game, self.position).walkable = False
 
         # place hitbox at position
         self.rect.topleft = self.position
@@ -479,14 +490,14 @@ class Entity(Sprite):
         spawn does stuff
         """
 
-        if not self.is_alive:
-            # Mark previous position
-            self.prev_position = self.position
-
+        if not self.state == Entity.ALIVE:
+            # Find the spawn location
             self.set_random_spawn()
 
-            self.is_alive = True
+            # Set the entity to be alive
+            obj.state = Entity.ALIVE
 
+            # Spawn all the entities children if there are any
             if self.children:
                 for child in self.children:
                     child.spawn()
@@ -503,7 +514,7 @@ class Entity(Sprite):
         """
 
         # Increase the score
-        if self.is_alive:
+        if self.state == Entity.ALIVE:
             self.score += score_obj.point_value
             self.game.entity_final_scores[self.id] = {
                 "is_player": self.is_player,
@@ -519,6 +530,13 @@ class Entity(Sprite):
         surf = self.image.copy()
         surf.fill(tint_color[0:3], None, pygame.BLEND_RGBA_MULT )
         self.image = surf
+
+
+    # states that the entity can be in.
+    #
+    # ALIVE: The entity is active and moving around the screen
+    # DEAD: The entity is inactive and removed from the screen
+    (ALIVE, DEAD) = range(2)
 
 
 class Line(Sprite):

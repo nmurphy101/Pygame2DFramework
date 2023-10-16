@@ -63,15 +63,6 @@ class TelePortal(Entity):
         now = datetime.now()
         self.spawn_timer = now + timedelta(seconds=randint(2, 5))
 
-        # Where the portal is located
-        x_pos = self.game.screen_size[X] - randrange(
-            self.game.grid_size, self.game.screen_size[X], self.game.grid_size
-        )
-        y_pos = self.game.screen_size[Y] - randrange(
-            self.game.grid_size, self.game.screen_size[Y] - self.game.screen_size[TOP], self.game.grid_size
-        )
-        self.position = (x_pos, y_pos)
-
         # teleportation portal Sprite images
         self.tele_portal_images = self.game.tele_portal_images
 
@@ -131,8 +122,8 @@ class TelePortal(Entity):
         """
 
         # render if alive and moved
-        if self.is_alive and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
-            # print(self.position, self.prev_position, self.is_alive, self.children)
+        if self.state == Entity.ALIVE and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
+            # print(self.position, self.prev_position, self.state, self.children)
 
             # Render the teleportal based on it's parameters
             self.game.screen.blit(self.image, self.position)
@@ -154,7 +145,7 @@ class TelePortal(Entity):
 
         self.set_random_spawn(3, 3)
 
-        self.is_alive = True
+        self.state = Entity.ALIVE
 
         updated_child = False
 
