@@ -95,9 +95,7 @@ class Snake(Entity):
 
         # Initilize the cached calculated path to target
         self.path = []
-
-        # Entity's children/followers in a train of same children objs
-        self.child_train = True
+        self.target_type = "food"
 
         # Number of starting tail segments
         self.num_tails = 5
@@ -112,22 +110,12 @@ class Snake(Entity):
 
 
     def aquire_primary_target(self, target_name: str) -> None:
-        """update
+        """aquire_primary_target
 
-        update does stuff
+        aquire_primary_target does stuff
         """
 
-        # Set variables pre loop
-        primary_target = (None, 10000)
-
-        for obj in self.game.sprite_group.sprites():
-            if target_name in obj.id:
-                dist_self = math_hypot(obj.position[X] - self.position[X], obj.position[Y] - self.position[Y])
-                if dist_self < primary_target[DIST_FROM_SELF_IDX]:
-                    pos = (obj.position[X], obj.position[Y])
-                    primary_target = (pos, dist_self)
-
-        self.target = ((primary_target[POS_IDX][X], primary_target[POS_IDX][Y]), dist_self, target_name)
+        self.target = self.get_target(self.position, target_name)
 
         self.direction = self.game.chosen_ai.decide_direction(
             self,
@@ -136,6 +124,25 @@ class Snake(Entity):
         )
 
         self.since_secondary_target = datetime.now()
+
+
+    def get_target(self, from_obj_pos, target_name):
+        """get_target
+
+        get_target does stuff
+        """
+
+        # Set variables pre loop
+        primary_target = (None, 10000)
+
+        for target in self.game.sprite_group.sprites():
+            if target_name in target.id and target.position != from_obj_pos:
+                dist_self = math_hypot(target.position[X] - from_obj_pos[X], target.position[Y] - from_obj_pos[Y])
+                if dist_self < primary_target[DIST_FROM_SELF_IDX]:
+                    pos = (target.position[X], target.position[Y])
+                    primary_target = (pos, dist_self)
+
+        return ((primary_target[POS_IDX][X], primary_target[POS_IDX][Y]), dist_self, target_name)
 
 
     def update(self) -> tuple[bool, bool]:
@@ -176,7 +183,7 @@ class Snake(Entity):
             # Render the entity's obj based on it's parameters
             self.game.screen.blit(self.image, self.position)
 
-            if len(self.children) > 0 and self.child_train:
+            if updated_refresh[ENTITY] and len(self.children) > 0:
                 # Only move/render the last child to front of the train
                 self.children[-1].draw()
 
@@ -251,12 +258,13 @@ class Snake(Entity):
         """
 
         move_cooldown_timer = self.time_last_moved + timedelta(milliseconds=self.base_speed/self.speed_mod)
+
         if datetime.now() >= move_cooldown_timer and self.state == Entity.ALIVE:
             if not self.is_player:
                 # Ai makes it's decision for what direction to move
-                self.aquire_primary_target("food")
+                self.aquire_primary_target(self.target_type)
 
-            input(f"press enter to continue move {self.direction}")
+            # input(f"press enter to continue move {self.direction}")
 
             # Save current position as last position
             self.prev_position = self.position
@@ -288,20 +296,27 @@ class Snake(Entity):
                 self.prev_direction = self.direction
                 self.position = (self.position[X] + self.size, self.position[Y])
 
-            # Mark previous grid position as walkable for pathfinding
-            obj_pos_to_node(self.game, self.prev_position).walkable = True
+            if self.prev_position != self.position:
+                # Mark previous grid position as walkable for pathfinding
+                obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-            # Mark grid position as unwalkable for pathfinding
-            obj_pos_to_node(self.game, self.position).walkable = False
+                # Mark grid position as unwalkable for pathfinding
+                obj_pos_to_node(self.game, self.position).walkable = False
 
-            # Set current position for hitbox
-            self.rect.topleft = self.position
+                # Set current position for hitbox
+                self.rect.topleft = self.position
+
+                # Set the new last moved time
+                self.time_last_moved = datetime.now()
+
+                # Entity updated
+                return True
 
             # Set the new last moved time
             self.time_last_moved = datetime.now()
 
-            # Entity updated
-            return True
+            # Entity didn't update
+            return False
 
         # Entity didn't update
         return False

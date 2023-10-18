@@ -31,7 +31,7 @@ class BaseGame():
     Required to be the called parent obj of any created game
     """
 
-    def __init__(self, alpha_screen: Surface, screen: Surface, app: App):
+    def __init__(self, app: App, alpha_screen: Surface, screen: Surface):
         """SnakeGame initilizer
 
         Args:

@@ -88,6 +88,9 @@ class Entity(Sprite):
         # Determines if entity can be killed
         self.is_killable = True
 
+        # If this entity has a parent obj
+        self.parent = None
+
         # Entity is a child/follower in a train of same children
         self.child_train = None
 
@@ -100,14 +103,24 @@ class Entity(Sprite):
         # Score this entity has accumulated
         self.score = 0
 
-        # Where the entity was located
-        self.prev_position = (0, 0)
-
-        # Where the entity is located
-        self.position = (0, 0)
-
         # How big entity is
         self.size = self.game.grid_size
+
+        # RGB color = pink default
+        self.obj_color = (255,105,180)
+
+        # Entity's visual representation
+        self.image = Surface((self.size, self.size))
+        self.image.fill(self.obj_color)
+
+        # spawned yet or not
+        self.is_spawned = False
+
+        # Current position
+        self.position = (-1, -1)
+
+        # Entity is a rectangle object
+        self.rect = self.image.get_rect(topleft=self.position)
 
         # How fast the entity can move per loop-tick
         # 1 = 100%, 0 = 0%, speed can't be greater than 1
@@ -126,16 +139,6 @@ class Entity(Sprite):
         self.sight_mod = 2
         self.prev_sight_mod = self.sight_mod
         self.sight = self.sight_mod * self.game.grid_size
-
-        # RGB color = pink default
-        self.obj_color = (255,105,180)
-
-        # Entity's visual representation
-        self.image = Surface((self.size, self.size))
-        self.image.fill(self.obj_color)
-
-        # Entity is a rectangle object
-        self.rect = self.image.get_rect(topleft=self.position)
 
         # Default death sound
         if self.game.app.is_audio:
@@ -164,6 +167,9 @@ class Entity(Sprite):
 
         # children list
         self.children: Deque[Entity] = Deque()
+
+        # Set the location of the entity
+        self.spawn()
 
 
     def update(self) -> tuple[bool, bool]:
@@ -236,7 +242,7 @@ class Entity(Sprite):
             self.game.menu.menu_option = MENU_GAME_OVER
 
         # Kill interacting_obj
-        interacting_obj.die(f"collided with {self.id} and died")
+        interacting_obj.die(f"collided with {self.display_name}")
 
 
     def die(self, death_reason: str) -> None:
@@ -247,7 +253,7 @@ class Entity(Sprite):
 
         if self.is_killable:
             logging_info(f"{self.id}: {death_reason}")
-            print((f"{self.id}: {death_reason}"))
+            # print((f"{self.display_name}: {death_reason}"))
 
             # Play death sound
             if self.game.app.is_audio:
@@ -264,29 +270,29 @@ class Entity(Sprite):
             self.state = Entity.DEAD
 
             # "remove" the entity from the game
-            # if "snake" in self.name:
-            #     self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+            if "snake" in self.name:
+                self.game.screen.fill(COLOR_BLACK, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
-            #     self.game.sprite_group.remove(self)
+                self.game.sprite_group.remove(self)
 
-            #     self.sight_lines_diag = None
+                self.sight_lines_diag = None
 
-            #     self.sight_lines = None
+                self.sight_lines = None
 
-            #     if self.children:
-            #         for child in self.children:
-            #             self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
-            #             child.die(f"Parent {self.id} died")
-            #             child.kill()
-            #     self.children = None
+                if self.children:
+                    for child in self.children:
+                        self.game.screen.fill(COLOR_BLACK, (child.rect.x, child.rect.y, child.rect.width, child.rect.height))
+                        child.die(f"Parent {self.id} died")
+                        child.kill()
+                self.children = None
 
-            #     self.kill()
+                self.kill()
 
-            input("press enter to continue from death")
+            # input("press enter to continue from death")
 
             # draw the object
-            # for obj in self.game.sprite_group:
-            #     obj.draw((False, True))
+            for obj in self.game.sprite_group:
+                obj.draw((False, True))
 
             # Free unreferenced memory
             gc_collect()
@@ -425,7 +431,7 @@ class Entity(Sprite):
         return False
 
 
-    def set_random_spawn(self, x_mod=1, y_mod=1) -> None:
+    def set_random_spawn(self, x_mod=1, y_mod=1, mod_walkability=True) -> None:
         """set_random_spawn
 
         Check for a random spawn location and if it's taken already
@@ -474,11 +480,12 @@ class Entity(Sprite):
         # change position
         self.position = (pos_x, pos_y)
 
-        # Mark previous grid position as walkable for pathfinding
-        obj_pos_to_node(self.game, self.prev_position).walkable = True
+        if mod_walkability:
+            # Mark previous grid position as walkable for pathfinding
+            obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-        # Mark grid position as unwalkable for pathfinding
-        obj_pos_to_node(self.game, self.position).walkable = False
+            # Mark grid position as unwalkable for pathfinding
+            obj_pos_to_node(self.game, self.position).walkable = False
 
         # place hitbox at position
         self.rect.topleft = self.position

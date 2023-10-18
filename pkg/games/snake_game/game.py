@@ -16,7 +16,7 @@ from os import path
 from threading import Thread
 
 from pygame import (
-    display,
+    display as pygame_display,
     draw,
     freetype,
     mixer,
@@ -100,15 +100,43 @@ class Game(BaseGame):
             app (App): The gameplatform
         """
 
+        print("Initilizing snake game obj")
+        self.screen = screen
+        self.alpha_screen = alpha_screen
+
+        # Show loading screen
+        self.screen.fill(COLOR_BLACK)
+        text_str = "Loading. . ."
+        horizontal_position = -1
+        h_offset = 0
+        w_offset = 0
+        position = (
+             app.screen_width / 2 + (len(text_str) * app.app_font.size) / 2 * horizontal_position + h_offset,
+            0 + app.app_font.size * 2 + w_offset
+        )
+        _ = app.app_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            COLOR_RED
+        )
+
+        # Show Loading screen
+        pygame_display.flip()
+
+        print("Loading Game config: Working", end="\r")
         # Game config file
         self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
         with open(self.game_config_file_path, encoding="utf8") as json_data_file:
             self.game_config: GameConfig = json_load(json_data_file)
+        print("Loading Gameconfig: Finished")
 
+        print("Loading Game leaderboard: Working", end="\r")
         # Game leaderboard file
         self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
         with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
             self.leaderboard: LeaderBoard = json_load(json_data_file)
+        print("Loading Game leaderboard: Finished")
 
         # Initilize parent init
         super().__init__(app, alpha_screen, screen)
@@ -122,6 +150,7 @@ class Game(BaseGame):
             size=REGULAR_FONT_SIZE,
         )
 
+        print("Loading Sounds and Music: Working", end="\r")
         # Game music
         self.game_music_intro = MUSIC_INTRO
         self.game_music_loop = MUSIC_LOOP
@@ -137,11 +166,13 @@ class Game(BaseGame):
                 mixer.Sound(SOUND_FOOD_PICKUP),
                 mixer.Sound(SOUND_PORTAL_ENTER),
             ]
+        print("Loading Sounds and Music: Finished")
 
         # Game object containers
         self.sprite_group: sprite.RenderUpdates[Entity] = sprite.RenderUpdates()
         self.entity_final_scores = {}
 
+        print("Loading Sprites: Working", end="\r")
         ## Game sprite Sheets
         # Snake Sprite Images
         self.snake_sprite_sheet = SpriteSheet(SPRITE_SHEET_SNAKE_PLAYER)
@@ -174,18 +205,24 @@ class Game(BaseGame):
             (1, 1),
             (1, 1),
         )
+        print("Loading Sprites: Finished")
 
+        print("Transforming Sprites: Working", end="\r")
         # Transform the sprite images relative to grid size
         self.transform_all_entity_images()
+        print("Transforming Sprites: Finished")
 
         # AI blackbox
         self.chosen_ai = None
 
+        print("Building pathfinding grid: Working", end="\r")
         # Pathfinding grid of the game space
         self.grid_width = self.screen_size[WIDTH] // self.grid_size
         self.grid_height = self.screen_size[HEIGHT] // self.grid_size
         self.grid = [[Node(x, y) for y in range(self.grid_height)] for x in range(self.grid_width)]
+        print("Building pathfinding grid: Finished")
 
+        print("Building Menus: Working", end="\r")
         # Set the game menus to the app menu object
         self.app.menu.menu_options[MENU_HOME] = lambda: home_menu(self.app.menu)
         self.app.menu.menu_options[MENU_PAUSE] = lambda: pause_menu(self.app.menu)
@@ -194,6 +231,7 @@ class Game(BaseGame):
         self.app.menu.menu_options[MENU_KEYBINDING] = lambda: keybinding_menu(self.app.menu)
         self.app.menu.menu_options[MENU_GAMEPLAY] = lambda: gameplay_menu(self.app.menu)
         self.app.menu.menu_options[MENU_LEADERBOARD] = lambda: leaderboard_menu(self.app.menu)
+        print("Building Menus: Finished")
 
 
     def play_loop(self):
@@ -226,21 +264,27 @@ class Game(BaseGame):
         # show the game bar at top of screen
         self.game_bar_display()
 
-        # self.screen.fill(COLOR_WHITE)
+        is_debug_mode = self.app.app_config["settings"]["debug"]["debug_mode"]
 
-        # for obj in self.sprite_group:
-        #     if "snake" in obj.name:
-        #         for x, y in obj.path:
-        #             draw.rect(self.screen, COLOR_BLUE, (x * self.grid_size, y * self.grid_size, self.grid_size, self.grid_size))
-        #         draw.rect(self.screen, COLOR_GREEN, (obj.position[0], obj.position[1], self.grid_size, self.grid_size))
-        #         draw.rect(self.screen, COLOR_RED, (obj.target[0][0], obj.target[0][1], self.grid_size, self.grid_size))
+        # if the display should be redone with the debug visuals
+        if self.app.app_config["settings"]["debug"]["debug_mode"]:
 
-        # for row in self.grid:
-        #     for node in row:
-        #         if not node.walkable:
-        #             draw.rect(self.screen, COLOR_BLACK, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size))
-                # else:
-                #     draw.rect(self.screen, COLOR_WHITE, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size), 1)
+            self.screen.fill(COLOR_WHITE)
+
+            for row in self.grid:
+                for node in row:
+                    if not node.walkable:
+                        draw.rect(self.screen, COLOR_BLACK, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size))
+                    else:
+                        draw.rect(self.screen, COLOR_WHITE, (node.x * self.grid_size, node.y * self.grid_size, self.grid_size, self.grid_size), 1)
+
+            for obj in self.sprite_group:
+                if "snake" in obj.name:
+                    for x, y in obj.path:
+                        draw.rect(self.screen, COLOR_BLUE, (x * self.grid_size, y * self.grid_size, self.grid_size, self.grid_size))
+                    draw.rect(self.screen, COLOR_GREEN, (obj.position[0], obj.position[1], self.grid_size, self.grid_size))
+                    if obj.target:
+                        draw.rect(self.screen, COLOR_RED, (obj.target[0][0], obj.target[0][1], self.grid_size, self.grid_size))
 
 
     def _object_actions(self, obj: Entity):

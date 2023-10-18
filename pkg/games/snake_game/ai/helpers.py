@@ -10,8 +10,6 @@ from ..constants import (
 
 # Object position to grid node converter
 def obj_pos_to_node(game, position: tuple) -> Node:
-    print("TESTING: ", len(game.grid[0]), len(game.grid), (position[X]//game.grid_size, position[Y]//game.grid_size))
-    print("TEST 2: ", game.grid[position[X]//game.grid_size][position[Y]//game.grid_size])
     return game.grid[position[X]//game.grid_size][position[Y]//game.grid_size]
 
 
@@ -37,7 +35,6 @@ def get_neighbors(game, node):
 # Define the A* pathfinding algorithm
 def astar(game, start, end):
     # initilize the open and closed lists
-    end.walkable = True
     open_list = [start]
     closed_list = []
 
@@ -47,7 +44,6 @@ def astar(game, start, end):
         closed_list.append(current_node)
 
         if current_node == end:
-            print("End node found")
             path = []
             while current_node:
                 if current_node == start: break

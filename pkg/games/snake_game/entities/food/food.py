@@ -50,9 +50,6 @@ class Food(Entity):
         # Entity is a rectangle object
         self.rect = self.image.get_rect(topleft=self.position)
 
-        # spawned
-        self.is_spawned = False
-
         # How much an obj grows from eating this food
         self.growth = 5
 
@@ -67,8 +64,6 @@ class Food(Entity):
             self.sound_death = self.game.sounds[SOUND_FOOD_PICKUP_IDX]
             self.sound_mod = 1.5
             self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
-
-        self.spawn()
 
 
     def update(self) -> bool:
@@ -101,7 +96,7 @@ class Food(Entity):
         """
 
         if not self.is_spawned:
-            self.set_random_spawn(5, 5)
+            self.set_random_spawn(5, 5, mod_walkability=False)
             self.is_spawned = True
             self.state = Entity.ALIVE
 

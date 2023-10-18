@@ -47,6 +47,7 @@ from .constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
+    COLOR_WHITE,
     CONFIG_APP_FILE_NAME,
     LOG_FILE_NAME,
     MENU_PAUSE,
@@ -93,18 +94,62 @@ class App():
     """
 
     def __init__(self, game_list: list):
+        print("Initilizing App Started")
+
+        print("Loading pygame and audio mixer: Working", end="\r")
         # setup mixer to avoid sound lag
         self.set_up_audio_mixer()
+        print("Loading pygame and audio mixer: Finished")
 
+        # Menu settings
+        self.menu = Menu(self)
+        self.pause_menu_options = {}
+
+        # App fonts
+        self.app_font = freetype.Font(
+            file=REGULAR_FONT,
+            size=REGULAR_FONT_SIZE,
+        )
+
+        # Initial app window settings
+        self.screen = pygame_display.set_mode(
+            (640, 360),
+            DOUBLEBUF,
+            16,
+        )
+
+        self.screen.fill(COLOR_BLACK)
+
+        text_str = "Loading. . ."
+        horizontal_position = -1
+        h_offset = 0
+        w_offset = 0
+        position = (
+            640 / 2 + (len(text_str) * self.app_font.size) / 2 * horizontal_position + h_offset,
+            0 + self.app_font.size * 2 + w_offset
+        )
+        _ = self.app_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            COLOR_RED
+        )
+
+        # Show Loading screen
+        pygame_display.flip()
+
+        print("Loading app config: Working", end="\r")
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_APP_FILE_NAME)
         with open(self.app_config_file_path, encoding="utf8") as json_data_file:
             self.app_config: AppConfig = json_load(json_data_file)
+        print("Loading app config: Finished")
 
+        print("Loading logger: Working", end="\r")
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
-            print(f"{getcwd()}/{LOG_FILE_NAME}")
             basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+        print("Loading logger: Finished")
 
         logging_info("App started")
 
@@ -127,12 +172,6 @@ class App():
         self.keybinding_switch = (False, None)
         self.focus_pause = False
 
-        # App fonts
-        self.app_font = freetype.Font(
-            file=REGULAR_FONT,
-            size=REGULAR_FONT_SIZE,
-        )
-
         # Sound settings
         if self.is_audio:
             self.menu_sounds = [
@@ -146,9 +185,7 @@ class App():
         self.ui_sound_options = {}
         self.pause_game_music = False
 
-        # Menu settings
-        self.menu = Menu(self)
-        self.pause_menu_options = {}
+
 
         # Event settings
         self.event_options = {
@@ -167,6 +204,8 @@ class App():
         for event in self.event_options:
             events.append(event)
         pygame_event.set_allowed(events)
+
+        print("Initilizing App Finished")
 
 
     def run(self):
@@ -296,7 +335,7 @@ class App():
 
     def set_game_settings(self) -> None:
         # Instantiate the Game Obj
-        self.game = self.game_pkg(self.alpha_screen, self.screen, self)
+        self.game = self.game_pkg(self, self.alpha_screen, self.screen)
 
         # Instatiate options dict's
         self.ui_sound_options = {

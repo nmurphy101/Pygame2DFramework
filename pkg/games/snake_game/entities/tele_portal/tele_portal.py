@@ -57,7 +57,7 @@ class TelePortal(Entity):
         self.parent = parent
 
         # spawned
-        self.is_spawned = True
+        self.is_spawned = False
 
         # When obj should be spawned
         now = datetime.now()
@@ -89,8 +89,6 @@ class TelePortal(Entity):
         self.children: Deque[TelePortal]
         if not parent:
             self.children.append(TelePortal(game, parent=self))
-
-        self.spawn()
 
 
     def update(self) -> tuple[bool, bool]:
