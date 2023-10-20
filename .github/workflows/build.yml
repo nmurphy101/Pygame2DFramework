@@ -24,16 +24,16 @@ jobs:
 
       - name: Check Output Parameters
         run: |
-          echo "Got tag name ${{ steps.release.outputs.tag_name }}"
-          echo "Got upload url ${{ steps.release.outputs.upload_url }}"
+          echo "Got tag name ${{ steps.create-release.outputs.tag_name }}"
+          echo "Got upload url ${{ steps.create-release.outputs.upload_url }}"
           
             
   build-windows:
     runs-on: windows-latest
     needs: main
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      # - name: Checkout
+      #   uses: actions/checkout@v3
 
       - name: Check Output Parameters
         run: |
