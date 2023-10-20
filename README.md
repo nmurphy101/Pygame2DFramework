@@ -14,7 +14,7 @@ pip3 freeze > requirements.txt
 ```
 
 # Build to exe
-pyinstaller --add-data="_internal/assets:assets" --onedir main.py
+pyinstaller main.spec
 
 # Setting up development Windows
 install and setup python3
