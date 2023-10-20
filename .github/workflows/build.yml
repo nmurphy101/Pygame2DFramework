@@ -5,28 +5,33 @@ on:
     branches: main
 
 jobs:
-  release-on-push:
+  main:
     runs-on: ubuntu-latest
     outputs: 
-      upload_url: ${{ steps.Release.outputs.upload_url }}
-      tag_name: ${{ steps.Release.outputs.tag_name }}
+      upload_url: ${{ steps.release.outputs.upload_url }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Release
+      - name: release
         uses: rymndhng/release-on-push-action@master
         with:
           bump_version_scheme: minor
             
   build-windows:
     runs-on: windows-latest
-    needs: release-on-push
+    needs: main
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Check Output Parameters
+        run: |
+          echo "Got tag name ${{ needs.main.outputs.tag_name }}"
+          echo "Got upload url ${{ needs.main.outputs.upload_url }}"
 
       - name: Install Python
         uses: actions/setup-python@v1
@@ -43,7 +48,7 @@ jobs:
           python -m PyInstaller main.spec
       - uses: actions/upload-artifact@v2
         with:
-          name: pygame_framework
+          name: pygame_framework_${{ needs.main.outputs.tag_name }}
           path: dist/main
           
       - name: Upload Release Asset
@@ -52,9 +57,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.release-on-push.outputs.upload_url }}
+          upload_url: ${{ needs.main.outputs.upload_url }}
           asset_path: dist/main
-          asset_name: pygame_framework-${{ needs.release-on-push.outputs.tag_name }}
+          asset_name: pygame_framework_${{ needs.main.outputs.tag_name }}
           asset_content_type: application/zip
         
               
