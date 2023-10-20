@@ -19,7 +19,7 @@ jobs:
       - name: Release
         uses: rymndhng/release-on-push-action@master
         with:
-          tag_prefix: v
+          bump_version_scheme: minor
             
   build-windows:
     runs-on: windows-latest
