@@ -1,3 +1,6 @@
+# Status
+[![CodeFactor](https://www.codefactor.io/repository/github/nmurphy101/pygame2dframework/badge)](https://www.codefactor.io/repository/github/nmurphy101/pygame2dframework) ![Release](https://github.com/nmurphy101/pygame2dframework/actions/workflows/build.yml/badge.svg?branch=main) ![Build](https://github.com/nmurphy101/pygame2dframework/actions/workflows/python-app.yml/badge.svg)
+
 # pygame 2D framework
 A framework/engine to make 2D pygame games with a game loader.
 First game is the classic snake with upgrades.
