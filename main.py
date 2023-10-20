@@ -72,7 +72,7 @@ def main():
     """
 
     # Import and set the window icon
-    icon = pygame_image.load("favicon.ico")
+    icon = pygame_image.load("_internal/assets/icons/favicon.ico")
     pygame_display.set_icon(icon)
 
     # Import all the game objects from the package names

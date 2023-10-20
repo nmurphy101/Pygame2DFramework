@@ -164,15 +164,15 @@ INV_DISPLAY_SETTING_MAP = {v: k for k, v in DISPLAY_SETTING_MAP.items()}
 DEFAULT_GAME_CONFIG = {
     "settings": {
         "gameplay": {
-            "human_player": False,
-            "killable_player": False,
+            "human_player": true,
+            "killable_player": true,
             "player_speed": 0.7,
-            "num_ai": 8,
-            "killable_ai": True,
+            "num_ai": 2,
+            "killable_ai": true,
             "ai_difficulty": 10,
-            "ai_speed": 3.6,
-            "teleporter": True,
-            "visible_sight_lines": False,
+            "ai_speed": 0.5,
+            "teleporter": true,
+            "visible_sight_lines": false,
             "num_of_food": 6,
             "grid_size": 16
         },
