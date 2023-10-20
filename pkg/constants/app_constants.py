@@ -16,13 +16,13 @@ CONFIG_APP_FILE_NAME = "app_config.json"
 LOG_FILE_NAME = "output.log"
 
 # Font
-REGULAR_FONT = "assets/fonts/PressStart2P-Regular.ttf"
+REGULAR_FONT = "_internal/assets/fonts/PressStart2P-Regular.ttf"
 REGULAR_FONT_SIZE = 32
 
 # ui sounds
-SOUND_UI_HOVER = "assets/sounds/8bitsfxpack_windows/UI01.wav"
-SOUND_UI_FORWARD = "assets/sounds/8bitsfxpack_windows/UI02.wav"
-SOUND_UI_BACKWARD = "assets/sounds/8bitsfxpack_windows/UI03.wav"
+SOUND_UI_HOVER = "_internal/assets/sounds/8bitsfxpack_windows/UI01.wav"
+SOUND_UI_FORWARD = "_internal/assets/sounds/8bitsfxpack_windows/UI02.wav"
+SOUND_UI_BACKWARD = "_internal/assets/sounds/8bitsfxpack_windows/UI03.wav"
 
 # Colors
 COLOR_BLACK = (0, 0, 0)
@@ -56,4 +56,27 @@ MOUSE_DOWN_MAP = {
     3: "right",
     4: "scroll_up",
     5: "scroll_down",
+}
+
+# Default app config
+DEFAULT_APP_CONFIG = {
+    "settings": {
+        "sound": {
+            "music": False,
+            "music_volume": 0.05,
+            "effect_volume": 0.1,
+            "menu_volume": "0.1"
+        },
+        "display": {
+            "fps": 3000,
+            "fps_display": True,
+            "fullscreen": False,
+            "resolution": "1280x720",
+            "window_title": "Game Platform - "
+        },
+        "debug": {
+            "log_level": "debug",
+            "debug_mode": False
+        }
+    }
 }

@@ -1,0 +1,75 @@
+name: Build Workflow
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build-windows:
+    runs-on: windows-2019
+    steps:
+      - name: Generate build number
+        id: buildnumber
+        uses: onyxmueller/build-tag-number@v1
+        with:
+          token: ${{secrets.github_token}}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # required for github-action-get-previous-tag
+
+      - name: Get previous tag
+        id: previoustag
+        uses: 'WyriHaximus/github-action-get-previous-tag@v1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get next minor version
+        id: semver
+        uses: 'WyriHaximus/github-action-next-semvers@v1'
+        with:
+          version: ${{ steps.previoustag.outputs.tag }}
+
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.10.11'
+          architecture: 'x64'
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run PyInstaller
+        run: |
+          python -m PyInstaller main.spec
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Windows_qwiklabs
+          path: dist/main.exe
+
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.semver.outputs.patch }}
+          release_name: Release ${{ steps.semver.outputs.patch }}
+          overwrite: true
+          body: |
+            Release version: ${{ github.event.release.tag_name }}  Build: ${{ steps.buildnumber.outputs.build_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: dist/main.exe
+          asset_name: pygame_framework.exe
+          asset_content_type: application/zip

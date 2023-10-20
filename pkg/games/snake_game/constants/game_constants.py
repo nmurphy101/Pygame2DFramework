@@ -25,23 +25,23 @@ GAME_TITLE = "Snake"
 CONFIG_GAME_FILE_NAME = "game_config.json"
 
 # Font
-REGULAR_FONT = "assets/fonts/PressStart2P-Regular.ttf"
+REGULAR_FONT = "_internal/assets/fonts/PressStart2P-Regular.ttf"
 REGULAR_FONT_SIZE = 32
 
 # Music
-MUSIC_INTRO = "assets/music/8bit_Stage1_Intro.wav"
-MUSIC_LOOP = "assets/music/8bit_Stage1_Loop.wav"
+MUSIC_INTRO = "_internal/assets/music/8bit_Stage1_Intro.wav"
+MUSIC_LOOP = "_internal/assets/music/8bit_Stage1_Loop.wav"
 
 # Sounds
-SOUND_SNAKE_DEATH = "assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"
-SOUND_FOOD_PICKUP = "assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"
-SOUND_PORTAL_ENTER = "assets/sounds/8bitsfxpack_windows/SciFi05.wav"
+SOUND_SNAKE_DEATH = "_internal/assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav"
+SOUND_FOOD_PICKUP = "_internal/assets/sounds/8bitretro_soundpack/PICKUP-COIN-OPJECT-ITEM/Retro_8-Bit_Game-Pickup_Object_Item_Coin_01.wav"
+SOUND_PORTAL_ENTER = "_internal/assets/sounds/8bitsfxpack_windows/SciFi05.wav"
 
 # Sprite sheets
-SPRITE_SHEET_SNAKE_PLAYER = "assets/sprites/snake/snake-sheet.png"
-SPRITE_SHEET_SNAKE_ENEMY = "assets/sprites/snake/snake_enemy-sheet.png"
-SPRITE_SHEET_FOOD = "assets/sprites/food/food-sheet.png"
-SPIRTE_SHEET_TELEPORTAL = "assets/sprites/tele_portal/tele_portal-sheet.png"
+SPRITE_SHEET_SNAKE_PLAYER = "_internal/assets/sprites/snake/snake-sheet.png"
+SPRITE_SHEET_SNAKE_ENEMY = "_internal/assets/sprites/snake/snake_enemy-sheet.png"
+SPRITE_SHEET_FOOD = "_internal/assets/sprites/food/food-sheet.png"
+SPIRTE_SHEET_TELEPORTAL = "_internal/assets/sprites/tele_portal/tele_portal-sheet.png"
 
 # Directions
 UP = 0
@@ -159,3 +159,45 @@ DISPLAY_SETTING_MAP = {
 }
 
 INV_DISPLAY_SETTING_MAP = {v: k for k, v in DISPLAY_SETTING_MAP.items()}
+
+# Default game config data
+DEFAULT_GAME_CONFIG = {
+    "settings": {
+        "gameplay": {
+            "human_player": False,
+            "killable_player": False,
+            "player_speed": 0.7,
+            "num_ai": 8,
+            "killable_ai": True,
+            "ai_difficulty": 10,
+            "ai_speed": 3.6,
+            "teleporter": True,
+            "visible_sight_lines": False,
+            "num_of_food": 6,
+            "grid_size": 16
+        },
+        "keybindings": {
+            "move_up": "W",
+            "move_left": "A",
+            "move_down": "S",
+            "move_right": "D"
+        }
+    }
+}
+
+# Default leaderboard data
+DEFAULT_LEADERBOARD = {
+    "highscore": 150,
+    "top_ten": [
+        20,
+        20,
+        30,
+        30,
+        30,
+        50,
+        90,
+        130,
+        140,
+        150
+    ]
+}
