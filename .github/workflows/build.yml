@@ -9,10 +9,8 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # required for github-action-get-previous-tag
-          
+        uses: actions/checkout@v1
+
       - name: Install Python
         uses: actions/setup-python@v1
         with:
@@ -28,8 +26,8 @@ jobs:
           python -m PyInstaller main.spec
       - uses: actions/upload-artifact@v2
         with:
-          name: Windows_qwiklabs
-          path: dist/main.exe
+          name: pygame_framework
+          path: dist/main
 
       - name: create release
         id: create_release
@@ -39,7 +37,6 @@ jobs:
         with:
           tag_name: ${{ github.event.head_commit.message }}
           release_name: Release ${{ github.event.head_commit.message }}
-          overwrite: true
           body: |
             Release version: ${{ github.event.release.tag_name }}
           draft: false
@@ -52,6 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: dist/main.exe
-          asset_name: pygame_framework.exe
+          asset_path: dist/main
+          asset_name: pygame_framework
           asset_content_type: application/zip
