@@ -11,8 +11,9 @@
 
 
 from gc import collect as gc_collect
-from json import load as json_load
+from json import dump as json_dump, load as json_load
 from os import path
+from pathlib import Path
 from threading import Thread
 
 from pygame import (
@@ -34,6 +35,8 @@ from .constants import (
     COLOR_GREY_DARK,
     COLOR_RED,
     COLOR_WHITE,
+    DEFAULT_GAME_CONFIG,
+    DEFAULT_LEADERBOARD,
     GAME_TITLE,
     REGULAR_FONT,
     REGULAR_FONT_SIZE,
@@ -127,15 +130,31 @@ class Game(BaseGame):
         print("Loading Game config: Working", end="\r")
         # Game config file
         self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
-        with open(self.game_config_file_path, encoding="utf8") as json_data_file:
-            self.game_config: GameConfig = json_load(json_data_file)
+        try:
+            with open(self.game_config_file_path, encoding="utf8") as json_data_file:
+                self.game_config: GameConfig = json_load(json_data_file)
+        except Exception as e:
+            print(f"Error: {e}")
+            self.game_config = DEFAULT_GAME_CONFIG
+            Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
+            with open(self.game_config_file_path, "w+", encoding="utf8") as _file:
+                json_dump(self.game_config, _file, ensure_ascii=False, indent=4)
+
         print("Loading Gameconfig: Finished")
 
         print("Loading Game leaderboard: Working", end="\r")
         # Game leaderboard file
         self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
-        with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
-            self.leaderboard: LeaderBoard = json_load(json_data_file)
+        try:
+            with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
+                self.leaderboard: LeaderBoard = json_load(json_data_file)
+        except Exception as e:
+            print(f"Error: {e}")
+            self.leaderboard = DEFAULT_LEADERBOARD
+            Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
+            with open(self.leaderboard_file_path, "w+", encoding="utf8") as _file:
+                json_dump(self.leaderboard, _file, ensure_ascii=False, indent=4)
+
         print("Loading Game leaderboard: Finished")
 
         # Initilize parent init

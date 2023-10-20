@@ -10,7 +10,7 @@
 """
 
 from inspect import currentframe, getframeinfo
-from json import load as json_load
+from json import dump as json_dump, load as json_load
 from logging import (
     INFO,
     DEBUG,
@@ -20,6 +20,7 @@ from logging import (
     info as logging_info,
 )
 from os import path, getcwd
+from pathlib import Path
 from statistics import mean
 
 from guppy import hpy
@@ -39,7 +40,7 @@ from pygame import (
     USEREVENT,
 )
 from pygame.constants import (
-    QUIT, KEYDOWN, K_ESCAPE, RESIZABLE, MOUSEBUTTONDOWN,
+    QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONDOWN,
     MOUSEBUTTONUP, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
 )
 
@@ -47,8 +48,8 @@ from .constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
-    COLOR_WHITE,
     CONFIG_APP_FILE_NAME,
+    DEFAULT_APP_CONFIG,
     LOG_FILE_NAME,
     MENU_PAUSE,
     MOUSE_DOWN_MAP,
@@ -141,14 +142,29 @@ class App():
         print("Loading app config: Working", end="\r")
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_APP_FILE_NAME)
-        with open(self.app_config_file_path, encoding="utf8") as json_data_file:
-            self.app_config: AppConfig = json_load(json_data_file)
+        print(path.dirname(__file__), self.app_config_file_path)
+        try:
+            with open(self.app_config_file_path, encoding="utf8") as json_data_file:
+                self.app_config: AppConfig = json_load(json_data_file)
+        except Exception as e:
+            print(f"Error: {e}")
+            self.app_config = DEFAULT_APP_CONFIG
+            Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
+            with open(self.app_config_file_path, "w+", encoding="utf8") as _file:
+                json_dump(self.app_config, _file, ensure_ascii=False, indent=4)
+
         print("Loading app config: Finished")
 
         print("Loading logger: Working", end="\r")
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
-            basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+            try:
+                basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+            except Exception as e:
+                print(f"Error: {e}")
+                Path(f"{getcwd()}/logs/").mkdir(parents=True, exist_ok=True)
+                with open(f"{getcwd()}/logs/{LOG_FILE_NAME}", "w+", encoding="utf8"): pass
+                basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
         print("Loading logger: Finished")
 
         logging_info("App started")
@@ -603,7 +619,8 @@ class App():
             self.clock.tick(self.fps)
 
         # Complete final game settings
-        self.set_game_settings()
+        if self.game_pkg:
+            self.set_game_settings()
 
 
     def _choose_game(self) -> list:

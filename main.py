@@ -15,10 +15,7 @@ __version__ = '1.0.0-alpha'
 
 
 from functools import wraps
-from importlib import import_module
 from io import StringIO
-from json import load as json_load
-from os import path, listdir
 from sys import exit as sys_exit
 
 from cProfile import Profile
@@ -26,9 +23,11 @@ from pstats import Stats
 from pygame import (
     display as pygame_display,
     quit as pygame_quit,
+    image as pygame_image,
 )
 
 from pkg.app import App
+from pkg.games.snake_game import Game as SnakeGame
 
 
 # profiling decorator
@@ -72,14 +71,12 @@ def main():
     The main app startup
     """
 
-    # Get the name of all the game packages
-    game_list = listdir("./pkg/games")
-    game_list.pop()
+    # Import and set the window icon
+    icon = pygame_image.load("favicon.ico")
+    pygame_display.set_icon(icon)
 
     # Import all the game objects from the package names
-    game_module_list = []
-    for game_name in game_list:
-        game_module_list.append(import_module(f"pkg.games.{game_name}").Game)
+    game_module_list = [SnakeGame]
 
     # Initilize the base game with the game options
     app = App(game_module_list)

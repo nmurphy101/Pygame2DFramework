@@ -142,7 +142,7 @@ class Entity(Sprite):
 
         # Default death sound
         if self.game.app.is_audio:
-            self.sound_death = mixer.Sound("assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
+            self.sound_death = mixer.Sound("_internal/assets/sounds/8bitretro_soundpack/MISC-NOISE-BIT_CRUSH/Retro_8-Bit_Game-Misc_Noise_06.wav")
             self.sound_mod = 4.5
             self.sound_death_volume = float(self.game.app.app_config["settings"]["sound"]["effect_volume"])/self.sound_mod
 
