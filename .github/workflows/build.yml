@@ -27,6 +27,7 @@ jobs:
           bump_version_scheme: minor
 
   build-windows:
+    if: ${{ needs.main.outputs.upload_url != '' }}
     runs-on: windows-latest
     needs: main
     steps:
