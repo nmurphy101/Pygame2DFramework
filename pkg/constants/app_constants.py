@@ -62,21 +62,21 @@ MOUSE_DOWN_MAP = {
 DEFAULT_APP_CONFIG = {
     "settings": {
         "sound": {
-            "music": False,
+            "music": true,
             "music_volume": 0.05,
             "effect_volume": 0.1,
             "menu_volume": "0.1"
         },
         "display": {
             "fps": 3000,
-            "fps_display": True,
-            "fullscreen": False,
+            "fps_display": false,
+            "fullscreen": false,
             "resolution": "1280x720",
             "window_title": "Game Platform - "
         },
         "debug": {
             "log_level": "debug",
-            "debug_mode": False
+            "debug_mode": false
         }
     }
 }
