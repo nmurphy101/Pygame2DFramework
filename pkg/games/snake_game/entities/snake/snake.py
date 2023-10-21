@@ -296,12 +296,18 @@ class Snake(Entity):
                 self.prev_direction = self.direction
                 self.position = (self.position[X] + self.size, self.position[Y])
 
+            # Don't update if entity has not actually moved
             if self.prev_position != self.position:
-                # Mark previous grid position as walkable for pathfinding
-                obj_pos_to_node(self.game, self.prev_position).walkable = True
+                try:
+                    # Mark previous grid position as walkable for pathfinding
+                    obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-                # Mark grid position as unwalkable for pathfinding
-                obj_pos_to_node(self.game, self.position).walkable = False
+                    # Mark grid position as unwalkable for pathfinding
+                    obj_pos_to_node(self.game, self.position).walkable = False
+
+                except IndexError:
+                    # When leaving the right and bottom of the screen
+                    pass
 
                 # Set current position for hitbox
                 self.rect.topleft = self.position
@@ -386,11 +392,16 @@ class TailSegment(Entity):
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
 
-            # Mark previous grid position as walkable for pathfinding
-            obj_pos_to_node(self.game, self.prev_position).walkable = True
+            try:
+                # Mark previous grid position as walkable for pathfinding
+                obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-            # Mark grid position as unwalkable for pathfinding
-            obj_pos_to_node(self.game, self.position).walkable = False
+                # Mark grid position as unwalkable for pathfinding
+                obj_pos_to_node(self.game, self.position).walkable = False
+
+            except IndexError:
+                # When leaving the right and bottom of the screen
+                pass
 
             # Choose the right image for this segment
             self.choose_img()

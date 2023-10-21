@@ -28,49 +28,54 @@ def game_over_menu(self: Menu):
     game_over_menu does stuff
     """
 
-    if self.refresh or self.menu_option != MENU_GAME_OVER:
-        # Clear previous frame render
-        self.app.game.screen.fill(COLOR_BLACK)
+    if not self.refresh and (self.menu_option == MENU_GAME_OVER and self.prev_menu == MENU_GAME_OVER):
+        return self.menu
 
-        # Make sure the right menu option is selected
-        self.menu_option = MENU_GAME_OVER
+    # Clear previous frame render
+    self.app.game.screen.fill(COLOR_BLACK)
 
-        # Stop the music
-        if self.app.is_audio:
-            mixer.music.stop()
+    # Make sure the right menu option is selected
+    self.menu_option = MENU_GAME_OVER
+    self.prev_menu = MENU_GAME_OVER
 
-        # Render the Game Over text
-        self.render_text("Game Over", 10, color=COLOR_RED)
+    # Stop the music
+    if self.app.is_audio:
+        mixer.music.stop()
 
-        # Get the player score
-        score = 0
-        for _, value in self.app.game.entity_final_scores.items():
-            if value["is_player"]:
-                score = value["score"]
+    # Render the Game Over text
+    self.render_text("Game Over", 10, color=COLOR_RED)
 
-        # Render the score
-        self.render_text('Score: ' + str(score), 8, color=COLOR_RED)
+    # Get the player score
+    score = 0
+    for _, value in self.app.game.entity_final_scores.items():
+        if value["is_player"]:
+            score = value["score"]
 
-        # Render the restart button
-        restart_obj = self.render_button("Restart", 1, has_outline=True)
+    # Render the score
+    self.render_text('Score: ' + str(score), 8, color=COLOR_RED)
 
-        # Render the quit button
-        quit_obj = self.render_button("Quit", -2, has_outline=True)
+    # Render the restart button
+    restart_obj = self.render_button("Restart", 1, has_outline=True)
 
-        def restart():
-            _get_score(self)
-            self.app.game.start()
+    # Render the quit button
+    quit_obj = self.render_button("Quit", -2, has_outline=True)
 
-        def return_to_home():
-            _get_score(self)
-            self.menu_options[MENU_HOME]()
+    def restart():
+        _get_score(self)
+        self.app.game.start()
+        self.menu_option = None
+        self.refresh = True
 
-        self.menu = [
-            (restart_obj, restart, 3, None),
-            (quit_obj, return_to_home, 3, None),
-        ]
+    def return_to_home():
+        _get_score(self)
+        self.menu_options[MENU_HOME]()
 
-        self.refresh = False
+    self.menu = [
+        (restart_obj, restart, 3, None),
+        (quit_obj, return_to_home, 3, None),
+    ]
+
+    self.refresh = False
 
     return self.menu
 

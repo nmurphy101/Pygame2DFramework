@@ -10,7 +10,10 @@
 """
 
 from inspect import currentframe, getframeinfo
-from logging import debug as logging_debug
+from logging import (
+    debug as logging_debug,
+    warning as logging_warning,
+)
 
 from pygame import (
     image,
@@ -33,7 +36,7 @@ class SpriteSheet:
             self.sheet = image.load(filename).convert_alpha()
 
         except FileNotFoundError as error:
-            print(f"Unable to load spritesheet image: {filename}")
+            logging_warning(f"Unable to load spritesheet image: {filename}")
             raise SystemExit(error) from error
 
 

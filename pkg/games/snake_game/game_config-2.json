@@ -7,7 +7,7 @@
             "num_ai": 2,
             "killable_ai": true,
             "ai_difficulty": 10,
-            "ai_speed": 0.5,
+            "ai_speed": 0.6,
             "teleporter": true,
             "visible_sight_lines": false,
             "num_of_food": 6,
