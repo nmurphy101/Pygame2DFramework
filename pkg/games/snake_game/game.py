@@ -12,6 +12,9 @@
 
 from gc import collect as gc_collect
 from json import dump as json_dump, load as json_load
+from logging import (
+    info as logging_info,
+)
 from os import path
 from pathlib import Path
 from threading import Thread
@@ -103,7 +106,7 @@ class Game(BaseGame):
             app (App): The gameplatform
         """
 
-        print("Initilizing snake game obj")
+        logging_info("Initilizing snake game obj")
         self.screen = screen
         self.alpha_screen = alpha_screen
 
@@ -127,35 +130,37 @@ class Game(BaseGame):
         # Show Loading screen
         pygame_display.flip()
 
-        print("Loading Game config: Working", end="\r")
+        logging_info("Loading Game config: Working")
         # Game config file
         self.game_config_file_path = path.join(path.dirname(__file__), "game_config.json")
+
         try:
             with open(self.game_config_file_path, encoding="utf8") as json_data_file:
                 self.game_config: GameConfig = json_load(json_data_file)
-        except Exception as e:
-            print(f"Error: {e}")
+
+        except FileNotFoundError:
             self.game_config = DEFAULT_GAME_CONFIG
             Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
             with open(self.game_config_file_path, "w+", encoding="utf8") as _file:
                 json_dump(self.game_config, _file, ensure_ascii=False, indent=4)
 
-        print("Loading Gameconfig: Finished")
+        logging_info("Loading Gameconfig: Finished")
 
-        print("Loading Game leaderboard: Working", end="\r")
+        logging_info("Loading Game leaderboard: Working")
         # Game leaderboard file
         self.leaderboard_file_path = path.join(path.dirname(__file__), "leaderboard.json")
+
         try:
             with open(self.leaderboard_file_path, encoding="utf8") as json_data_file:
                 self.leaderboard: LeaderBoard = json_load(json_data_file)
-        except Exception as e:
-            print(f"Error: {e}")
+
+        except FileNotFoundError:
             self.leaderboard = DEFAULT_LEADERBOARD
             Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
             with open(self.leaderboard_file_path, "w+", encoding="utf8") as _file:
                 json_dump(self.leaderboard, _file, ensure_ascii=False, indent=4)
 
-        print("Loading Game leaderboard: Finished")
+        logging_info("Loading Game leaderboard: Finished")
 
         # Initilize parent init
         super().__init__(app, alpha_screen, screen)
@@ -169,7 +174,7 @@ class Game(BaseGame):
             size=REGULAR_FONT_SIZE,
         )
 
-        print("Loading Sounds and Music: Working", end="\r")
+        logging_info("Loading Sounds and Music: Working")
         # Game music
         self.game_music_intro = MUSIC_INTRO
         self.game_music_loop = MUSIC_LOOP
@@ -185,13 +190,13 @@ class Game(BaseGame):
                 mixer.Sound(SOUND_FOOD_PICKUP),
                 mixer.Sound(SOUND_PORTAL_ENTER),
             ]
-        print("Loading Sounds and Music: Finished")
+        logging_info("Loading Sounds and Music: Finished")
 
         # Game object containers
         self.sprite_group: sprite.RenderUpdates[Entity] = sprite.RenderUpdates()
         self.entity_final_scores = {}
 
-        print("Loading Sprites: Working", end="\r")
+        logging_info("Loading Sprites: Working")
         ## Game sprite Sheets
         # Snake Sprite Images
         self.snake_sprite_sheet = SpriteSheet(SPRITE_SHEET_SNAKE_PLAYER)
@@ -224,24 +229,24 @@ class Game(BaseGame):
             (1, 1),
             (1, 1),
         )
-        print("Loading Sprites: Finished")
+        logging_info("Loading Sprites: Finished")
 
-        print("Transforming Sprites: Working", end="\r")
+        logging_info("Transforming Sprites: Working")
         # Transform the sprite images relative to grid size
         self.transform_all_entity_images()
-        print("Transforming Sprites: Finished")
+        logging_info("Transforming Sprites: Finished")
 
         # AI blackbox
         self.chosen_ai = None
 
-        print("Building pathfinding grid: Working", end="\r")
+        logging_info("Building pathfinding grid: Working")
         # Pathfinding grid of the game space
         self.grid_width = self.screen_size[WIDTH] // self.grid_size
         self.grid_height = self.screen_size[HEIGHT] // self.grid_size
-        self.grid = [[Node(x, y) for y in range(self.grid_height)] for x in range(self.grid_width)]
-        print("Building pathfinding grid: Finished")
+        self.grid = [[Node(x, y) for y in range(self.grid_height + self.grid_size)] for x in range(self.grid_width + self.grid_size)]
+        logging_info("Building pathfinding grid: Finished")
 
-        print("Building Menus: Working", end="\r")
+        logging_info("Building Menus: Working")
         # Set the game menus to the app menu object
         self.app.menu.menu_options[MENU_HOME] = lambda: home_menu(self.app.menu)
         self.app.menu.menu_options[MENU_PAUSE] = lambda: pause_menu(self.app.menu)
@@ -250,7 +255,7 @@ class Game(BaseGame):
         self.app.menu.menu_options[MENU_KEYBINDING] = lambda: keybinding_menu(self.app.menu)
         self.app.menu.menu_options[MENU_GAMEPLAY] = lambda: gameplay_menu(self.app.menu)
         self.app.menu.menu_options[MENU_LEADERBOARD] = lambda: leaderboard_menu(self.app.menu)
-        print("Building Menus: Finished")
+        logging_info("Building Menus: Finished")
 
 
     def play_loop(self):
@@ -282,8 +287,6 @@ class Game(BaseGame):
 
         # show the game bar at top of screen
         self.game_bar_display()
-
-        is_debug_mode = self.app.app_config["settings"]["debug"]["debug_mode"]
 
         # if the display should be redone with the debug visuals
         if self.app.app_config["settings"]["debug"]["debug_mode"]:

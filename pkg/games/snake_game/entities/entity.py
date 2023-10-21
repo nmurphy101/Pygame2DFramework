@@ -13,6 +13,7 @@
 from datetime import datetime
 from gc import collect as gc_collect
 from logging import (
+    debug as logging_debug,
     warning as logging_warning,
     info as logging_info,
 )
@@ -239,7 +240,7 @@ class Entity(Sprite):
 
         # Loose the game if interacting_obj is the player
         if interacting_obj.is_player:
-            self.game.menu.menu_option = MENU_GAME_OVER
+            self.game.app.menu.menu_option = MENU_GAME_OVER
 
         # Kill interacting_obj
         interacting_obj.die(f"collided with {self.display_name}")
@@ -252,8 +253,7 @@ class Entity(Sprite):
         """
 
         if self.is_killable:
-            logging_info(f"{self.id}: {death_reason}")
-            # print((f"{self.display_name}: {death_reason}"))
+            logging_info((f"{self.display_name}: {death_reason}"))
 
             # Play death sound
             if self.game.app.is_audio:
@@ -396,7 +396,7 @@ class Entity(Sprite):
             if self.secondary_target == obj.position:
                 self.secondary_target = None
 
-            # print(self.id, " Interacting with obj ", obj.id)
+            logging_debug(f"{self.id} Interacting with obj {obj.id}")
 
             # Do obj's interaction method
             obj.interact(self)
@@ -414,14 +414,13 @@ class Entity(Sprite):
 
         # Collision check between self and other obj's child
         if obj.children:
-            # print(f"{obj.id} has children {obj.children}")
             for child in obj.children:
                 try:
                     if Rect.colliderect(self.rect, child.rect):
                         if self.secondary_target == child.position:
                             self.secondary_target = None
 
-                        # print(f"----{self.id} Interacting with child 1 {child.id}-----")
+                        logging_debug(f"----{self.id} Interacting with child 1 {child.id}-----")
 
                         child.interact(self)
 

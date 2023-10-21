@@ -14,7 +14,10 @@
 from math import hypot as math_hypot
 from datetime import datetime, timedelta
 from inspect import currentframe, getframeinfo
-from logging import warning as logging_warning
+from logging import(
+    debug as logging_debug,
+    warning as logging_warning,
+)
 from typing import TYPE_CHECKING
 
 from pygame import Rect
@@ -86,7 +89,7 @@ class DecisionBox:
         # Use intent algorithm depending on ai_difficulty to decide what direction to move
         direction = self.situational_intent(ai_entity, target)
 
-        # print(f"Got Direction: {direction}")
+        logging_debug(f"Got Direction: {direction}")
 
         return direction
 
@@ -102,7 +105,7 @@ class DecisionBox:
             [int]: [description]
         """
 
-        # print("Simple Intent Chosen")
+        logging_debug("Simple Intent Chosen")
         intent = None
 
         # Equal, Right, or left  Intent
@@ -121,7 +124,7 @@ class DecisionBox:
 
         intent = self.check_intent(ai_entity, intent)
 
-        # print(f"Got simple intent: {intent}")
+        logging_debug(f"Got simple intent: {intent}")
 
         return intent
 
@@ -137,9 +140,9 @@ class DecisionBox:
             [int]: [description]
         """
 
-        # print("situational Intent Chosen")
+        logging_debug("situational Intent Chosen")
         intent = None
-        # print(ai_entity.secondary_target)
+        logging_debug(ai_entity.secondary_target)
         if ai_entity.secondary_target == None:
             # down, or up  Intent
             if ai_entity.position[Y] < target[POS_IDX][Y]:
@@ -189,7 +192,7 @@ class DecisionBox:
 
         intent = self.check_intent(ai_entity, intent)
 
-        # print(f"Got situational intent: {intent}")
+        logging_debug(f"Got situational intent: {intent}")
 
         return intent
 
@@ -201,10 +204,10 @@ class DecisionBox:
 
         # Continue with cached path or calculate a new one
 
-        print(ai_entity.id, ai_entity.path)
+        logging_debug(ai_entity.id, ai_entity.path)
 
-        print("Entity position: ", (ai_entity.position[X]//self.game.grid_size, ai_entity.position[Y]//self.game.grid_size))
-        print("Target position: ", (target[POS_IDX][X]//self.game.grid_size, target[POS_IDX][Y]//self.game.grid_size))
+        logging_debug("Entity position: ", (ai_entity.position[X]//self.game.grid_size, ai_entity.position[Y]//self.game.grid_size))
+        logging_debug("Target position: ", (target[POS_IDX][X]//self.game.grid_size, target[POS_IDX][Y]//self.game.grid_size))
 
         try:
             ai_entity.path.pop(0)
@@ -214,8 +217,8 @@ class DecisionBox:
 
         next_node = self.game.grid[ai_entity.path[0][X]][ai_entity.path[0][Y]] if ai_entity.path and not ai_entity.path == [] else self.default_node
 
-        print(((next_node.x, next_node.y), next_node.walkable) if next_node else print("NA"))
-        print(f"Node walkable? {(next_node.walkable, next_node.x, next_node.y, ai_entity.path) if ai_entity.path else ai_entity.path}")
+        logging_debug(((next_node.x, next_node.y), next_node.walkable) if next_node else logging_debug("NA"))
+        logging_debug(f"Node walkable? {(next_node.walkable, next_node.x, next_node.y, ai_entity.path) if ai_entity.path else ai_entity.path}")
 
         if ai_entity.path == [] or not next_node.walkable:
             # Get the path to target via astar pathfinding algorithm
@@ -251,7 +254,7 @@ class DecisionBox:
 
         # Get the intent of the next direction
         else:
-            # print(f"Was unable to find the direction from the A_star position: {next_pos}")
+            logging_debug(f"Was unable to find the direction from the A_star position: {next_pos}")
             pass
 
 
@@ -274,7 +277,7 @@ class DecisionBox:
             [int]: [description]
         """
 
-        # print("Checking intent: ", intent)
+        logging_debug(f"Checking intent: {intent}")
         # Loop to check intent
         self.reset_sight_lines(ai_entity)
         for obj in self.game.sprite_group:
@@ -284,13 +287,13 @@ class DecisionBox:
 
             # Check if object obstructs ai_entity (and isn't self)
             if obj != ai_entity:
-                # print("Object checking")
+                logging_debug("Object checking")
                 intent = self._obj_check_intent(obj, ai_entity, intent)
 
             # Check if object's children if any (even if self) obstructs ai_entity
             if obj.children:
                 try:
-                    # print("child checking")
+                    logging_debug("child checking")
                     for child in obj.children:
                         intent = self._obj_check_intent(child, ai_entity, intent)
 
@@ -324,7 +327,7 @@ class DecisionBox:
             ai_entity.prev_sight_mod =  ai_entity.sight_mod
             ai_entity.sight_mod = ai_entity.sight_mod - 1
             ai_entity.sight = ai_entity.sight_mod * self.game.grid_size
-            # print("Reducing sight and re-verifying")
+            logging_debug("Reducing sight and re-verifying")
             for line in ai_entity.sight_lines:
                 line.open = True
                 line.draw()
@@ -362,7 +365,7 @@ class DecisionBox:
         for diag_line in ai_entity.sight_lines_diag:
             # Check the sight lines for a open direction
             if Rect.colliderect(other_object.rect, diag_line.rect):
-                # print(f"It sees the collision between {other_object.id} and self on diagonal line {DIRECTION_MAP[diag_line.direction]}")
+                logging_debug(f"It sees the collision between {other_object.id} and self on diagonal line {DIRECTION_MAP[diag_line.direction]}")
                 diag_line.open = False
 
         # figure the current number of open lines
@@ -377,9 +380,9 @@ class DecisionBox:
 
             # Check the sight lines for a open direction
             elif Rect.colliderect(other_object.rect, line.rect):
-                # print(f"It sees the collision between {other_object.id} and self on cardinal line {DIRECTION_MAP[line.direction]}")
+                logging_debug(f"It sees the collision between {other_object.id} and self on cardinal line {DIRECTION_MAP[line.direction]}")
                 # if not "segment" in other_object.id:
-                # print(f"cardinal line collision {other_object.id} and {line.direction}")
+                logging_debug(f"cardinal line collision {other_object.id} and {line.direction}")
                 # Will Ai see and use portals?
                 if "teleportal" in other_object.name and self.ai_difficulty >= self.portal_use_difficulty:
                     line.open = self.decide_portal(other_object, ai_entity)
@@ -392,28 +395,28 @@ class DecisionBox:
             # Edge of screen detection
             # top
             elif line.direction == UP and ai_entity.position[Y] <= self.game.screen_size[TOP]:
-                # print("Top edge collision predicted")
+                logging_debug("Top edge collision predicted")
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # bottom
             elif line.direction == DOWN and ai_entity.position[Y] + ai_entity.size >= self.game.screen_size[HEIGHT]:
-                # print("bottom edge collision predicted")
+                logging_debug("bottom edge collision predicted")
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # left
             elif line.direction == LEFT and ai_entity.position[X] <= self.game.screen_size[LEFT]:
-                # print("left edge collision predicted")
+                logging_debug("left edge collision predicted")
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 continue
 
             # right
             elif line.direction == RIGHT and ai_entity.position[X] + ai_entity.size >= self.game.screen_size[WIDTH]:
-                # print("right edge collision predicted")
+                logging_debug("right edge collision predicted")
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 continue
@@ -423,34 +426,34 @@ class DecisionBox:
             elif line.direction == UP and ai_entity.direction == DOWN:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
-                # print("failed line UP on can't move backwards")
+                logging_debug("failed line UP on can't move backwards")
                 continue
 
             # # Down not allowed when previously having moved up
             elif line.direction == DOWN and ai_entity.direction == UP:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
-                # print("failed line DOWN on can't move backwards")
+                logging_debug("failed line DOWN on can't move backwards")
                 continue
 
             # # Right not allowed when previously having moved down
             elif line.direction == RIGHT and ai_entity.direction == LEFT:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
-                # print("failed line RIGHT on can't move backwards")
+                logging_debug("failed line RIGHT on can't move backwards")
                 continue
 
             # # Left not allowed when previously having moved down
             elif line.direction == LEFT and ai_entity.direction == RIGHT:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
-                # print("failed line LEFT on can't move backwards")
+                logging_debug("failed line LEFT on can't move backwards")
                 continue
 
             elif other_object.parent is not None and spritecollide(line, other_object.parent.children, False):
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
-                # print(f"Line {line.direction} definitely has some sort of collision with child obj's")
+                logging_debug(f"Line {line.direction} definitely has some sort of collision with child obj's")
                 continue
 
             # Verify with diagonal sight lines if available
@@ -459,16 +462,15 @@ class DecisionBox:
                     if not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open and not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
-                        # print("failed line UP on diagonal")
+                        logging_debug("failed line UP on diagonal")
                         # input(f"Press to continue: 0 - {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open} and {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open}")
                         continue
-                        print(f"Checking for excape on direction {line.direction}::{verified_next_path}")
 
                 elif line.direction == DOWN and intent == DOWN:
                     if not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open and not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
-                        # print("failed line DOWN on diagonal")
+                        logging_debug("failed line DOWN on diagonal")
                         # input(f"Press to continue: 2 - {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open} and {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open}")
                         continue
 
@@ -476,7 +478,7 @@ class DecisionBox:
                     if not ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open and not ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
-                        # print("failed line LEFT on diagonal")
+                        logging_debug("failed line LEFT on diagonal")
                         # input(f"Press to continue: 3 - {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open} and {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open}")
                         continue
 
@@ -484,13 +486,13 @@ class DecisionBox:
                     if not ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open and not ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open:
                         line.open = False
                         self.number_open_lines = self.number_open_lines - 1
-                        # print("failed line RIGHT on diagonal")
+                        logging_debug("failed line RIGHT on diagonal")
                         # input(f"Press to continue: 1 - {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open} and {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open}")
                         continue
 
             # TODO: Check for dead end routes via the game grid nodes
 
-        # print(f"num open lines: {self.number_open_lines}")
+        logging_debug(f"num open lines: {self.number_open_lines}")
 
 
     def reset_sight_lines(self, ai_entity: Entity) -> None:

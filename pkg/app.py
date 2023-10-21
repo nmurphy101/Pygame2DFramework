@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-    Game App
+    App Platform
 
 
     Base for a game in a window
@@ -23,7 +23,6 @@ from os import path, getcwd
 from pathlib import Path
 from statistics import mean
 
-from guppy import hpy
 from pygame import (
     draw as pygame_draw,
     event as pygame_event,
@@ -95,12 +94,8 @@ class App():
     """
 
     def __init__(self, game_list: list):
-        print("Initilizing App Started")
-
-        print("Loading pygame and audio mixer: Working", end="\r")
         # setup mixer to avoid sound lag
         self.set_up_audio_mixer()
-        print("Loading pygame and audio mixer: Finished")
 
         # Menu settings
         self.menu = Menu(self)
@@ -113,59 +108,32 @@ class App():
         )
 
         # Initial app window settings
-        self.screen = pygame_display.set_mode(
-            (640, 360),
-            DOUBLEBUF,
-            16,
-        )
+        self._display_loading_screen()
 
-        self.screen.fill(COLOR_BLACK)
-
-        text_str = "Loading. . ."
-        horizontal_position = -1
-        h_offset = 0
-        w_offset = 0
-        position = (
-            640 / 2 + (len(text_str) * self.app_font.size) / 2 * horizontal_position + h_offset,
-            0 + self.app_font.size * 2 + w_offset
-        )
-        _ = self.app_font.render_to(
-            self.screen,
-            position,
-            text_str,
-            COLOR_RED
-        )
-
-        # Show Loading screen
-        pygame_display.flip()
-
-        print("Loading app config: Working", end="\r")
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_APP_FILE_NAME)
-        print(path.dirname(__file__), self.app_config_file_path)
+
         try:
             with open(self.app_config_file_path, encoding="utf8") as json_data_file:
                 self.app_config: AppConfig = json_load(json_data_file)
-        except Exception as e:
-            print(f"Error: {e}")
+
+        except FileNotFoundError:
             self.app_config = DEFAULT_APP_CONFIG
             Path(path.dirname(__file__)).mkdir(parents=True, exist_ok=True)
             with open(self.app_config_file_path, "w+", encoding="utf8") as _file:
                 json_dump(self.app_config, _file, ensure_ascii=False, indent=4)
 
-        print("Loading app config: Finished")
-
-        print("Loading logger: Working", end="\r")
         # Setup the app logger for event tracking and debugging
         if self.app_config["settings"]["debug"]["log_level"]:
             try:
                 basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-            except Exception as e:
-                print(f"Error: {e}")
+
+            except FileNotFoundError:
                 Path(f"{getcwd()}/logs/").mkdir(parents=True, exist_ok=True)
                 with open(f"{getcwd()}/logs/{LOG_FILE_NAME}", "w+", encoding="utf8"): pass
                 basicConfig(level=_get_log_level(self.app_config), filename=f"{getcwd()}/logs/{LOG_FILE_NAME}", filemode="w", format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-        print("Loading logger: Finished")
+
+        logging_info("Loading logger: Finished")
 
         logging_info("App started")
 
@@ -221,7 +189,41 @@ class App():
             events.append(event)
         pygame_event.set_allowed(events)
 
-        print("Initilizing App Finished")
+        logging_info("Initilizing App Finished")
+
+
+    def _display_loading_screen(self):
+        """
+        _display_loading_screen
+
+        _display_loading_screen does stuff
+        """
+
+        self.screen = pygame_display.set_mode(
+            (640, 360),
+            DOUBLEBUF,
+            16,
+        )
+
+        self.screen.fill(COLOR_BLACK)
+
+        text_str = "Loading. . ."
+        horizontal_position = -1
+        h_offset = 0
+        w_offset = 0
+        position = (
+            640 / 2 + (len(text_str) * self.app_font.size) / 2 * horizontal_position + h_offset,
+            0 + self.app_font.size * 2 + w_offset
+        )
+        _ = self.app_font.render_to(
+            self.screen,
+            position,
+            text_str,
+            COLOR_RED
+        )
+
+        # Show Loading screen
+        pygame_display.flip()
 
 
     def run(self):
@@ -230,8 +232,6 @@ class App():
 
         run does stuff
         """
-
-        # h=hpy()
 
         # Game loop clock
         self.clock = pygame_time.Clock()
@@ -248,11 +248,9 @@ class App():
             mixer.music.set_endevent(NEXT)
 
             chosen_menu = None
+
             # Go into gameplay loop if not in a menu
             if self.menu.menu_option is None:
-                # Clear previous frame render
-                # self.game.screen.fill(COLOR_BLACK)
-
                 # Gameplay logic/drawing this turn/tick
                 self.game.play_loop()
 
@@ -275,13 +273,10 @@ class App():
             # The game loop clocktarget FPS
             self.clock.tick(self.fps)
 
-        # print(h.heap())
-
 
     def set_up_audio_mixer(self):
         """
         set_up_audio_mixer
-
 
         set_up_audio_mixer does stuff
         """
@@ -313,7 +308,6 @@ class App():
     def set_window_settings(self) -> None:
         """
         set_window_settings
-
 
         set_window_settings does stuff
         """
@@ -350,6 +344,11 @@ class App():
 
 
     def set_game_settings(self) -> None:
+        """set_game_settings
+
+        set_game_settings for the game
+        """
+
         # Instantiate the Game Obj
         self.game = self.game_pkg(self, self.alpha_screen, self.screen)
 
@@ -403,7 +402,8 @@ class App():
 
         for event in pygame_event.get():
             # Possible event options:
-            #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN, MOUSEBUTTONDOWN
+            #   QUIT, NEXT, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, KEYDOWN,
+            #   MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEHOVER
             decision_func = self.event_options.get(event.type)
             if decision_func:
                 decision_func(event=event, menu=current_menu)
@@ -467,7 +467,7 @@ class App():
             new_key ([str]): [description]
         """
 
-        # print("changing keybinding for/new_key", action, new_key)
+        logging_debug("changing keybinding for/new_key", action, new_key)
         self.game.game_config["settings"]["keybindings"][action] = new_key.upper()
         self.menu.refresh = True
 
@@ -481,7 +481,6 @@ class App():
 
         # Pressed escape to pause/unpause/back
         if kwargs["event"].key == K_ESCAPE and self.game:
-            # print(self.menu.menu_option)
             if self.menu.menu_option == None:
                 self.play_ui_sound(1)
 
@@ -509,7 +508,6 @@ class App():
         """
 
         if kwargs["menu"] and MOUSE_DOWN_MAP[kwargs["event"].button] == "left":
-            # print("mouse down")
             for button in kwargs["menu"]:
                 button_obj, _, _, _ = button
                 if self.game:
@@ -575,7 +573,6 @@ class App():
         """
 
         num = self.ui_sound_options.get(action, 0)
-        # print(f"Sound num: {num}")
         self.play_ui_sound(num)
 
 
@@ -630,7 +627,10 @@ class App():
         _choose_game does stuff
         """
 
-        menu = []
+        if self.menu.menu:
+            return self.menu.menu
+
+        self.menu.menu = []
 
         # render the choose game title
         text_str = "Choose Game"
@@ -666,11 +666,11 @@ class App():
                 COLOR_PURPLE
             )
 
-            # print("game added: ", game)
-            menu.append((button, self._load_game, 0, game))
+            logging_info(f"Game added: {game}")
+            self.menu.menu.append((button, self._load_game, 0, game))
             index += 1
 
-        return menu
+        return self.menu.menu
 
 
     def _load_game(self, game_pkg: type) -> None:

@@ -32,7 +32,7 @@ class BaseGame():
     """
 
     def __init__(self, app: App, alpha_screen: Surface, screen: Surface):
-        """SnakeGame initilizer
+        """BaseGame initilizer
 
         Args:
             alpha_screen (Surface): [description]

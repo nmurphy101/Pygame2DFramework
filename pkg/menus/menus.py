@@ -431,7 +431,6 @@ class Menu():
         toggle_gameplay_setting does stuff
         """
 
-        # print("toggling setting: {setting}")
         self.toggle_setting(self.app.game.game_config, "gameplay", setting)
         self.refresh = True
 

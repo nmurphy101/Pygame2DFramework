@@ -11,7 +11,7 @@
 
 
 __author__ = "Nicholas Murphy"
-__version__ = '1.0.0-alpha'
+__version__ = '1.0.3-alpha'
 
 
 from functools import wraps

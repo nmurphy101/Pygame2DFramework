@@ -121,7 +121,6 @@ class TelePortal(Entity):
 
         # render if alive and moved
         if self.state == Entity.ALIVE and (updated_refresh[ENTITY] or updated_refresh[CHILD]):
-            # print(self.position, self.prev_position, self.state, self.children)
 
             # Render the teleportal based on it's parameters
             self.game.screen.blit(self.image, self.position)

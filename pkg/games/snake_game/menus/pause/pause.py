@@ -29,13 +29,15 @@ def pause_menu(self: Menu):
     pause_menu does stuff
     """
 
-    # if self.refresh or self.menu_option != MENU_PAUSE:
+    if not self.refresh and (self.menu_option == MENU_PAUSE and self.prev_menu == MENU_PAUSE):
+        return self.menu
 
     # Clear previous frame render
     self.app.screen.fill(COLOR_BLACK)
 
     # Make sure the right menu option is selected
     self.menu_option = MENU_PAUSE
+    self.prev_menu = MENU_PAUSE
 
     if self.prev_menu is None:
         # Free unreferenced memory
