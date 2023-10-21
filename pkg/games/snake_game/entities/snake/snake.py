@@ -298,16 +298,11 @@ class Snake(Entity):
 
             # Don't update if entity has not actually moved
             if self.prev_position != self.position:
-                try:
-                    # Mark previous grid position as walkable for pathfinding
-                    obj_pos_to_node(self.game, self.prev_position).walkable = True
+                # Mark previous grid position as walkable for pathfinding
+                obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-                    # Mark grid position as unwalkable for pathfinding
-                    obj_pos_to_node(self.game, self.position).walkable = False
-
-                except IndexError:
-                    # When leaving the right and bottom of the screen
-                    pass
+                # Mark grid position as unwalkable for pathfinding
+                obj_pos_to_node(self.game, self.position).walkable = False
 
                 # Set current position for hitbox
                 self.rect.topleft = self.position
@@ -392,16 +387,11 @@ class TailSegment(Entity):
             self.position = self.parent.prev_position
             self.rect.topleft = self.position
 
-            try:
-                # Mark previous grid position as walkable for pathfinding
-                obj_pos_to_node(self.game, self.prev_position).walkable = True
+            # Mark previous grid position as walkable for pathfinding
+            obj_pos_to_node(self.game, self.prev_position).walkable = True
 
-                # Mark grid position as unwalkable for pathfinding
-                obj_pos_to_node(self.game, self.position).walkable = False
-
-            except IndexError:
-                # When leaving the right and bottom of the screen
-                pass
+            # Mark grid position as unwalkable for pathfinding
+            obj_pos_to_node(self.game, self.position).walkable = False
 
             # Choose the right image for this segment
             self.choose_img()
