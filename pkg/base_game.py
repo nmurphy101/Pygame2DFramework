@@ -56,8 +56,8 @@ class BaseGame():
         # Game screens
         self.screen = screen
         self.alpha_screen = alpha_screen
-        game_width = self.app.screen_width - (self.app.screen_width % self.grid_size)
-        game_height = self.app.screen_height - (self.app.screen_height % self.grid_size)
+        game_width = self.app.screen_width - (self.app.screen_width % self.grid_size) - self.grid_size
+        game_height = self.app.screen_height - (self.app.screen_height % self.grid_size) - self.grid_size
         game_top = self.game_bar_height
         game_left = 0
         self.screen_size = (game_width, game_height, game_top, game_left)

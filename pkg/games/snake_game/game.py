@@ -241,9 +241,9 @@ class Game(BaseGame):
 
         logging_info("Building pathfinding grid: Working")
         # Pathfinding grid of the game space
-        self.grid_width = self.screen_size[WIDTH] // self.grid_size
-        self.grid_height = self.screen_size[HEIGHT] // self.grid_size
-        self.grid = [[Node(x, y) for y in range(self.grid_height + self.grid_size)] for x in range(self.grid_width + self.grid_size)]
+        self.grid_width = self.screen_size[WIDTH] // self.grid_size + self.grid_size
+        self.grid_height = self.screen_size[HEIGHT] // self.grid_size + self.grid_size
+        self.grid = [[Node(x, y) for y in range(self.grid_height)] for x in range(self.grid_width)]
         logging_info("Building pathfinding grid: Finished")
 
         logging_info("Building Menus: Working")
