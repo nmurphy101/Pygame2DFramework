@@ -3,23 +3,32 @@
 
 # pygame 2D framework
 A framework/engine to make 2D pygame games with a game loader.
-First game is the classic snake with upgrades.
+First game is the classic snake with portals.
+
+# Just interested in playing one of the available games?
+Go to the releases section or click here [HERE](https://github.com/nmurphy101/pygame2Dframework/releases)
+
+Then download the most recent release's `pygame_framework_version_number.zip` file in the Assests section of that release
+
+Unzip and run the main.exe file.
+
+Enjoy!
 
 # Available Games
-## Snake_game
-A game of snake. Can play it by hand or via the AI.
+## Snake
+A game of snake. Can play it by yourself or vs one or many AI.
   - as a twist there are portals that occasionally move around that teleport you from one to the other
+  - gameplay settings give control over options like number of ai, invinsibility, etc
 
-# Generate requirements.txt when developing
-```
-pip3 install pygame
-pip3 freeze > requirements.txt
-```
 
-# Build to exe
-pyinstaller main.spec
+# Want to develop a game with this project?
+## Before starting
+Use the snake game in the games directory as an example of how to write your game
+Make a new directory in the pkg/games directory to store your game files
+Store your assets in the _internal/assets directory
 
-# Setting up development Windows
+## Windows
+### Setting up development environment
 install and setup python3
 setup a virtual environment, enter virtual environment, and install needed packages
 ```
@@ -33,7 +42,11 @@ run the main file
 python ./main.py
 ```
 
-# Setting up development Mac/Linux
+#### Manual build to exe
+pyinstaller main.spec
+
+## Mac/Linux
+### Setting up development environment
 install and setup python3
 setup a virtual environment, enter virtual environment, and install needed packages
 ```
