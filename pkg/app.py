@@ -107,8 +107,14 @@ class App():
             size=REGULAR_FONT_SIZE,
         )
 
+        self.screen = pygame_display.set_mode(
+            (640, 360),
+            DOUBLEBUF,
+            16,
+        )
+
         # Initial app window settings
-        self._display_loading_screen()
+        self._display_loading_screen(self.screen)
 
         # App config file
         self.app_config_file_path = path.join(path.dirname(__file__), CONFIG_APP_FILE_NAME)
@@ -192,18 +198,12 @@ class App():
         logging_info("Initilizing App Finished")
 
 
-    def _display_loading_screen(self):
+    def _display_loading_screen(self, screen: Surface):
         """
         _display_loading_screen
 
         _display_loading_screen does stuff
         """
-
-        self.screen = pygame_display.set_mode(
-            (640, 360),
-            DOUBLEBUF,
-            16,
-        )
 
         self.screen.fill(COLOR_BLACK)
 

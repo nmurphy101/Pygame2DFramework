@@ -88,7 +88,7 @@ def gameplay_menu(self: Menu):
                 index -= 1.5
                 # Render the Volume Up button
                 up_obj = self.render_button("Up", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod+50, clear_background=False)
-                menu_builder.append((up_obj,  self.increase_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))
+                menu_builder.append((up_obj, self.increase_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))
                 # Render the Volume Down button
                 down_obj = self.render_button("Down", index, color=COLOR_PURPLE, w_offset=10, h_offset=row_mod-100, clear_background=False)
                 menu_builder.append((down_obj, self.decrease_gameplay_setting, MENU_GAMEPLAY, INV_DISPLAY_SETTING_MAP[setting]))

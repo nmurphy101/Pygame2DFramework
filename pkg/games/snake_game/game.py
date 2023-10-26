@@ -87,11 +87,10 @@ from ...app import App
 from ...base_game import BaseGame
 
 
-class Game(BaseGame):
-    """Game
+class SnakeGame(BaseGame):
+    """SnakeGame
 
     The main object for playing the game of snake.
-    Required to be the called `Game` for the app loader to load the game
     """
 
     TITLE = GAME_TITLE
@@ -111,24 +110,7 @@ class Game(BaseGame):
         self.alpha_screen = alpha_screen
 
         # Show loading screen
-        self.screen.fill(COLOR_BLACK)
-        text_str = "Loading. . ."
-        horizontal_position = -1
-        h_offset = 0
-        w_offset = 0
-        position = (
-             app.screen_width / 2 + (len(text_str) * app.app_font.size) / 2 * horizontal_position + h_offset,
-            0 + app.app_font.size * 2 + w_offset
-        )
-        _ = app.app_font.render_to(
-            self.screen,
-            position,
-            text_str,
-            COLOR_RED
-        )
-
-        # Show Loading screen
-        pygame_display.flip()
+        app._display_loading_screen(self.screen)
 
         logging_info("Loading Game config: Working")
         # Game config file
