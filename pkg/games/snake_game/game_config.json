@@ -1,10 +1,10 @@
 {
     "settings": {
         "gameplay": {
-            "human_player": false,
+            "human_player": true,
             "killable_player": true,
             "player_speed": 0.7,
-            "num_ai": 1,
+            "num_ai": 2,
             "killable_ai": true,
             "ai_difficulty": 10,
             "ai_speed": 0.5,

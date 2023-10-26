@@ -510,7 +510,6 @@ class DecisionBox:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 logging_debug("failed line UP on diagonal")
-                # input(f"Press to continue: 0 - {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open} and {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open}")
                 return True
 
         elif line.direction == DOWN and intent == DOWN:
@@ -518,7 +517,6 @@ class DecisionBox:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 logging_debug("failed line DOWN on diagonal")
-                # input(f"Press to continue: 2 - {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open} and {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open}")
                 return True
 
         elif line.direction == LEFT and intent == LEFT:
@@ -526,7 +524,6 @@ class DecisionBox:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 logging_debug("failed line LEFT on diagonal")
-                # input(f"Press to continue: 3 - {ai_entity.sight_lines_diag[int(LEFT_UP-.5)].open} and {ai_entity.sight_lines_diag[int(DOWN_LEFT-.5)].open}")
                 return True
 
         elif line.direction == RIGHT and intent == RIGHT:
@@ -534,7 +531,6 @@ class DecisionBox:
                 line.open = False
                 self.number_open_lines = self.number_open_lines - 1
                 logging_debug("failed line RIGHT on diagonal")
-                # input(f"Press to continue: 1 - {ai_entity.sight_lines_diag[int(RIGHT_DOWN-.5)].open} and {ai_entity.sight_lines_diag[int(UP_RIGHT-.5)].open}")
                 return True
 
         return False
