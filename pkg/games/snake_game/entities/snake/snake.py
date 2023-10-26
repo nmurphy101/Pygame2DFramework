@@ -28,6 +28,10 @@ from ...constants import (
     CHILD,
     X,
     Y,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
 )
 
 if TYPE_CHECKING:
@@ -104,9 +108,9 @@ class Snake(Entity):
         self.children: Deque[TailSegment] = Deque()
         for pos in range(self.num_tails+1):
             if pos == 0:
-                self.children.append(TailSegment(self, self.game, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, self.direction, player=self.is_player))
             else:
-                self.children.append(TailSegment(self, self.game, player=self.is_player))
+                self.children.append(TailSegment(self, self.game, self.direction, player=self.is_player))
 
 
     def aquire_primary_target(self, target_name: str) -> None:
@@ -207,6 +211,7 @@ class Snake(Entity):
                 tail = TailSegment(
                     self,
                     self.game,
+                    self.direction,
                     player=self.is_player,
                 )
 
@@ -264,7 +269,7 @@ class Snake(Entity):
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target(self.target_type)
 
-            # input(f"press enter to continue move {self.direction}")
+            input(f"press enter to continue move {self.direction}")
 
             # Save current position as last position
             self.prev_position = self.position
@@ -279,19 +284,19 @@ class Snake(Entity):
                 self.position = (self.position[X], self.position[Y] - self.size)
 
             # Moving down
-            elif self.direction == 2:
+            elif self.direction == DOWN:
                 self.image = self.sprite_images[11]
                 self.prev_direction = self.direction
                 self.position = (self.position[X], self.position[Y] + self.size)
 
             # Moving left
-            elif self.direction == 3:
+            elif self.direction == LEFT:
                 self.image = self.sprite_images[13]
                 self.prev_direction = self.direction
                 self.position = (self.position[X] - self.size, self.position[Y])
 
             # Moving right
-            elif self.direction == 1:
+            elif self.direction == RIGHT:
                 self.image = self.sprite_images[12]
                 self.prev_direction = self.direction
                 self.position = (self.position[X] + self.size, self.position[Y])
@@ -329,7 +334,7 @@ class TailSegment(Entity):
     Tail Segment for the snake
     """
 
-    def __init__(self, parent: Snake, game: "Game", player: bool = False):
+    def __init__(self, parent: Snake, game: "Game", direction: int, player: bool = False):
         # Name for this type of object
         self.name = "tail-segment_"
 
@@ -344,7 +349,6 @@ class TailSegment(Entity):
 
         # Parent of this child
         self.parent = parent
-        self.parent_dir = parent.direction
 
         # Is this a entity part of the player obj?
         self.is_player = player
@@ -354,6 +358,9 @@ class TailSegment(Entity):
 
         # No Sight lines for tail segments
         self.sight_lines = []
+
+        # Direction the snake was heading in
+        self.direction = direction
 
         # Entity's visual representation
         self.img_index = 2
@@ -411,39 +418,43 @@ class TailSegment(Entity):
         """
 
         # Moving up
-        if self.parent.direction == 0:
+        if self.parent.direction == UP:
+            self.direction = UP
             if self.parent.child_prev_direction == self.parent.direction:
                 self.img_index = 0
-            elif self.parent.child_prev_direction == 1:
+            elif self.parent.child_prev_direction == RIGHT:
                 self.img_index = 5
-            elif self.parent.child_prev_direction == 3:
+            elif self.parent.child_prev_direction == LEFT:
                 self.img_index = 4
 
         # Moving down
-        elif self.parent.direction == 2:
+        elif self.parent.direction == DOWN:
+            self.direction = DOWN
             if self.parent.child_prev_direction == self.parent.direction:
                 self.img_index = 0
-            elif self.parent.child_prev_direction == 1:
+            elif self.parent.child_prev_direction == RIGHT:
                 self.img_index = 2
-            elif self.parent.child_prev_direction == 3:
+            elif self.parent.child_prev_direction == LEFT:
                 self.img_index = 3
 
         # Moving left
-        elif self.parent.direction == 3:
+        elif self.parent.direction == LEFT:
+            self.direction = LEFT
             if self.parent.child_prev_direction == self.parent.direction:
                 self.img_index = 1
-            elif self.parent.child_prev_direction == 0:
+            elif self.parent.child_prev_direction == UP:
                 self.img_index = 2
-            elif self.parent.child_prev_direction == 2:
+            elif self.parent.child_prev_direction == DOWN:
                 self.img_index = 5
 
         # Moving right
-        elif self.parent.direction == 1:
+        elif self.parent.direction == RIGHT:
+            self.direction = RIGHT
             if self.parent.child_prev_direction == self.parent.direction:
                 self.img_index = 1
-            elif self.parent.child_prev_direction == 0:
+            elif self.parent.child_prev_direction == UP:
                 self.img_index = 3
-            elif self.parent.child_prev_direction == 2:
+            elif self.parent.child_prev_direction == DOWN:
                 self.img_index = 4
 
         else:
@@ -451,39 +462,60 @@ class TailSegment(Entity):
 
         self.image = self.parent.sprite_images[self.img_index]
 
-        self.parent_dir = self.parent.direction
-
 
     def make_end_img(self) -> None:
         """make_end_img
         """
 
         ahead_img_index = self.parent.children[-2].img_index
-        if ahead_img_index in [0, 4, 5]:
-            if self.parent_dir == 0:
+        ahead_direction = self.parent.children[-2].direction
+
+       # Moving up
+        if ahead_direction == UP:
+            # left to up is still tail heading left
+            if ahead_img_index == 5:
+                self.img_index = 8
+            # right to up is still tail heading right
+            elif ahead_img_index == 4:
+                self.img_index = 9
+            else:
                 self.img_index = 6
 
-            elif self.parent_dir == 1:
+        # Moving down
+        elif ahead_direction == DOWN:
+            # left to down is still tail heading left
+            if ahead_img_index == 2:
                 self.img_index = 8
-
-            elif self.parent_dir == 3:
+            # right to down is still tail heading right
+            elif ahead_img_index == 3:
                 self.img_index = 9
-
             else:
                 self.img_index = 7
 
-        elif ahead_img_index in [1, 2, 3]:
-            if self.parent_dir == 1:
-                self.img_index = 8
-
-            elif self.parent_dir == 0:
-                self.img_index = 6
-
-            elif self.parent_dir == 0:
+        # Moving left
+        elif ahead_direction == LEFT:
+            # top to left is still tail heading down
+            if ahead_img_index == 5:
                 self.img_index = 7
-
+            # bottom to left is still tail heading up
+            elif ahead_img_index == 2:
+                self.img_index = 6
             else:
                 self.img_index = 9
+
+        # Moving right
+        elif ahead_direction == RIGHT:
+            # top to right is still tail heading down
+            if ahead_img_index == 4:
+                self.img_index = 7
+            # bottom to right is still tail heading up
+            elif ahead_img_index == 3:
+                self.img_index = 6
+            else:
+                self.img_index = 8
+
+        else:
+            self.img_index = self.img_index
 
         self.image = self.parent.sprite_images[self.img_index]
 
@@ -492,4 +524,3 @@ class TailSegment(Entity):
 
         # Render the tail segment based on it's parameters
         self.game.screen.blit(self.image, self.position)
-
