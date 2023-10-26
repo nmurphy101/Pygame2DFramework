@@ -9,4 +9,4 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-from .game import Game
+from .game import SnakeGame

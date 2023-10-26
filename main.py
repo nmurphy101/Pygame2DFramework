@@ -27,7 +27,7 @@ from pygame import (
 )
 
 from pkg.app import App
-from pkg.games.snake_game import Game as SnakeGame
+from pkg.games.snake_game import SnakeGame
 
 
 # profiling decorator
