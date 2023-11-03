@@ -23,9 +23,9 @@ from typing import TYPE_CHECKING
 from pygame import Rect
 from pygame.sprite import spritecollide
 
-from ..ai.node import Node
-from ..ai.helpers import astar, obj_pos_to_node
-from ..constants import (
+from pkg.games.snake_game.ai.node import Node
+from pkg.games.snake_game.ai.helpers import astar, obj_pos_to_node
+from pkg.games.snake_game.constants import (
     UP,
     RIGHT,
     DOWN,
@@ -43,10 +43,11 @@ from ..constants import (
     HEIGHT,
     TOP,
 )
-from ..entities import Entity, TelePortal, Line
+from pkg.games.snake_game.entities.entity import Entity
+from pkg.games.snake_game.entities.tele_portal import TelePortal
 
 if TYPE_CHECKING:
-    from ..game import Game
+    from pkg.games.snake_game.game import SnakeGame
 
 
 class DecisionBox:
@@ -56,7 +57,7 @@ class DecisionBox:
     """
 
 
-    def __init__(self, game: "Game"):
+    def __init__(self, game: "SnakeGame"):
         self.game = game
         self.ai_difficulty = 10
         self.time_to_chase_target = 0
@@ -69,7 +70,7 @@ class DecisionBox:
         self.default_node = Node(x=-1, y=-1, walkable=False)
 
 
-    def decide_direction(self, ai_entity: Entity, target: tuple, ai_difficulty:int=None) -> int:
+    def decide_direction(self, ai_entity: "Entity", target: tuple, ai_difficulty:int=None) -> int:
         """decide_direction
 
         Args:
@@ -94,7 +95,7 @@ class DecisionBox:
         return direction
 
 
-    def simple_intent(self, ai_entity: Entity, target: tuple) -> int:
+    def simple_intent(self, ai_entity: "Entity", target: tuple) -> int:
         """simple_intent
 
         Args:
@@ -129,7 +130,7 @@ class DecisionBox:
         return intent
 
 
-    def situational_intent(self, ai_entity: Entity, target: tuple) -> int:
+    def situational_intent(self, ai_entity: "Entity", target: tuple) -> int:
         """situational_intent
 
         Args:
@@ -278,7 +279,7 @@ class DecisionBox:
         return True if astar(self.game, start_node, end_node) else False
 
 
-    def check_intent(self, ai_entity: Entity, intent: int) -> int:
+    def check_intent(self, ai_entity: "Entity", intent: int) -> int:
         """check_intent
 
         Args:
@@ -320,7 +321,7 @@ class DecisionBox:
         return intent
 
 
-    def _obj_check_intent(self, other_object: Entity, ai_entity: Entity, intent: int) -> int:
+    def _obj_check_intent(self, other_object: "Entity", ai_entity: "Entity", intent: int) -> int:
         """_obj_check_intent
 
         Args:
@@ -485,9 +486,6 @@ class DecisionBox:
             [bool]: [description]
         """
 
-        if other_object.parent is not None:
-            print("TESTING: ", spritecollide(line, other_object.parent.children, False))
-
         if other_object.parent is None or spritecollide(line, other_object.parent.children, False) == []: return False
 
         line.open = False
@@ -536,7 +534,7 @@ class DecisionBox:
         return False
 
 
-    def _verify_sight_lines(self, other_object: Entity, ai_entity: Entity, intent: int) -> None:
+    def _verify_sight_lines(self, other_object: "Entity", ai_entity: "Entity", intent: int) -> None:
         """verify_sight_lines
 
         Args:
@@ -577,7 +575,7 @@ class DecisionBox:
         logging_debug(f"num open lines: {self.number_open_lines}")
 
 
-    def _reset_sight_lines(self, ai_entity: Entity) -> None:
+    def _reset_sight_lines(self, ai_entity: "Entity") -> None:
         """reset_sight_lines
 
         Args:
@@ -594,7 +592,7 @@ class DecisionBox:
             line.open = True
 
 
-    def _get_intent(self, intent: int, ai_entity: Entity) -> int:
+    def _get_intent(self, intent: int, ai_entity: "Entity") -> int:
         """get_intent
 
         Args:
@@ -620,7 +618,7 @@ class DecisionBox:
         return intent if is_found else alternate_intent
 
 
-    def _decide_portal(self, portal: TelePortal, ai_entity: Entity) -> bool:
+    def _decide_portal(self, portal: "TelePortal", ai_entity: "Entity") -> bool:
         """decide_portal
 
         Args:

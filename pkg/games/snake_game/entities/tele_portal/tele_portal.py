@@ -16,9 +16,9 @@ from typing import Deque, TYPE_CHECKING
 
 from pygame import mixer
 
-from ..entity import Entity
+from pkg.games.snake_game.entities import Entity
 
-from ...constants import (
+from pkg.games.snake_game.constants import (
     COLOR_BLACK,
     SOUND_PORTAL_ENTER_IDX,
     X,
@@ -32,7 +32,7 @@ from ...constants import (
     LEFT,
 )
 if TYPE_CHECKING:
-    from ...game import Game
+    from pkg.games.snake_game.game import SnakeGame
 
 
 class TelePortal(Entity):
@@ -41,7 +41,7 @@ class TelePortal(Entity):
     Teleport portal that entities can use to go to a connected portal elsewhere
     """
 
-    def __init__(self, game: "Game", parent: "TelePortal" = None):
+    def __init__(self, game: "SnakeGame", parent: "TelePortal" = None):
         self.name = "teleportal_"
 
         # Initilize parent init

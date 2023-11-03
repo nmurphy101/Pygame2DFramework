@@ -83,8 +83,8 @@ from .menus import (
 
 from .game_configs import GameConfig, LeaderBoard
 
-from ...app import App
-from ...base_game import BaseGame
+from pkg.app import App
+from pkg.base_game import BaseGame
 
 
 class SnakeGame(BaseGame):

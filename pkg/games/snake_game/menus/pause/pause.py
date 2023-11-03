@@ -12,9 +12,9 @@
 
 from gc import collect as gc_collect
 
-from .....menus import Menu
+from pkg.menus import Menu
 
-from ...constants.game_constants import (
+from pkg.games.snake_game.constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
     MENU_HOME,

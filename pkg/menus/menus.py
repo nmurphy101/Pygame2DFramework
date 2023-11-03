@@ -10,14 +10,12 @@
 """
 
 from json import dump as json_dump, load as json_load
-from os import path
 from typing import TYPE_CHECKING
 
 from pygame import (
     mixer,
     display,
     Surface,
-    transform,
     gfxdraw,
     DOUBLEBUF,
     FULLSCREEN,
@@ -27,7 +25,7 @@ from pygame import (
 from .display import display_menu
 from .sound import sound_menu
 
-from ..constants.app_constants import (
+from pkg.constants.app_constants import (
     COLOR_BLACK,
     COLOR_WHITE,
     MENU_HOME,
@@ -46,7 +44,7 @@ from ..constants.app_constants import (
 )
 
 if TYPE_CHECKING:
-    from ..app import App
+    from pkg.app import App
 
 
 class Menu():

@@ -88,9 +88,9 @@ def _get_log_level(json_config: AppConfig):
 
 
 class App():
-    """Game
+    """App
 
-    Base game structure.
+    Base app structure.
     """
 
     def __init__(self, game_list: list):

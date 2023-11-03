@@ -9,9 +9,9 @@
     :license: GPLv3, see LICENSE for more details.
 """
 
-from .....menus import Menu
+from pkg.menus import Menu
 
-from ...constants.game_constants import (
+from pkg.games.snake_game.constants.game_constants import (
     GAME_TITLE,
     COLOR_BLACK,
     COLOR_RED,

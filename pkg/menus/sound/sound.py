@@ -12,7 +12,7 @@
 
 from typing import TYPE_CHECKING
 
-from ...constants.app_constants import (
+from pkg.constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
@@ -21,7 +21,7 @@ from ...constants.app_constants import (
 )
 
 if TYPE_CHECKING:
-    from ..menus import Menu
+    from pkg.menus import Menu
 
 
 def sound_menu(self: "Menu"):

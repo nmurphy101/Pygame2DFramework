@@ -15,10 +15,9 @@ from datetime import datetime, timedelta
 
 from pygame import key as pygame_key
 
-from ...ai.helpers import obj_pos_to_node
-from ..entity import Entity
-
-from ...constants import (
+from pkg.games.snake_game.ai.helpers import obj_pos_to_node
+from pkg.games.snake_game.entities.entity import Entity
+from pkg.games.snake_game.constants import (
     COLOR_BLACK,
     INPUT_KEY_MAP,
     SOUND_SNAKE_DEATH_IDX,
@@ -35,7 +34,7 @@ from ...constants import (
 )
 
 if TYPE_CHECKING:
-    from ...game import Game
+    from pkg.games.snake_game.game import SnakeGame
 
 
 class Snake(Entity):
@@ -44,7 +43,7 @@ class Snake(Entity):
     obj for the snake
     """
 
-    def __init__(self, game: "Game", is_player: bool = False):
+    def __init__(self, game: "SnakeGame", is_player: bool = False):
         # Name for this type of object
         self.name = "snake_"
 
@@ -269,7 +268,7 @@ class Snake(Entity):
                 # Ai makes it's decision for what direction to move
                 self.aquire_primary_target(self.target_type)
 
-            input(f"press enter to continue move {self.direction}")
+            # input(f"press enter to continue move {self.direction}")
 
             # Save current position as last position
             self.prev_position = self.position
@@ -334,7 +333,7 @@ class TailSegment(Entity):
     Tail Segment for the snake
     """
 
-    def __init__(self, parent: Snake, game: "Game", direction: int, player: bool = False):
+    def __init__(self, parent: Snake, game: "SnakeGame", direction: int, player: bool = False):
         # Name for this type of object
         self.name = "tail-segment_"
 

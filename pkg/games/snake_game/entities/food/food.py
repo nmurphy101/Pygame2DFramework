@@ -12,7 +12,7 @@
 from random import randrange
 from typing import TYPE_CHECKING
 
-from ...constants import (
+from pkg.games.snake_game.constants import (
     SOUND_FOOD_PICKUP_IDX,
     TOP,
     ENTITY,
@@ -21,11 +21,10 @@ from ...constants import (
     Y,
 )
 
-from ..entity import Entity
-from ..snake import Snake
+from pkg.games.snake_game.entities import Entity, Snake
 
 if TYPE_CHECKING:
-    from ...game import Game
+    from pkg.games.snake_game.game import SnakeGame
 
 
 class Food(Entity):
@@ -34,7 +33,7 @@ class Food(Entity):
     Food for the snake
     """
 
-    def __init__(self, game: "Game"):
+    def __init__(self, game: "SnakeGame"):
         # Name for this type of object
         self.name = "food_"
 
