@@ -15,6 +15,7 @@ from json import dump as json_dump, load as json_load
 from logging import (
     info as logging_info,
 )
+import numpy as np
 from os import path
 from pathlib import Path
 from threading import Thread
@@ -22,8 +23,11 @@ from threading import Thread
 from pygame import (
     display as pygame_display,
     draw,
-    freetype,
-    mixer,
+    error as pygame_error,
+    font as pygame_font,
+    freetype as pygame_freetype,
+    mixer as pygame_mixer,
+    sndarray as pygame_sndarray,
     sprite,
     Surface,
     transform,
@@ -83,8 +87,8 @@ from .menus import (
 
 from .game_configs import GameConfig, LeaderBoard
 
-from ...app import App
-from ...base_game import BaseGame
+from pkg.app import App
+from pkg.base_game import BaseGame
 
 
 class SnakeGame(BaseGame):
@@ -151,10 +155,13 @@ class SnakeGame(BaseGame):
             raise OSError("grid_size must be a multiple of 4")
 
         # Game fonts
-        self.game_font = freetype.Font(
-            file=REGULAR_FONT,
-            size=REGULAR_FONT_SIZE,
-        )
+        try:
+            self.game_font = pygame_freetype.Font(
+                file=REGULAR_FONT,
+                size=REGULAR_FONT_SIZE,
+            )
+        except:
+            self.app_font = pygame_freetype.SysFont(pygame_font.get_default_font(), REGULAR_FONT_SIZE)
 
         logging_info("Loading Sounds and Music: Working")
         # Game music
@@ -163,15 +170,31 @@ class SnakeGame(BaseGame):
         self.playlist = [self.game_music_loop]
         self.current_track = 0
         if self.app.is_audio:
-            mixer.music.load(self.game_music_intro)
-            mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
+            try:
+                pygame_mixer.music.load(self.game_music_intro)
+                pygame_mixer.music.set_volume(float(self.app.app_config["settings"]["sound"]["music_volume"]))
 
-            # Game Sounds
-            self.sounds = [
-                mixer.Sound(SOUND_SNAKE_DEATH),
-                mixer.Sound(SOUND_FOOD_PICKUP),
-                mixer.Sound(SOUND_PORTAL_ENTER),
-            ]
+                # Game Sounds
+                self.sounds = [
+                    pygame_mixer.Sound(SOUND_SNAKE_DEATH),
+                    pygame_mixer.Sound(SOUND_FOOD_PICKUP),
+                    pygame_mixer.Sound(SOUND_PORTAL_ENTER),
+                ]
+            except pygame_error:
+                # default fallback sound
+                size = 44100
+                sounds = []
+                for num in range(3):
+                    sound_arr = np.random.randint(-32768, 32767, size=size*2)
+                    sound_arr = sound_arr.reshape(size, 2)
+                    default_sound = pygame_sndarray.make_sound(sound_arr)
+                    sounds.append(default_sound)
+                self.menu_sounds = [
+                    pygame_mixer.Sound(sounds[0]), # hover
+                    pygame_mixer.Sound(sounds[1]), # forward
+                    pygame_mixer.Sound(sounds[2]), # backward
+                ]
+
         logging_info("Loading Sounds and Music: Finished")
 
         # Game object containers

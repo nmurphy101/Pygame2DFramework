@@ -36,9 +36,9 @@ from pygame import (
 )
 from pygame.sprite import Sprite
 
-from ..ai.helpers import obj_pos_to_node
+from pkg.games.snake_game.ai.helpers import obj_pos_to_node
 
-from ..constants import (
+from pkg.games.snake_game.constants import (
     COLOR_BLACK,
     MENU_GAME_OVER,
     ENTITY,
@@ -59,7 +59,7 @@ from ..constants import (
 )
 
 if TYPE_CHECKING:
-    from ..game import Game
+    from pkg.games.snake_game.game import SnakeGame
 
 
 FAKE = Faker()
@@ -71,7 +71,7 @@ class Entity(Sprite):
     base obj for all entities
     """
 
-    def __init__(self, game: "Game", name: str):
+    def __init__(self, game: "SnakeGame", name: str):
         Sprite.__init__(self)
 
         # Base game obj

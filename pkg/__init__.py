@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 """
-    Snake Game
+    App
 
-    All the Snake Game modules
+    The app that controlls the games
 
     :copyright: (c) 2021 by Nicholas Murphy.
     :license: GPLv3, see LICENSE for more details.
 """
-
-from .game import SnakeGame

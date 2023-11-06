@@ -2,7 +2,7 @@ import heapq
 
 from .node import Node
 
-from ..constants import (
+from pkg.games.snake_game.constants import (
     X,
     Y,
 )

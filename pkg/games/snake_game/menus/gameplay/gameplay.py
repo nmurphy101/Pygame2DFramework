@@ -10,9 +10,9 @@
 """
 
 
-from .....menus import Menu
+from pkg.menus import Menu
 
-from ...constants.game_constants import (
+from pkg.games.snake_game.constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,

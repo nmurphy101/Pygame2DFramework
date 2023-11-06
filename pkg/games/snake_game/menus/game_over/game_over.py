@@ -12,9 +12,9 @@
 
 from pygame import mixer
 
-from .....menus import Menu
+from pkg import menus
 
-from ...constants.game_constants import (
+from pkg.games.snake_game.constants.game_constants import (
     COLOR_BLACK,
     COLOR_RED,
     MENU_HOME,
@@ -22,7 +22,7 @@ from ...constants.game_constants import (
 )
 
 
-def game_over_menu(self: Menu):
+def game_over_menu(self: "menus"):
     """game_over_menu
 
     game_over_menu does stuff
