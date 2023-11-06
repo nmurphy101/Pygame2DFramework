@@ -10,4 +10,3 @@
 """
 
 from .game import SnakeGame
-from .tests import *
