@@ -19,6 +19,7 @@ from logging import (
     debug as logging_debug,
     info as logging_info,
 )
+import numpy as np
 from os import path, getcwd
 from pathlib import Path
 from statistics import mean
@@ -28,11 +29,13 @@ from pygame import (
     event as pygame_event,
     error as pygame_error,
     display as pygame_display,
-    freetype,
+    font as pygame_font,
+    freetype as pygame_freetype,
     init as pygame_init,
     get_init as pygame_get_init,
     time as pygame_time,
-    mixer,
+    mixer as pygame_mixer,
+    sndarray as pygame_sndarray,
     Surface,
     DOUBLEBUF,
     FULLSCREEN,
@@ -43,7 +46,7 @@ from pygame.constants import (
     MOUSEBUTTONUP, WINDOWFOCUSGAINED, WINDOWFOCUSLOST, USEREVENT
 )
 
-from .constants.app_constants import (
+from pkg.constants.app_constants import (
     COLOR_BLACK,
     COLOR_RED,
     COLOR_PURPLE,
@@ -58,8 +61,8 @@ from .constants.app_constants import (
     SOUND_UI_FORWARD,
     SOUND_UI_BACKWARD,
 )
-from .menus.menus import Menu
-from .app_config import AppConfig
+from pkg.menus.menus import Menu
+from pkg.app_config import AppConfig
 
 
 # Define custom events
@@ -102,10 +105,13 @@ class App():
         self.pause_menu_options = {}
 
         # App fonts
-        self.app_font = freetype.Font(
-            file=REGULAR_FONT,
-            size=REGULAR_FONT_SIZE,
-        )
+        try:
+            self.app_font = freetype.Font(
+                file=REGULAR_FONT,
+                size=REGULAR_FONT_SIZE,
+            )
+        except:
+            self.app_font = pygame_freetype.SysFont(pygame_font.get_default_font(), REGULAR_FONT_SIZE)
 
         self.screen = pygame_display.set_mode(
             (640, 360),
@@ -164,18 +170,31 @@ class App():
 
         # Sound settings
         if self.is_audio:
-            self.menu_sounds = [
-                mixer.Sound(SOUND_UI_HOVER), # hover
-                mixer.Sound(SOUND_UI_FORWARD), # forward
-                mixer.Sound(SOUND_UI_BACKWARD), # backward
-            ]
-        else :
+            try:
+                self.menu_sounds = [
+                    pygame_mixer.Sound(SOUND_UI_HOVER), # hover
+                    pygame_mixer.Sound(SOUND_UI_FORWARD), # forward
+                    pygame_mixer.Sound(SOUND_UI_BACKWARD), # backward
+                ]
+            except FileNotFoundError:
+                # default fallback sound
+                size = 44100
+                sounds = []
+                for num in range(3):
+                    sound_arr = np.random.randint(-32768, 32767, size=size*2)
+                    sound_arr = sound_arr.reshape(size, 2)
+                    default_sound = pygame_sndarray.make_sound(sound_arr)
+                    sounds.append(default_sound)
+                self.menu_sounds = [
+                    pygame_mixer.Sound(sounds[0]), # hover
+                    pygame_mixer.Sound(sounds[1]), # forward
+                    pygame_mixer.Sound(sounds[2]), # backward
+                ]
+        else:
             self.menu_sounds = [None, None, None]
 
         self.ui_sound_options = {}
         self.pause_game_music = False
-
-
 
         # Event settings
         self.event_options = {
@@ -245,7 +264,7 @@ class App():
         # App loop
         while self.running:
             # Send event NEXT every time music tracks ends
-            mixer.music.set_endevent(NEXT)
+            pygame_mixer.music.set_endevent(NEXT)
 
             chosen_menu = None
 
@@ -283,23 +302,23 @@ class App():
 
         if not pygame_get_init():
             # setup mixer to avoid sound lag
-            mixer.pre_init(44100, -16, 2, 2048)
+            pygame_mixer.pre_init(44100, -16, 2, 2048)
             pygame_init()
-            mixer.quit()
+            pygame_mixer.quit()
             self.is_audio = False
             try:
-                mixer.init(44100, -16, 2, 2048)
+                pygame_mixer.init(44100, -16, 2, 2048)
                 self.is_audio = True
             except pygame_error:
                 pass
 
         else:
             # setup mixer to avoid sound lag
-            mixer.pre_init(44100, -16, 2, 2048)
-            mixer.quit()
+            pygame_mixer.pre_init(44100, -16, 2, 2048)
+            pygame_mixer.quit()
             self.is_audio = False
             try:
-                mixer.init(44100, -16, 2, 2048)
+                pygame_mixer.init(44100, -16, 2, 2048)
                 self.is_audio = True
             except pygame_error:
                 pass
@@ -417,16 +436,16 @@ class App():
         # Start/Restart the game music
         if self.is_audio:
             self.set_up_audio_mixer()
-            is_playing = mixer.music.get_busy()
+            is_playing = pygame_mixer.music.get_busy()
             if self.app_config["settings"]["sound"]["music"] and not is_playing:
-                mixer.music.load(self.game.playlist[self.game.current_track])
-                mixer.music.set_volume(
+                pygame_mixer.music.load(self.game.playlist[self.game.current_track])
+                pygame_mixer.music.set_volume(
                     float(self.app_config["settings"]["sound"]["music_volume"])
                 )
-                mixer.music.play(0, 0, 1)
+                pygame_mixer.music.play(0, 0, 1)
 
             elif not self.app_config["settings"]["sound"]["music"] and is_playing:
-                mixer.music.pause()
+                pygame_mixer.music.pause()
 
 
     def quit(self, **_) -> None:
@@ -561,8 +580,8 @@ class App():
             # Get next track (modulo number of tracks)
             self.game.current_track = (self.game.current_track + 1) % len(self.game.playlist)
             if self.is_audio:
-                mixer.music.load(self.game.playlist[self.game.current_track])
-                mixer.music.play(0, 0, 1)
+                pygame_mixer.music.load(self.game.playlist[self.game.current_track])
+                pygame_mixer.music.play(0, 0, 1)
 
 
     def play_menu_sound(self, action) -> None:
@@ -586,7 +605,7 @@ class App():
         menu_sound = self.menu_sounds[num]
         if self.is_audio:
             menu_sound.set_volume(float(self.app_config["settings"]["sound"]["menu_volume"])/1.5)
-            mixer.Sound.play(menu_sound)
+            pygame_mixer.Sound.play(menu_sound)
 
 
     def choose_game_loop(self) -> None:
@@ -600,7 +619,7 @@ class App():
         while not self.game_pkg and self.running:
             # Send event NEXT every time music tracks ends
             if self.is_audio:
-                mixer.music.set_endevent(NEXT)
+                pygame_mixer.music.set_endevent(NEXT)
 
             # Gameplay logic this turn/tick
             menu = self._choose_game()
