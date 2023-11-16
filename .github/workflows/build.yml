@@ -48,7 +48,7 @@ jobs:
       - name: Run PyInstaller and zip
         run: |
           python -m PyInstaller main.spec
-          Compress-Archive -Path dist/main/* -Destination dist/main.zip
+          Compress-Archive -Path dist/main/* -Destination pygame_framework_windows.zip
       - uses: actions/upload-artifact@v2
         with:
           name: pygame_framework_windows_${{ needs.main.outputs.tag_name }}.zip
@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.main.outputs.upload_url }}
-          asset_path: dist/main.zip
+          asset_path: pygame_framework_windows.zip
           asset_name: pygame_framework_windows_${{ needs.main.outputs.tag_name }}.zip
           asset_content_type: application/zip
 
@@ -87,7 +87,7 @@ jobs:
       - name: Run PyInstaller and zip
         run: |
           python -m PyInstaller main.spec
-          zip -vr dist/main.zip dist/main
+          zip -vr pygame_framework_mac.zip dist/main
       - uses: actions/upload-artifact@v2
         with:
           name: pygame_framework_mac_${{ needs.main.outputs.tag_name }}.zip
@@ -100,6 +100,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.main.outputs.upload_url }}
-          asset_path: dist/main.zip
+          asset_path: pygame_framework_mac.zip
           asset_name: pygame_framework_mac_${{ needs.main.outputs.tag_name }}.zip
           asset_content_type: application/zip
